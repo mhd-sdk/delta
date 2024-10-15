@@ -1,6 +1,8 @@
 
 package rti;
 
+option go_package = "./rti";
+
 message ResponseAuxilliaryReferenceData
 	{
 	// presence bits defined here is also referred in response_get_instrument_by_underlying.proto and response_search_symbols.proto

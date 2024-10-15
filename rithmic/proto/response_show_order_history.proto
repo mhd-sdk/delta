@@ -1,5 +1,7 @@
 package rti;
 
+option go_package = "./rti";
+
 message ResponseShowOrderHistory
 	{       
 	// PB_OFFSET = 100000, is the offset added for each MNM field id

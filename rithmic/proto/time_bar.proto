@@ -1,6 +1,8 @@
 
 package rti;
 
+option go_package = "./rti";
+
 message TimeBar
 	{                                     
 	// PB_OFFSET = 100000, is the offset added for each MNM field id

@@ -1,6 +1,8 @@
 
 package rti;
 
+option go_package = "./rti";
+
 message RequestMarketDataUpdate
 	{          
 	// update bits and Request enum defined here is also referred in request_subscribe_by_underlying.proto

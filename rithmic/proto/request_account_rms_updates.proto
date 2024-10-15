@@ -1,6 +1,8 @@
 
 package rti;
 
+option go_package = "./rti";
+
 message RequestAccountRmsUpdates
 	{
 	enum UpdateBits {

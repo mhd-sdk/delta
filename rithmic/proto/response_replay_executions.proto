@@ -1,5 +1,7 @@
 package rti;
 
+option go_package = "./rti";
+
 message ResponseReplayExecutions
 	{
 	required int32   template_id  = 154467;

@@ -1,6 +1,8 @@
 
 package rti;
 
+option go_package = "./rti";
+
 message ResponseGetInstrumentByUnderlying
 	{       
 	// presence bits field defined here is an exact copy of response_reference_data.proto
