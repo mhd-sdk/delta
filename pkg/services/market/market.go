@@ -9,7 +9,7 @@ type MarketServiceImpl interface {
 }
 
 type MarketService struct {
-	services.BaseService
+	services.RithmicWS
 }
 
 func NewMarketService() *MarketService {
