@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/kr/pretty"
 	"github.com/lmittmann/tint"
 	"google.golang.org/protobuf/proto"
 )
@@ -17,6 +18,8 @@ import (
 var (
 	addr = flag.String("addr", " wss://rituz00100.rithmic.com:443", "address of the server")
 )
+
+const RITHMIC_SYSTEM_NAME = "Rithmic Test"
 
 func main() {
 	slog.SetDefault(slog.New(
@@ -69,22 +72,37 @@ func main() {
 		log.Fatal("Error unmarshalling message:", err)
 		return
 	}
-	if !slices.Contains(response.GetSystemName(), "Rithmic Test") {
-		slog.Error("Rithmic test server unreachable, exiting...")
+	if !slices.Contains(response.GetSystemName(), RITHMIC_SYSTEM_NAME) {
+		slog.Error(RITHMIC_SYSTEM_NAME + " server unreachable, exiting...")
 		os.Exit(1)
 	}
+
+	conn.Close()
 
 	usr := "mhdi.seddik@gmail.com"
 	pwd := "lDIKLQCX"
 
-	slog.Info("Rithmic test server found, logging in as " + usr + "...")
+	slog.Info(RITHMIC_SYSTEM_NAME + " server found, logging in...")
 
-	loginRequest := rti.RequestLogin{
-		User:     proto.String(usr),
-		Password: proto.String(pwd),
+	conn, _, err = websocket.DefaultDialer.Dial(url, nil)
+	if err != nil {
+		log.Fatal("Error connecting to WebSocket:", err)
+		os.Exit(1)
 	}
 
-	data, err := proto.Marshal(loginRequest.ProtoReflect().Interface())
+	infraType := rti.RequestLogin_TICKER_PLANT
+	loginRequest := rti.RequestLogin{
+		TemplateId:      proto.Int32(10),
+		User:            proto.String(usr),
+		Password:        proto.String(pwd),
+		SystemName:      proto.String(RITHMIC_SYSTEM_NAME),
+		AppName:         proto.String("DeltΔ"),
+		InfraType:       &infraType,
+		AppVersion:      proto.String("1.0.0"),
+		TemplateVersion: proto.String("3.9"),
+	}
+
+	data, err = proto.Marshal(loginRequest.ProtoReflect().Interface())
 	if err != nil {
 		log.Fatal("Error marshalling message:", err)
 		return
@@ -96,4 +114,72 @@ func main() {
 		return
 	}
 
+	_, msg, err = conn.ReadMessage()
+	if err != nil {
+		log.Println("Error reading message:", err)
+		return
+	}
+
+	var loginResponse rti.ResponseLogin
+
+	err = proto.Unmarshal(msg, &loginResponse)
+	if err != nil {
+		log.Println("Error unmarshalling message:", err)
+		return
+	}
+
+	slog.Info("Login successful")
+
+	lastTrade := uint32(rti.RequestMarketDataUpdate_LAST_TRADE)
+	marketDataRequest := rti.RequestMarketDataUpdate{
+		TemplateId: proto.Int32(100),
+		Symbol:     proto.String("ESZ4"),
+		Exchange:   proto.String("CME"),
+		Request:    rti.RequestMarketDataUpdate_SUBSCRIBE.Enum(),
+		UpdateBits: &lastTrade,
+	}
+
+	data, err = proto.Marshal(marketDataRequest.ProtoReflect().Interface())
+	if err != nil {
+		log.Fatal("Error marshalling message:", err)
+		return
+	}
+
+	err = conn.WriteMessage(websocket.BinaryMessage, data)
+	if err != nil {
+		log.Println("Error sending message:", err)
+		return
+	}
+
+	_, msg, err = conn.ReadMessage()
+	if err != nil {
+		log.Println("Error reading message:", err)
+		return
+	}
+
+	var marketDataResponse rti.ResponseMarketDataUpdate
+
+	err = proto.Unmarshal(msg, &marketDataResponse)
+	if err != nil {
+		log.Println("Error unmarshalling message:", err)
+		return
+	}
+
+	for {
+		_, msg, err = conn.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message:", err)
+			return
+		}
+
+		var lastTrade rti.LastTrade
+
+		err = proto.Unmarshal(msg, &lastTrade)
+		if err != nil {
+			log.Println("Error unmarshalling message:", err)
+			return
+		}
+
+		pretty.Println(lastTrade.String())
+	}
 }
