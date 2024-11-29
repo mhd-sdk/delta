@@ -2,6 +2,7 @@ import { GaugeChart, GaugeTypes } from '@carbon/charts-react';
 import { Slider } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useMarketMock } from '../../hooks/useMarketMock';
+import { Graph } from '../Graph/Graph';
 
 function getDateMinusSeconds(seconds: number): Date {
   const currentDate = new Date();
@@ -19,6 +20,7 @@ export const MarketMock = (): JSX.Element => {
 
   return (
     <>
+      <Graph />
       <div className={styles.container}>
         <GaugeChart
           data={[
