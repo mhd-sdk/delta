@@ -8,6 +8,7 @@ import (
 	"slices"
 
 	"github.com/gorilla/websocket"
+	"github.com/kr/pretty"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -58,6 +59,8 @@ func New(connectionArgs ConnectionArgs) *RithmicWS {
 		slog.Error("Error unmarshalling", "message", err)
 		os.Exit(1)
 	}
+
+	pretty.Println(response.SystemName)
 
 	if connectionArgs.SystemName == "" {
 		connectionArgs.SystemName = DEFAULT_RITHMIC_SYSTEM_NAME
