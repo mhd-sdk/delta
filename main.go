@@ -21,13 +21,15 @@ func main() {
 		Title:  "wails",
 		Width:  700,
 		Height: 400,
+
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
 		Windows: &windows.Options{
 			IsZoomControlEnabled: false,
 		},
-		WindowStartState: options.Maximised,
+		// WindowStartState: options.Maximised,
+		WindowStartState: options.Minimised,
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,
 		Bind: []interface{}{

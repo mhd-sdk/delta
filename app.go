@@ -2,16 +2,25 @@ package main
 
 import (
 	"context"
+	"delta/pkg/persistence"
+	"log/slog"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx         context.Context
+	Persistence *persistence.Persistence
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	return &App{}
+	p, err := persistence.New("delta")
+	if err != nil {
+		slog.Info("erreur")
+	}
+	return &App{
+		Persistence: p,
+	}
 }
 
 // startup is called when the app starts. The context is saved
@@ -24,6 +33,10 @@ func (a *App) Ping() string {
 	return "pong"
 }
 
-func (a *App) Login(name string) string {
-	return "pong"
+func (a *App) Load() (persistence.AppData, error) {
+	return a.Persistence.Load()
+}
+
+func (a *App) Save(data persistence.AppData) error {
+	return a.Persistence.Save(data)
 }
