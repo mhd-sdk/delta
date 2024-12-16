@@ -51,12 +51,14 @@ const styles = {
     right: 0;
     margin-top: 1rem;
     margin-right: ${isOpen ? '0rem' : '-23rem'};
+    padding-right: 1rem;
     width: 23rem;
     transition: margin-right 0.3s;
 
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    align-items: end;
   `,
   wrapper: css`
     height: calc(100% - 3rem);

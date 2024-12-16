@@ -3,9 +3,11 @@ package main
 import (
 	"embed"
 
+	"github.com/leaanthony/u"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 )
 
@@ -27,9 +29,22 @@ func main() {
 		},
 		Windows: &windows.Options{
 			IsZoomControlEnabled: false,
+			WebviewGpuIsDisabled: false,
 		},
+
+		Mac: &mac.Options{
+
+			DisableZoom: false,
+			Preferences: &mac.Preferences{
+				TabFocusesLinks:        u.True,
+				TextInteractionEnabled: u.True,
+				FullscreenEnabled:      u.True,
+			},
+		},
+
 		// WindowStartState: options.Maximised,
 		WindowStartState: options.Minimised,
+
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,
 		Bind: []interface{}{

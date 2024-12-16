@@ -24,7 +24,7 @@ func ClearData() error {
 
 func Proto() error {
 
-	protoDir := "rithmic/proto/"
+	protoDir := "docs/rithmic/proto/"
 	outputDir := "./pkg/generated"
 
 	var protoFiles []string

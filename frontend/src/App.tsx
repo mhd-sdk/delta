@@ -1,21 +1,23 @@
 import { Settings, Switcher } from '@carbon/icons-react';
-import { Content, Header, HeaderGlobalAction, HeaderGlobalBar, HeaderName, PopoverContent, SkipToContent, Tile } from '@carbon/react';
+import { Content, Header, HeaderGlobalAction, HeaderGlobalBar, HeaderName, PopoverContent, SkipToContent } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useState } from 'react';
-import GridLayout from 'react-grid-layout';
 import { Notification, Notifications } from './components/Notifications/Notifications';
 import { Separator } from './components/Separator';
+import { Grid } from './components/Grid/Grid';
 
 function App() {
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<Notification[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
-  const layout: GridLayout.Layout[] = [
-    { i: 'a', x: 0, y: 0, w: 1, h: 2, static: true },
-    { i: 'b', x: 1, y: 0, w: 3, h: 2, minW: 2, maxW: 4 },
-    { i: 'c', x: 4, y: 0, w: 1, h: 2 },
-  ];
+  const [tiles, setTiles] = useState<{ id: string; content: JSX.Element; x: number; y: number; w: number; h: number }[]>([
+    { id: '1', content: <div>1</div>, x: 0, y: 0, w: 20, h: 20 },
+    { id: '2', content: <div>2</div>, x: 20, y: 0, w: 20, h: 20 },
+    { id: '3', content: <div>3</div>, x: 40, y: 0, w: 20, h: 20 },
+    { id: '4', content: <div>4</div>, x: 60, y: 0, w: 20, h: 20 },
+  ]);
+
   return (
     <div
       id="App"
@@ -48,36 +50,34 @@ function App() {
           </HeaderGlobalAction>
         </HeaderGlobalBar>
       </Header>
-      <Tile className={styles.toolBox(isToolBoxOpen)}>tiles</Tile>
+      <div className={styles.toolBox(isToolBoxOpen)}>tiles</div>
 
       <Content className={styles.content}>
-        <GridLayout className="layout" layout={layout} cols={12} rowHeight={30} width={1200}>
-          <div key="a">a</div>
-          <div key="b">b</div>
-          <div key="c">c</div>
-        </GridLayout>
+        <Grid tiles={tiles} />
       </Content>
     </div>
   );
 }
 
 const styles = {
+  layout: css`
+    height: calc(100vh - 3rem);
+  `,
   content: css`
     transition: margin-left 0.3s;
+    width: 100%;
+    height: calc(100vh - 3rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #f4f4f4;
   `,
   toolBox: (isOpen: boolean) => css`
-    margin-top: ${isOpen ? '3rem' : '-4rem'};
+    margin-top: ${isOpen ? '3rem' : '0rem'};
+    height: 3rem;
     transition: margin-top 0.3s;
     border-bottom: 1px solid #d0d0d084;
-  `,
-  notifs: (isOpen: boolean) => css`
-    margin-top: 3rem;
-    position: absolute;
-    right: 0;
-    margin-right: ${isOpen ? '0rem' : '-20rem'};
-    width: 20rem;
-    transition: margin-right 0.3s;
-    height: calc(100% - 3rem);
+    padding: 0;
+    background-color: #f4f4f4;
   `,
   header: css``,
   headerActions: css`
