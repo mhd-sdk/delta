@@ -2,10 +2,10 @@ import { Notification as NotificationIcon } from '@carbon/icons-react';
 import { HeaderGlobalAction, ToastNotification } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useRef, useState } from 'react';
-import { Notification } from '../../types/notifications';
+import { INotification } from '../../types/notifications';
 
 interface Props {
-  notifications: Notification[];
+  notifications: INotification[];
 }
 
 export const Notifications = ({ notifications }: Props): JSX.Element => {

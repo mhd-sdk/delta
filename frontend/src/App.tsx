@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Grid } from './components/Grid/Grid';
 import { Notifications } from './components/Notifications/Notifications';
 import { Separator } from './components/Separator';
+import { INotification } from './types/notifications';
 import { TileEnum, TileInterface } from './types/tiles';
 
 const genId = (Tiles: TileInterface[]): string => {
@@ -19,7 +20,7 @@ function App() {
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
   const toggleToolBox = () => setIsToolBoxOpen(!isToolBoxOpen);
 
-  const [notifications] = useState<Notification[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
+  const [notifications] = useState<INotification[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
   const [isLayoutLocked, setIsLayoutLocked] = useState(false);
   const lockLabel = isLayoutLocked ? 'Unlock layout' : 'Lock layout';

@@ -2,6 +2,7 @@ package rithmic
 
 import (
 	"delta/pkg/generated/rti"
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -191,13 +192,12 @@ func (r *RithmicWS) SubscribeMarketDataLastTrade(symbol string, exchange string,
 	}()
 }
 
-func (r *RithmicWS) ListProductCodes() ([]rti.ResponseProductCodes, error) {
+func (r *RithmicWS) ListProducts() ([]*rti.ResponseProductCodes, error) {
 	conn := r.wsClients[rti.RequestLogin_TICKER_PLANT]
 
 	rq := rti.RequestProductCodes{
-		TemplateId:          proto.Int32(111),
-		Exchange:            proto.String("CME"),
-		GiveToiProductsOnly: proto.Bool(true),
+		TemplateId: proto.Int32(111),
+		Exchange:   proto.String("CME"),
 	}
 
 	data, err := proto.Marshal(rq.ProtoReflect().Interface())
@@ -212,7 +212,7 @@ func (r *RithmicWS) ListProductCodes() ([]rti.ResponseProductCodes, error) {
 		return nil, err
 	}
 
-	var productCodes []rti.ResponseProductCodes
+	var productCodes []*rti.ResponseProductCodes
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -228,25 +228,27 @@ func (r *RithmicWS) ListProductCodes() ([]rti.ResponseProductCodes, error) {
 			return nil, err
 		}
 
-		productCodes = append(productCodes, productCodesResponse)
-
 		// Check for the presence of fields to determine if more messages are expected
 		sequenceFinished := len(productCodesResponse.RqHandlerRpCode) == 0 && len(productCodesResponse.RpCode) != 0
 		if sequenceFinished {
 			break // No more messages to receive
 		}
 
+		productCodes = append(productCodes, &productCodesResponse)
+
 	}
 
 	return productCodes, nil
 }
 
-func (r *RithmicWS) GetInstrument() ([]rti.ResponseGetInstrumentByUnderlying, error) {
+func (r *RithmicWS) SearchSymbols(productCode string) ([]*rti.ResponseSearchSymbols, error) {
 	conn := r.wsClients[rti.RequestLogin_TICKER_PLANT]
 
-	rq := rti.RequestGetInstrumentByUnderlying{
-		TemplateId:       proto.Int32(112),
-		UnderlyingSymbol: proto.String("ES"),
+	rq := rti.RequestSearchSymbols{
+		TemplateId: proto.Int32(109),
+		SearchText: proto.String("MES"),
+		// Pattern:    rti.RequestSearchSymbols_CONTAINS.Enum(),
+		Pattern: rti.RequestSearchSymbols_EQUALS.Enum().Enum(),
 	}
 
 	data, err := proto.Marshal(rq.ProtoReflect().Interface())
@@ -261,7 +263,56 @@ func (r *RithmicWS) GetInstrument() ([]rti.ResponseGetInstrumentByUnderlying, er
 		return nil, err
 	}
 
-	var instruments []rti.ResponseGetInstrumentByUnderlying
+	var symbols []*rti.ResponseSearchSymbols
+	for {
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message:", err)
+			return nil, err
+		}
+
+		var response rti.ResponseSearchSymbols
+
+		err = proto.Unmarshal(msg, &response)
+		if err != nil {
+			log.Println("Error unmarshalling message:", err)
+			return nil, err
+		}
+
+		// Check for the presence of fields to determine if more messages are expected
+		sequenceFinished := len(response.RqHandlerRpCode) == 0 && len(response.RpCode) != 0
+		if sequenceFinished {
+			break // No more messages to receive
+		}
+
+		symbols = append(symbols, &response)
+
+	}
+
+	return symbols, nil
+}
+
+func (r *RithmicWS) GetInstrument(symbolName string) ([]*rti.ResponseGetInstrumentByUnderlying, error) {
+	conn := r.wsClients[rti.RequestLogin_TICKER_PLANT]
+
+	rq := rti.RequestGetInstrumentByUnderlying{
+		TemplateId:       proto.Int32(102),
+		UnderlyingSymbol: proto.String(symbolName),
+	}
+
+	data, err := proto.Marshal(rq.ProtoReflect().Interface())
+	if err != nil {
+		slog.Error("Error marshalling", "message", err)
+		return nil, err
+	}
+
+	err = conn.WriteMessage(websocket.BinaryMessage, data)
+	if err != nil {
+		log.Println("Error sending message:", err)
+		return nil, err
+	}
+
+	var instruments []*rti.ResponseGetInstrumentByUnderlying
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -277,7 +328,9 @@ func (r *RithmicWS) GetInstrument() ([]rti.ResponseGetInstrumentByUnderlying, er
 			return nil, err
 		}
 
-		instruments = append(instruments, instrumentResponse)
+		fmt.Println(instrumentResponse.String())
+
+		instruments = append(instruments, &instrumentResponse)
 
 		// Check for the presence of fields to determine if more messages are expected
 		sequenceFinished := len(instrumentResponse.RqHandlerRpCode) == 0 && len(instrumentResponse.RpCode) != 0
