@@ -1,18 +1,11 @@
-import { Notification } from '@carbon/icons-react';
+import { Notification as NotificationIcon } from '@carbon/icons-react';
 import { HeaderGlobalAction, ToastNotification } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useRef, useState } from 'react';
+import { Notification } from '../../types/notifications';
 
 interface Props {
   notifications: Notification[];
-}
-
-export interface Notification {
-  id?: number;
-  title: string;
-  subtitle?: string;
-  type: 'error' | 'info' | 'info-square' | 'success' | 'warning' | 'warning-alt';
-  caption?: string;
 }
 
 export const Notifications = ({ notifications }: Props): JSX.Element => {
@@ -34,7 +27,7 @@ export const Notifications = ({ notifications }: Props): JSX.Element => {
   return (
     <div ref={ref} className={styles.wrapper}>
       <HeaderGlobalAction aria-label="Notifications" onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}>
-        <Notification size={20} />
+        <NotificationIcon size={20} />
       </HeaderGlobalAction>
       <div className={styles.notifs(isNotificationsOpen)}>
         {notifications.map((notif, idx) => (

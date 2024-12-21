@@ -8,7 +8,6 @@ import (
 	"slices"
 
 	"github.com/gorilla/websocket"
-	"github.com/kr/pretty"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -60,8 +59,6 @@ func New(connectionArgs ConnectionArgs) *RithmicWS {
 		os.Exit(1)
 	}
 
-	pretty.Println(response.SystemName)
-
 	if connectionArgs.SystemName == "" {
 		connectionArgs.SystemName = DEFAULT_RITHMIC_SYSTEM_NAME
 	}
@@ -83,7 +80,7 @@ func New(connectionArgs ConnectionArgs) *RithmicWS {
 			InfraType:       &infraType,
 			TemplateId:      proto.Int32(10),
 			TemplateVersion: proto.String("3.9"),
-			AppName:         proto.String("DeltΔ"),
+			AppName:         proto.String("mese:Delta"),
 			AppVersion:      proto.String("1.0.0"),
 			User:            proto.String(connectionArgs.User),
 			Password:        proto.String(connectionArgs.Password),
@@ -192,4 +189,103 @@ func (r *RithmicWS) SubscribeMarketDataLastTrade(symbol string, exchange string,
 			handler(lastTrade)
 		}
 	}()
+}
+
+func (r *RithmicWS) ListProductCodes() ([]rti.ResponseProductCodes, error) {
+	conn := r.wsClients[rti.RequestLogin_TICKER_PLANT]
+
+	rq := rti.RequestProductCodes{
+		TemplateId:          proto.Int32(111),
+		Exchange:            proto.String("CME"),
+		GiveToiProductsOnly: proto.Bool(true),
+	}
+
+	data, err := proto.Marshal(rq.ProtoReflect().Interface())
+	if err != nil {
+		slog.Error("Error marshalling", "message", err)
+		return nil, err
+	}
+
+	err = conn.WriteMessage(websocket.BinaryMessage, data)
+	if err != nil {
+		log.Println("Error sending message:", err)
+		return nil, err
+	}
+
+	var productCodes []rti.ResponseProductCodes
+	for {
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message:", err)
+			return nil, err
+		}
+
+		var productCodesResponse rti.ResponseProductCodes
+
+		err = proto.Unmarshal(msg, &productCodesResponse)
+		if err != nil {
+			log.Println("Error unmarshalling message:", err)
+			return nil, err
+		}
+
+		productCodes = append(productCodes, productCodesResponse)
+
+		// Check for the presence of fields to determine if more messages are expected
+		sequenceFinished := len(productCodesResponse.RqHandlerRpCode) == 0 && len(productCodesResponse.RpCode) != 0
+		if sequenceFinished {
+			break // No more messages to receive
+		}
+
+	}
+
+	return productCodes, nil
+}
+
+func (r *RithmicWS) GetInstrument() ([]rti.ResponseGetInstrumentByUnderlying, error) {
+	conn := r.wsClients[rti.RequestLogin_TICKER_PLANT]
+
+	rq := rti.RequestGetInstrumentByUnderlying{
+		TemplateId:       proto.Int32(112),
+		UnderlyingSymbol: proto.String("ES"),
+	}
+
+	data, err := proto.Marshal(rq.ProtoReflect().Interface())
+	if err != nil {
+		slog.Error("Error marshalling", "message", err)
+		return nil, err
+	}
+
+	err = conn.WriteMessage(websocket.BinaryMessage, data)
+	if err != nil {
+		log.Println("Error sending message:", err)
+		return nil, err
+	}
+
+	var instruments []rti.ResponseGetInstrumentByUnderlying
+	for {
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message:", err)
+			return nil, err
+		}
+
+		var instrumentResponse rti.ResponseGetInstrumentByUnderlying
+
+		err = proto.Unmarshal(msg, &instrumentResponse)
+		if err != nil {
+			log.Println("Error unmarshalling message:", err)
+			return nil, err
+		}
+
+		instruments = append(instruments, instrumentResponse)
+
+		// Check for the presence of fields to determine if more messages are expected
+		sequenceFinished := len(instrumentResponse.RqHandlerRpCode) == 0 && len(instrumentResponse.RpCode) != 0
+		if sequenceFinished {
+			break // No more messages to receive
+		}
+
+	}
+
+	return instruments, nil
 }

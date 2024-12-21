@@ -3,7 +3,7 @@ import { Button, Content, Header, HeaderGlobalAction, Popover, PopoverContent } 
 import { css } from '@emotion/css';
 import { useState } from 'react';
 import { Grid } from './components/Grid/Grid';
-import { Notification, Notifications } from './components/Notifications/Notifications';
+import { Notifications } from './components/Notifications/Notifications';
 import { Separator } from './components/Separator';
 import { TileEnum, TileInterface } from './types/tiles';
 
