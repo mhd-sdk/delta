@@ -27,7 +27,7 @@ export const Notifications = ({ notifications }: Props): JSX.Element => {
   return (
     <div ref={ref} className={styles.wrapper}>
       <HeaderGlobalAction aria-label="Notifications" onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}>
-        <NotifIcon size={20} />
+        <NotifIcon />
       </HeaderGlobalAction>
       <div className={styles.notifs(isNotificationsOpen)}>
         {notifications.map((notif, idx) => (

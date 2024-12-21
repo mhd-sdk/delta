@@ -1,8 +1,8 @@
 import { ChartCandlestick, Locked, Settings, Switcher, Unlocked } from '@carbon/icons-react';
-import { Button, Content, Header, HeaderGlobalAction, Theme } from '@carbon/react';
+import { Content, Header, HeaderGlobalAction, OverflowMenu, OverflowMenuItem, Theme } from '@carbon/react';
 import { css } from '@emotion/css';
-import { motion } from 'motion/react';
-import { useState } from 'react';
+import { autoUpdate, flip, offset, useFloating } from '@floating-ui/react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Grid } from './components/Grid/Grid';
 import { Notifications } from './components/Notifications/Notifications';
 import { Separator } from './components/Separator';
@@ -24,6 +24,23 @@ function App() {
     setTheme(newTheme);
     document.documentElement.dataset.carbonTheme = newTheme;
   };
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const { refs, floatingStyles, update } = useFloating({
+    placement: 'bottom', // Position le menu sous le bouton
+    middleware: [
+      offset(4), // Ajoute un espace de 4px entre le bouton et le menu
+      flip(),
+    ],
+    whileElementsMounted: autoUpdate, // Met à jour la position lorsque la fenêtre ou l'élément change
+  });
+
+  useLayoutEffect(() => {
+    refs.setReference(buttonRef.current);
+    refs.setFloating(menuRef.current);
+    update();
+  }, [refs, update]);
 
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
   const toggleToolBox = () => setIsToolBoxOpen(!isToolBoxOpen);
@@ -70,37 +87,30 @@ function App() {
         <Header aria-label="Delta">
           <div className={styles.ml(0.5)}>
             <HeaderGlobalAction aria-label="Tiles" tooltipAlignment="end" isActive={isToolBoxOpen} onClick={toggleToolBox}>
-              <Switcher size={20} />
+              <Switcher />
             </HeaderGlobalAction>
           </div>
           <Separator />
           <div className={styles.favorites}>
             <HeaderGlobalAction aria-label="Chart" tooltipAlignment="center" onClick={() => handleNewTile(TileEnum.Chart)}>
-              <ChartCandlestick size={20} />
+              <ChartCandlestick />
             </HeaderGlobalAction>
           </div>
           <Separator />
           <div className={styles.rightActions}>
             <HeaderGlobalAction onClick={toggleLock} aria-label={lockLabel} tooltipAlignment="center">
-              {isLayoutLocked ? <Locked size={20} /> : <Unlocked size={20} />}
+              {isLayoutLocked ? <Locked /> : <Unlocked />}
             </HeaderGlobalAction>
             <Notifications notifications={notifications} />
 
-            {/* <Popover open={isSettingsOpen} isTabTip align="bottom-right" onRequestClose={() => setIsSettingsOpen(false)}> */}
-            <HeaderGlobalAction aria-label="Settings" isActive={isSettingsOpen} tooltipAlignment="end" onClick={toggleSettings}>
-              <Settings size={20} />
-            </HeaderGlobalAction>
+            <OverflowMenu renderIcon={Settings} size="lg" flipped aria-label="overflow-menu">
+              <OverflowMenuItem itemText="Preferences" />
+              <OverflowMenuItem itemText="Account infos" />
+              <OverflowMenuItem hasDivider itemText="Disconnect" isDelete />
+            </OverflowMenu>
           </div>
         </Header>
-        {isSettingsOpen && (
-          <motion.div id="settings" className={styles.settingsPanel}>
-            <fieldset>
-              <Button>Preferences</Button>
-              <Button onClick={handleToggleTheme}>theme</Button>
-              <Button>Logout</Button>
-            </fieldset>
-          </motion.div>
-        )}
+
         <div className={styles.toolBox(isToolBoxOpen)}></div>
 
         <Content className={styles.content}>
@@ -148,14 +158,10 @@ const styles = {
     align-items: center;
     margin-right: 0.5rem;
   `,
-  settingsPanel: css`
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    position: absolute;
-    z-index: 100;
-    margin-top: 3rem;
-    right: 0.5rem;
+  settingsMenu: css`
+    position: fixed !important;
+    right: 0 !important;
+    opacity: 0.5 !important;
   `,
 };
 
