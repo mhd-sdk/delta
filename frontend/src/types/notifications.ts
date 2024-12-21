@@ -1,4 +1,4 @@
-export interface INotification {
+export interface NotificationInterface {
   id?: number;
   title: string;
   subtitle?: string;

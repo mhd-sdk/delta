@@ -1,4 +1,8 @@
 @use '@carbon/react';
+@use '@carbon/styles';
+@use '@carbon/react/scss/zone';
+@use '@carbon/styles/scss/theme';
+@use '@carbon/styles/scss/themes';
 
 body {
     overflow: hidden;
@@ -11,5 +15,14 @@ main {
 .cds--content {
     padding: 0;
     margin: 0 !important;
+}
+
+
+:root[data-carbon-theme='g10'] {
+  @include theme.theme(themes.$g10);
+}
+
+:root[data-carbon-theme='g100'] {
+  @include theme.theme(themes.$g100);
 }
 

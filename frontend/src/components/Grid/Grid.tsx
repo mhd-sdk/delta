@@ -1,7 +1,6 @@
 import { css } from '@emotion/css';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { TileInterface } from '../../types/tiles';
-import { ChartTile } from '../Tiles/ChartTile';
 import { Tile } from '../Tiles/Tile';
 
 interface Props {
@@ -29,32 +28,28 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
     onChange?.(newTiles);
   };
 
-  const renderTile = (tile: TileInterface) => {
-    switch (tile.content.type) {
-      case 'Chart':
-        return <ChartTile />;
-      default:
-        return null;
-    }
+  const handleDelete = (id: string) => {
+    const newTiles = tiles.filter((tile) => tile.content.id !== id);
+    onChange?.(newTiles);
   };
 
   return (
     <ResponsiveReactGridLayout
+      onLayoutChange={handleLayoutChange}
+      className={styles.layout}
       useCSSTransforms={true}
       isDraggable={!isLocked}
       isResizable={!isLocked}
       compactType="vertical"
-      className={styles.layout}
-      layouts={layouts}
       breakpoints={{ lg: 0 }}
+      layouts={layouts}
       cols={{ lg: 50 }}
       autoSize={true}
       rowHeight={10}
-      onLayoutChange={handleLayoutChange}
     >
       {tiles.map((tile) => (
         <div key={tile.content.id} className={styles.tile}>
-          <Tile tile={tile} />
+          <Tile tile={tile} onDelete={handleDelete} />
         </div>
       ))}
     </ResponsiveReactGridLayout>

@@ -11,7 +11,8 @@ import (
 )
 
 func Dev() error {
-	return sh.RunV("wails", "dev", "-browser")
+	return sh.RunV("wails", "dev", "-browser", "-loglevel", "info")
+
 }
 
 func ClearData() error {

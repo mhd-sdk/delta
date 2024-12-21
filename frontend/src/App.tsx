@@ -1,11 +1,12 @@
 import { ChartCandlestick, Locked, Settings, Switcher, Unlocked } from '@carbon/icons-react';
-import { Button, Content, Header, HeaderGlobalAction, Popover, PopoverContent } from '@carbon/react';
+import { Button, Content, Header, HeaderGlobalAction, Theme } from '@carbon/react';
 import { css } from '@emotion/css';
+import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Grid } from './components/Grid/Grid';
 import { Notifications } from './components/Notifications/Notifications';
 import { Separator } from './components/Separator';
-import { INotification } from './types/notifications';
+import { NotificationInterface } from './types/notifications';
 import { TileEnum, TileInterface } from './types/tiles';
 
 const genId = (Tiles: TileInterface[]): string => {
@@ -17,10 +18,17 @@ const genId = (Tiles: TileInterface[]): string => {
 };
 
 function App() {
+  const [theme, setTheme] = useState<'white' | 'g90'>('white');
+  const handleToggleTheme = () => {
+    const newTheme = theme === 'white' ? 'g90' : 'white';
+    setTheme(newTheme);
+    document.documentElement.dataset.carbonTheme = newTheme;
+  };
+
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
   const toggleToolBox = () => setIsToolBoxOpen(!isToolBoxOpen);
 
-  const [notifications] = useState<INotification[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
+  const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
   const [isLayoutLocked, setIsLayoutLocked] = useState(false);
   const lockLabel = isLayoutLocked ? 'Unlock layout' : 'Lock layout';
@@ -57,45 +65,49 @@ function App() {
   };
 
   return (
-    <div id="App">
-      <Header aria-label="Delta">
-        <div className={styles.ml(0.5)}>
-          <HeaderGlobalAction aria-label="Tiles" tooltipAlignment="end" isActive={isToolBoxOpen} onClick={toggleToolBox}>
-            <Switcher size={20} />
-          </HeaderGlobalAction>
-        </div>
-        <Separator />
-        <div className={styles.favorites}>
-          <HeaderGlobalAction aria-label="Chart" tooltipAlignment="center" onClick={() => handleNewTile(TileEnum.Chart)}>
-            <ChartCandlestick size={20} />
-          </HeaderGlobalAction>
-        </div>
-        <Separator />
-        <div className={styles.rightActions}>
-          <HeaderGlobalAction onClick={toggleLock} aria-label={lockLabel} tooltipAlignment="center">
-            {isLayoutLocked ? <Locked size={20} /> : <Unlocked size={20} />}
-          </HeaderGlobalAction>
-          <Notifications notifications={notifications} />
+    <Theme theme={theme}>
+      <div id="App">
+        <Header aria-label="Delta">
+          <div className={styles.ml(0.5)}>
+            <HeaderGlobalAction aria-label="Tiles" tooltipAlignment="end" isActive={isToolBoxOpen} onClick={toggleToolBox}>
+              <Switcher size={20} />
+            </HeaderGlobalAction>
+          </div>
+          <Separator />
+          <div className={styles.favorites}>
+            <HeaderGlobalAction aria-label="Chart" tooltipAlignment="center" onClick={() => handleNewTile(TileEnum.Chart)}>
+              <ChartCandlestick size={20} />
+            </HeaderGlobalAction>
+          </div>
+          <Separator />
+          <div className={styles.rightActions}>
+            <HeaderGlobalAction onClick={toggleLock} aria-label={lockLabel} tooltipAlignment="center">
+              {isLayoutLocked ? <Locked size={20} /> : <Unlocked size={20} />}
+            </HeaderGlobalAction>
+            <Notifications notifications={notifications} />
 
-          <Popover open={isSettingsOpen} isTabTip align="bottom-right" onRequestClose={() => setIsSettingsOpen(false)}>
+            {/* <Popover open={isSettingsOpen} isTabTip align="bottom-right" onRequestClose={() => setIsSettingsOpen(false)}> */}
             <HeaderGlobalAction aria-label="Settings" isActive={isSettingsOpen} tooltipAlignment="end" onClick={toggleSettings}>
               <Settings size={20} />
             </HeaderGlobalAction>
-            <PopoverContent className={styles.settingsPanel}>
-              <fieldset>
-                <legend>Edit columns</legend>
-                <Button>ok</Button>
-              </fieldset>
-            </PopoverContent>
-          </Popover>
-        </div>
-      </Header>
-      <div className={styles.toolBox(isToolBoxOpen)}></div>
+          </div>
+        </Header>
+        {isSettingsOpen && (
+          <motion.div id="settings" className={styles.settingsPanel}>
+            <fieldset>
+              <Button>Preferences</Button>
+              <Button onClick={handleToggleTheme}>theme</Button>
+              <Button>Logout</Button>
+            </fieldset>
+          </motion.div>
+        )}
+        <div className={styles.toolBox(isToolBoxOpen)}></div>
 
-      <Content className={styles.content}>
-        <Grid isLocked={isLayoutLocked} tiles={tiles} onChange={setTiles} />
-      </Content>
-    </div>
+        <Content className={styles.content}>
+          <Grid isLocked={isLayoutLocked} tiles={tiles} onChange={setTiles} />
+        </Content>
+      </div>
+    </Theme>
   );
 }
 
@@ -109,7 +121,6 @@ const styles = {
     height: calc(100vh - 3rem);
     overflow-x: hidden;
     overflow-y: auto;
-    background-color: #f4f4f4;
   `,
   toolBox: (isOpen: boolean) => css`
     margin-top: ${isOpen ? '3rem' : '0rem'};
@@ -138,7 +149,13 @@ const styles = {
     margin-right: 0.5rem;
   `,
   settingsPanel: css`
-    padding: 0.5rem !important;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: absolute;
+    z-index: 100;
+    margin-top: 3rem;
+    right: 0.5rem;
   `,
 };
 

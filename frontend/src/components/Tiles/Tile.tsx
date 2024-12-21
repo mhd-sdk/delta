@@ -6,7 +6,7 @@ import { ChartTile } from './ChartTile';
 
 interface Props {
   tile: TileInterface;
-  onDelete?: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 export const Tile = ({ tile, onDelete }: Props) => {
@@ -44,7 +44,7 @@ export const Tile = ({ tile, onDelete }: Props) => {
             console.log('Edit clicked');
           }}
         />
-        <MenuItem label="Delete" kind="danger" />
+        <MenuItem label="Delete" kind="danger" onClick={() => onDelete(tile.content.id)} />
       </Menu>
     </>
   );
