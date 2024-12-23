@@ -6,14 +6,18 @@ export function GetProducts() {
   return window['go']['main']['App']['GetProducts']();
 }
 
-export function Load() {
-  return window['go']['main']['App']['Load']();
+export function GetSystems() {
+  return window['go']['main']['App']['GetSystems']();
+}
+
+export function LoadAppData() {
+  return window['go']['main']['App']['LoadAppData']();
 }
 
 export function Ping() {
   return window['go']['main']['App']['Ping']();
 }
 
-export function Save(arg1) {
-  return window['go']['main']['App']['Save'](arg1);
+export function SaveAppData(arg1) {
+  return window['go']['main']['App']['SaveAppData'](arg1);
 }

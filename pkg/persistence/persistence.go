@@ -3,7 +3,6 @@ package persistence
 import (
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 )
@@ -22,7 +21,6 @@ func GetPersistenceDir(appName string) (string, error) {
 		// Fallback to current directory in case of error
 		dir = "."
 	}
-	slog.Info("Config directory:", dir)
 	// Create directory if it doesn't exist
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		return "", err

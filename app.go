@@ -34,15 +34,23 @@ func NewApp() *App {
 	slog.Info("Starting DeltΔ...")
 
 	url := "wss://rituz00100.rithmic.com:443"
+	// url := "wss://rprotocol-de.rithmic.com:443"
 
 	usr := "mhdi.seddik@gmail.com"
+	// usr := "xmhd"
 	pwd := "lDIKLQCX"
+	// pwd := "TST563"
 
-	r := rithmic.New(rithmic.ConnectionArgs{
+	r, err := rithmic.New(rithmic.ConnectionArgs{
 		Url:      url,
 		User:     usr,
 		Password: pwd,
+		// SystemName: rithmic.DEFAULT_RITHMIC_SYSTEM_NAME,
+		SystemName: "TopstepTrader",
 	})
+	if err != nil {
+		slog.Error("Error creating RithmicWS", "error", err)
+	}
 
 	return &App{
 		Persistence: p,
@@ -60,14 +68,18 @@ func (a *App) Ping() string {
 	return "pong"
 }
 
-func (a *App) Load() (persistence.AppData, error) {
+func (a *App) LoadAppData() (persistence.AppData, error) {
 	return a.Persistence.Load()
 }
 
-func (a *App) Save(data persistence.AppData) error {
+func (a *App) SaveAppData(data persistence.AppData) error {
 	return a.Persistence.Save(data)
 }
 
 func (a *App) GetProducts() ([]*rti.ResponseProductCodes, error) {
 	return a.RithmicWs.ListProducts()
+}
+
+func (a *App) GetSystems() (*rti.ResponseRithmicSystemInfo, error) {
+	return a.RithmicWs.ListSystems()
 }

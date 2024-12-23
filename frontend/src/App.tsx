@@ -1,10 +1,12 @@
 import { ChartCandlestick, Locked, Settings, Switcher, Unlocked } from '@carbon/icons-react';
-import { Content, Header, HeaderGlobalAction, OverflowMenu, OverflowMenuItem, Theme } from '@carbon/react';
+import { Button, Content, GlobalTheme, Header, HeaderGlobalAction, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { css } from '@emotion/css';
-import { autoUpdate, flip, offset, useFloating } from '@floating-ui/react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import { DatafeedModal } from './components/DatafeedModal/DatafeedModal';
 import { Grid } from './components/Grid/Grid';
 import { Notifications } from './components/Notifications/Notifications';
+import { PreferenceModal } from './components/PreferencesModal/PreferencesModal';
 import { Separator } from './components/Separator';
 import { NotificationInterface } from './types/notifications';
 import { TileEnum, TileInterface } from './types/tiles';
@@ -18,41 +20,19 @@ const genId = (Tiles: TileInterface[]): string => {
 };
 
 function App() {
-  const [theme, setTheme] = useState<'white' | 'g90'>('white');
-  const handleToggleTheme = () => {
-    const newTheme = theme === 'white' ? 'g90' : 'white';
-    setTheme(newTheme);
-    document.documentElement.dataset.carbonTheme = newTheme;
-  };
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
-  const { refs, floatingStyles, update } = useFloating({
-    placement: 'bottom', // Position le menu sous le bouton
-    middleware: [
-      offset(4), // Ajoute un espace de 4px entre le bouton et le menu
-      flip(),
-    ],
-    whileElementsMounted: autoUpdate, // Met à jour la position lorsque la fenêtre ou l'élément change
-  });
-
-  useLayoutEffect(() => {
-    refs.setReference(buttonRef.current);
-    refs.setFloating(menuRef.current);
-    update();
-  }, [refs, update]);
+  const themeCode = theme === 'light' ? 'g10' : 'g90';
 
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
-  const toggleToolBox = () => setIsToolBoxOpen(!isToolBoxOpen);
+
+  const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
+
+  const [isDatafeedOpen, setIsDatafeedOpen] = useState(false);
 
   const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
   const [isLayoutLocked, setIsLayoutLocked] = useState(false);
-  const lockLabel = isLayoutLocked ? 'Unlock layout' : 'Lock layout';
-  const toggleLock = () => setIsLayoutLocked(!isLayoutLocked);
-
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const toggleSettings = () => setIsSettingsOpen(!isSettingsOpen);
 
   const [tiles, setTiles] = useState<TileInterface[]>([
     {
@@ -66,6 +46,17 @@ function App() {
       h: 20,
     },
   ]);
+
+  const lockLabel = isLayoutLocked ? 'Unlock layout' : 'Lock layout';
+
+  const handleToggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+  };
+
+  const toggleLock = () => setIsLayoutLocked(!isLayoutLocked);
+
+  const toggleToolBox = () => setIsToolBoxOpen(!isToolBoxOpen);
 
   const handleNewTile = (type: TileEnum) => {
     const newTile: TileInterface = {
@@ -81,10 +72,17 @@ function App() {
     setTiles([...tiles, newTile]);
   };
 
+  useEffect(() => {
+    document.documentElement.dataset.carbonTheme = themeCode;
+  }, [themeCode]);
+
+  const notify = () => toast('Wow so easy !');
+
   return (
-    <Theme theme={theme}>
+    <GlobalTheme theme={themeCode}>
       <div id="App">
         <Header aria-label="Delta">
+          <Button onClick={notify}>Notify !</Button>
           <div className={styles.ml(0.5)}>
             <HeaderGlobalAction aria-label="Tiles" tooltipAlignment="end" isActive={isToolBoxOpen} onClick={toggleToolBox}>
               <Switcher />
@@ -104,7 +102,8 @@ function App() {
             <Notifications notifications={notifications} />
 
             <OverflowMenu renderIcon={Settings} size="lg" flipped aria-label="overflow-menu">
-              <OverflowMenuItem itemText="Preferences" />
+              <OverflowMenuItem itemText="Preferences" onClick={() => setIsPreferencesOpen(true)} />
+              <OverflowMenuItem itemText="Switch theme" onClick={handleToggleTheme} />
               <OverflowMenuItem itemText="Account infos" />
               <OverflowMenuItem hasDivider itemText="Disconnect" isDelete />
             </OverflowMenu>
@@ -116,8 +115,11 @@ function App() {
         <Content className={styles.content}>
           <Grid isLocked={isLayoutLocked} tiles={tiles} onChange={setTiles} />
         </Content>
+        <PreferenceModal isOpen={isPreferencesOpen} setIsOpen={(isOpen) => setIsPreferencesOpen(isOpen)} />
+        <DatafeedModal isOpen={isDatafeedOpen} setIsOpen={(isOpen) => setIsDatafeedOpen(isOpen)} />
+        <ToastContainer />
       </div>
-    </Theme>
+    </GlobalTheme>
   );
 }
 

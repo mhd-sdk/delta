@@ -1,7 +1,11 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 
-export const Separator = (): JSX.Element => {
-  return <div className={styles.separator}></div>;
+interface Props {
+  className?: string;
+}
+
+export const Separator = ({ className }: Props): JSX.Element => {
+  return <div className={cx(styles.separator, className)}></div>;
 };
 
 const styles = {

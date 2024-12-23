@@ -89,6 +89,7 @@ export namespace persistence {
 	export class UserData {
 	    username: string;
 	    password: string;
+	    rememberMe: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new UserData(source);
@@ -98,6 +99,7 @@ export namespace persistence {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.username = source["username"];
 	        this.password = source["password"];
+	        this.rememberMe = source["rememberMe"];
 	    }
 	}
 	export class AppData {
@@ -168,6 +170,26 @@ export namespace rti {
 	        this.timezone_time_of_interest = source["timezone_time_of_interest"];
 	        this.begin_time_of_interest_msm = source["begin_time_of_interest_msm"];
 	        this.end_time_of_interest_msm = source["end_time_of_interest_msm"];
+	    }
+	}
+	export class ResponseRithmicSystemInfo {
+	    template_id?: number;
+	    user_msg?: string[];
+	    rp_code?: string[];
+	    system_name?: string[];
+	    has_aggregated_quotes?: boolean[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ResponseRithmicSystemInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.template_id = source["template_id"];
+	        this.user_msg = source["user_msg"];
+	        this.rp_code = source["rp_code"];
+	        this.system_name = source["system_name"];
+	        this.has_aggregated_quotes = source["has_aggregated_quotes"];
 	    }
 	}
 

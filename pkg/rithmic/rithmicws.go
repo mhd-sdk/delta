@@ -6,14 +6,15 @@ import (
 	"log"
 	"log/slog"
 	"os"
-	"slices"
 
 	"github.com/gorilla/websocket"
 	"google.golang.org/protobuf/proto"
 )
 
 type RithmicWS struct {
-	wsClients (map[rti.RequestLogin_SysInfraType]*websocket.Conn)
+	wsClients       (map[rti.RequestLogin_SysInfraType]*websocket.Conn)
+	heartbeatClient *websocket.Conn
+	connectionArgs  ConnectionArgs
 }
 
 type ConnectionArgs struct {
@@ -23,11 +24,67 @@ type ConnectionArgs struct {
 	SystemName string
 }
 
-func New(connectionArgs ConnectionArgs) *RithmicWS {
-	conn, _, err := websocket.DefaultDialer.Dial(connectionArgs.Url, nil)
+func (r *RithmicWS) Login() error {
+	for _, infraType := range AVAILABLE_RITHMIC_INFRA_TYPES {
+		loginRequest := rti.RequestLogin{
+			InfraType:       &infraType,
+			TemplateId:      proto.Int32(10),
+			TemplateVersion: proto.String("3.9"),
+			AppName:         proto.String("mese:Delta"),
+			AppVersion:      proto.String("1.0.0"),
+			User:            proto.String(r.connectionArgs.User),
+			Password:        proto.String(r.connectionArgs.Password),
+			SystemName:      proto.String(r.connectionArgs.SystemName),
+		}
+
+		data, err := proto.Marshal(loginRequest.ProtoReflect().Interface())
+		if err != nil {
+			return err
+		}
+
+		conn, _, err := websocket.DefaultDialer.Dial(r.connectionArgs.Url, nil)
+		if err != nil {
+			return err
+		}
+
+		err = conn.WriteMessage(websocket.BinaryMessage, data)
+		if err != nil {
+			return err
+		}
+
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			return err
+		}
+
+		var loginResponse rti.ResponseLogin
+
+		err = proto.Unmarshal(msg, &loginResponse)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(loginResponse.String())
+
+		r.wsClients[infraType] = conn
+	}
+
+	return nil
+}
+
+func New(connectionArgs ConnectionArgs) (*RithmicWS, error) {
+	client := &RithmicWS{
+		wsClients:      make(map[rti.RequestLogin_SysInfraType]*websocket.Conn),
+		connectionArgs: connectionArgs,
+	}
+
+	return client, nil
+}
+
+func (r *RithmicWS) ListSystems() (*rti.ResponseRithmicSystemInfo, error) {
+	conn, _, err := websocket.DefaultDialer.Dial(r.connectionArgs.Url, nil)
 	if err != nil {
-		slog.Error("Error connecting to WebSocket", "error", err)
-		os.Exit(1)
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -37,92 +94,29 @@ func New(connectionArgs ConnectionArgs) *RithmicWS {
 
 	data, err := proto.Marshal(systemInfoRequest.ProtoReflect().Interface())
 	if err != nil {
-		slog.Error("Error marshalling", "message", err)
-		os.Exit(1)
+		return nil, err
 	}
 
 	err = conn.WriteMessage(websocket.BinaryMessage, data)
 	if err != nil {
-		slog.Error("Error sending", "message", err)
-		os.Exit(1)
+		return nil, err
 	}
 
 	_, msg, err := conn.ReadMessage()
 	if err != nil {
-		slog.Error("Error reading", "message", err)
-		os.Exit(1)
+		return nil, err
 	}
 
 	var response rti.ResponseRithmicSystemInfo
+
 	err = proto.Unmarshal(msg, &response)
 	if err != nil {
-		slog.Error("Error unmarshalling", "message", err)
-		os.Exit(1)
-	}
-
-	if connectionArgs.SystemName == "" {
-		connectionArgs.SystemName = DEFAULT_RITHMIC_SYSTEM_NAME
-	}
-
-	if !slices.Contains(response.GetSystemName(), connectionArgs.SystemName) {
-		slog.Error("Error connecting to rithmic services, requested system not found", "system name", connectionArgs.SystemName)
-		slog.Info("Here's a list of existing systems", "system names", response.GetSystemName())
-		os.Exit(1)
+		return nil, err
 	}
 
 	conn.Close()
 
-	client := &RithmicWS{
-		wsClients: make(map[rti.RequestLogin_SysInfraType]*websocket.Conn),
-	}
-
-	for _, infraType := range AVAILABLE_RITHMIC_INFRA_TYPES {
-		loginRequest := rti.RequestLogin{
-			InfraType:       &infraType,
-			TemplateId:      proto.Int32(10),
-			TemplateVersion: proto.String("3.9"),
-			AppName:         proto.String("mese:Delta"),
-			AppVersion:      proto.String("1.0.0"),
-			User:            proto.String(connectionArgs.User),
-			Password:        proto.String(connectionArgs.Password),
-			SystemName:      proto.String(connectionArgs.SystemName),
-		}
-
-		data, err := proto.Marshal(loginRequest.ProtoReflect().Interface())
-		if err != nil {
-			slog.Error("Error marshalling", "message", err)
-			os.Exit(1)
-		}
-
-		conn, _, err := websocket.DefaultDialer.Dial(connectionArgs.Url, nil)
-		if err != nil {
-			slog.Error("Error connecting to WebSocket", "error", err)
-			os.Exit(1)
-		}
-
-		err = conn.WriteMessage(websocket.BinaryMessage, data)
-		if err != nil {
-			slog.Error("Error sending", "message", err)
-			os.Exit(1)
-		}
-
-		_, msg, err := conn.ReadMessage()
-		if err != nil {
-			slog.Error("Error reading", "message", err)
-			os.Exit(1)
-		}
-
-		var loginResponse rti.ResponseLogin
-
-		err = proto.Unmarshal(msg, &loginResponse)
-		if err != nil {
-			slog.Error("Error unmarshalling", "message", err)
-			os.Exit(1)
-		}
-
-		client.wsClients[infraType] = conn
-	}
-	return client
+	return &response, nil
 }
 
 func (r *RithmicWS) Close() {
@@ -194,6 +188,9 @@ func (r *RithmicWS) SubscribeMarketDataLastTrade(symbol string, exchange string,
 
 func (r *RithmicWS) ListProducts() ([]*rti.ResponseProductCodes, error) {
 	conn := r.wsClients[rti.RequestLogin_TICKER_PLANT]
+	if conn == nil {
+		return nil, fmt.Errorf("no connection to rithmic")
+	}
 
 	rq := rti.RequestProductCodes{
 		TemplateId: proto.Int32(111),
@@ -208,7 +205,7 @@ func (r *RithmicWS) ListProducts() ([]*rti.ResponseProductCodes, error) {
 
 	err = conn.WriteMessage(websocket.BinaryMessage, data)
 	if err != nil {
-		log.Println("Error sending message:", err)
+		slog.Error("Error sending message", "error", err)
 		return nil, err
 	}
 

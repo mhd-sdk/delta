@@ -5,8 +5,10 @@ import {persistence} from '../models';
 
 export function GetProducts():Promise<Array<rti.ResponseProductCodes>>;
 
-export function Load():Promise<persistence.AppData>;
+export function GetSystems():Promise<rti.ResponseRithmicSystemInfo>;
+
+export function LoadAppData():Promise<persistence.AppData>;
 
 export function Ping():Promise<string>;
 
-export function Save(arg1:persistence.AppData):Promise<void>;
+export function SaveAppData(arg1:persistence.AppData):Promise<void>;
