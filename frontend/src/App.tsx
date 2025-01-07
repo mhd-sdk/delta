@@ -3,7 +3,7 @@ import { Button, Content, GlobalTheme, Header, HeaderGlobalAction, OverflowMenu,
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
-import { DatafeedModal } from './components/DatafeedModal/DatafeedModal';
+import { AuthModal } from './components/AuthModal/AuthModal';
 import { Grid } from './components/Grid/Grid';
 import { Notifications } from './components/Notifications/Notifications';
 import { PreferenceModal } from './components/PreferencesModal/PreferencesModal';
@@ -28,7 +28,7 @@ function App() {
 
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
 
-  const [isDatafeedOpen, setIsDatafeedOpen] = useState(false);
+  const [isDatafeedOpen, setIsDatafeedOpen] = useState(true);
 
   const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
@@ -116,7 +116,7 @@ function App() {
           <Grid isLocked={isLayoutLocked} tiles={tiles} onChange={setTiles} />
         </Content>
         <PreferenceModal isOpen={isPreferencesOpen} setIsOpen={(isOpen) => setIsPreferencesOpen(isOpen)} />
-        <DatafeedModal isOpen={isDatafeedOpen} setIsOpen={(isOpen) => setIsDatafeedOpen(isOpen)} />
+        <AuthModal isOpen={isDatafeedOpen} setIsOpen={(isOpen) => setIsDatafeedOpen(isOpen)} />
         <ToastContainer />
       </div>
     </GlobalTheme>

@@ -1,3 +1,24 @@
+export namespace main {
+	
+	export class loginArgs {
+	    Username: string;
+	    Password: string;
+	    System: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new loginArgs(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Username = source["Username"];
+	        this.Password = source["Password"];
+	        this.System = source["System"];
+	    }
+	}
+
+}
+
 export namespace persistence {
 	
 	export class Tile {
@@ -90,6 +111,7 @@ export namespace persistence {
 	    username: string;
 	    password: string;
 	    rememberMe: boolean;
+	    system: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new UserData(source);
@@ -100,6 +122,7 @@ export namespace persistence {
 	        this.username = source["username"];
 	        this.password = source["password"];
 	        this.rememberMe = source["rememberMe"];
+	        this.system = source["system"];
 	    }
 	}
 	export class AppData {

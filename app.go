@@ -36,18 +36,7 @@ func NewApp() *App {
 	url := "wss://rituz00100.rithmic.com:443"
 	// url := "wss://rprotocol-de.rithmic.com:443"
 
-	usr := "mhdi.seddik@gmail.com"
-	// usr := "xmhd"
-	pwd := "lDIKLQCX"
-	// pwd := "TST563"
-
-	r, err := rithmic.New(rithmic.ConnectionArgs{
-		Url:      url,
-		User:     usr,
-		Password: pwd,
-		// SystemName: rithmic.DEFAULT_RITHMIC_SYSTEM_NAME,
-		SystemName: "TopstepTrader",
-	})
+	r, err := rithmic.New(url)
 	if err != nil {
 		slog.Error("Error creating RithmicWS", "error", err)
 	}
@@ -68,7 +57,7 @@ func (a *App) Ping() string {
 	return "pong"
 }
 
-func (a *App) LoadAppData() (persistence.AppData, error) {
+func (a *App) GetAppData() (persistence.AppData, error) {
 	return a.Persistence.Load()
 }
 
@@ -82,4 +71,27 @@ func (a *App) GetProducts() ([]*rti.ResponseProductCodes, error) {
 
 func (a *App) GetSystems() (*rti.ResponseRithmicSystemInfo, error) {
 	return a.RithmicWs.ListSystems()
+}
+
+type loginArgs struct {
+	Username string
+	Password string
+	System   string
+}
+
+func (a *App) Login(args loginArgs) error {
+
+	// usr := "mhdi.seddik@gmail.com"
+	// usr := "xmhd"
+	// pwd := "lDIKLQCX"
+	// pwd := "TST563"
+	// system := "TopstepTrader"
+
+	connArgs := rithmic.ConnectionArgs{
+		User:       args.Username,
+		Password:   args.Password,
+		SystemName: args.System,
+	}
+
+	return a.RithmicWs.Login(connArgs)
 }

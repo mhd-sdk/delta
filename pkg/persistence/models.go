@@ -4,6 +4,7 @@ type UserData struct {
 	Username   string `json:"username"`
 	Password   string `json:"password"`
 	RememberMe bool   `json:"rememberMe"`
+	System     string `json:"system"`
 }
 
 type Preferences struct {

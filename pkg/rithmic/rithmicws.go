@@ -15,16 +15,18 @@ type RithmicWS struct {
 	wsClients       (map[rti.RequestLogin_SysInfraType]*websocket.Conn)
 	heartbeatClient *websocket.Conn
 	connectionArgs  ConnectionArgs
+	Url             string
 }
 
 type ConnectionArgs struct {
-	Url        string
 	User       string
 	Password   string
 	SystemName string
 }
 
-func (r *RithmicWS) Login() error {
+func (r *RithmicWS) Login(connectionArgs ConnectionArgs) error {
+	r.connectionArgs = connectionArgs
+
 	for _, infraType := range AVAILABLE_RITHMIC_INFRA_TYPES {
 		loginRequest := rti.RequestLogin{
 			InfraType:       &infraType,
@@ -42,7 +44,7 @@ func (r *RithmicWS) Login() error {
 			return err
 		}
 
-		conn, _, err := websocket.DefaultDialer.Dial(r.connectionArgs.Url, nil)
+		conn, _, err := websocket.DefaultDialer.Dial(r.Url, nil)
 		if err != nil {
 			return err
 		}
@@ -72,17 +74,17 @@ func (r *RithmicWS) Login() error {
 	return nil
 }
 
-func New(connectionArgs ConnectionArgs) (*RithmicWS, error) {
+func New(url string) (*RithmicWS, error) {
 	client := &RithmicWS{
-		wsClients:      make(map[rti.RequestLogin_SysInfraType]*websocket.Conn),
-		connectionArgs: connectionArgs,
+		Url:       url,
+		wsClients: make(map[rti.RequestLogin_SysInfraType]*websocket.Conn),
 	}
 
 	return client, nil
 }
 
 func (r *RithmicWS) ListSystems() (*rti.ResponseRithmicSystemInfo, error) {
-	conn, _, err := websocket.DefaultDialer.Dial(r.connectionArgs.Url, nil)
+	conn, _, err := websocket.DefaultDialer.Dial(r.Url, nil)
 	if err != nil {
 		return nil, err
 	}
