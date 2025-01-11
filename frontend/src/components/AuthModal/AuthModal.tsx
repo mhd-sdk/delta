@@ -1,8 +1,8 @@
 import { ArrowUpRight } from '@carbon/icons-react';
-import { Checkbox, Link, Modal } from '@carbon/react';
+import { Link, Modal, TextInput, Toggle } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
-import { GetAppData } from '../../../wailsjs/go/main/App';
+import { GetAppData, SaveAppData } from '../../../wailsjs/go/main/App';
 import { persistence } from '../../../wailsjs/go/models';
 import { BrowserOpenURL } from '../../../wailsjs/runtime/runtime';
 
@@ -12,20 +12,33 @@ interface Props {
 }
 
 export const AuthModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
-  const [appData, setAppData] = useState<persistence.AppData>();
-  const [rememberMe, setRememberMe] = useState(false);
+  const [useKeys, setUseKeys] = useState(false);
+  const [key, setKey] = useState('');
+  const [secret, setSecret] = useState('');
+  const handleToggle = () => {
+    setUseKeys(!useKeys);
+  };
 
   useEffect(() => {
-    GetAppData().then((data) => {
-      setRememberMe(data.user.rememberMe);
-      setAppData(data);
-    });
+    const loadKeys = async () => {
+      const data = await GetAppData();
+      if (data.keys.apiKey === '' || data.keys.secretKey === '') {
+        setIsOpen(true);
+      }
+    };
+    loadKeys();
   }, []);
-  console.log({ appData });
 
-  const handleChangeRememberMe = () => {
-    setRememberMe(!rememberMe);
-    setAppData({ ...appData } as persistence.AppData);
+  const handleSubmit = async () => {
+    const data = await GetAppData();
+    SaveAppData({
+      ...data,
+      keys: {
+        apiKey: useKeys ? key : data.keys.apiKey,
+        secretKey: useKeys ? secret : data.keys.secretKey,
+      },
+    } as persistence.AppData);
+    setIsOpen(false);
   };
 
   return (
@@ -33,9 +46,11 @@ export const AuthModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
       preventCloseOnClickOutside
       className={styles.modal}
       open={isOpen}
-      passiveModal
+      passiveModal={!useKeys}
       modalHeading="Broker Authentication"
-      onRequestClose={() => setIsOpen(false)}
+      primaryButtonText="Connect"
+      closeButtonLabel="You cannot close this modal"
+      onRequestSubmit={handleSubmit}
     >
       <p
         style={{
@@ -48,6 +63,7 @@ export const AuthModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
         </Link>{' '}
         services for market data and trading. To use the application, you need to{' '}
         <Link
+          data-modal-primary-focus
           href="#"
           onClick={() =>
             BrowserOpenURL(
@@ -60,12 +76,32 @@ export const AuthModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
         </Link>
         .
       </p>
-      <Checkbox labelText="Keep logged in" id="remember-me" value="remember-me" checked={rememberMe} onChange={handleChangeRememberMe} />
+      <Toggle
+        size="sm"
+        labelText=""
+        labelA="Use API Keys instead"
+        labelB="Use API Keys instead"
+        id="togglekeys"
+        toggled={useKeys}
+        onToggle={handleToggle}
+      />
+
+      {useKeys && (
+        <div className={styles.flex}>
+          <TextInput id={'API-KEY'} labelText="Key" value={key} onChange={(e) => setKey(e.target.value)} />
+          <TextInput id={'API-SECRET'} labelText="Secret" value={secret} onChange={(e) => setSecret(e.target.value)} />
+        </div>
+      )}
     </Modal>
   );
 };
 
 const styles = {
+  flex: css`
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  `,
   modal: css`
     display: flex;
     flex-direction: row;

@@ -1,20 +1,37 @@
 package persistence
 
-type UserData struct {
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	RememberMe bool   `json:"rememberMe"`
-	System     string `json:"system"`
+type Preferences struct {
+	GeneralPreferences GeneralPreferences `json:"generalPreferences"`
 }
 
-type Preferences struct {
-	Theme      string      `json:"theme"`
-	Workspaces []Workspace `json:"workspaces"`
+type Theme string
+
+const (
+	LightTheme Theme = "light"
+	DarkTheme  Theme = "dark"
+)
+
+type Language string
+
+const (
+	EnglishLanguage Language = "en"
+	FrenchLanguage  Language = "fr"
+)
+
+type GeneralPreferences struct {
+	Theme    Theme    `json:"theme"`
+	Language Language `json:"language"`
+}
+
+type Keys struct {
+	ApiKey    string `json:"apiKey"`
+	SecretKey string `json:"secretKey"`
 }
 
 type AppData struct {
-	User        UserData    `json:"user"`
+	Keys        Keys        `json:"keys"`
 	Preferences Preferences `json:"preferences"`
+	Workspaces  []Workspace `json:"workspaces"`
 }
 
 type Workspace struct {

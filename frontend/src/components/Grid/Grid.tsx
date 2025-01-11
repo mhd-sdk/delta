@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { Responsive, WidthProvider } from 'react-grid-layout';
+import { useAppData } from '../../hooks/useAppData';
 import { TileInterface } from '../../types/tiles';
 import { Tile } from '../Tiles/Tile';
 
@@ -33,6 +34,8 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
     onChange?.(newTiles);
   };
 
+  const { appData } = useAppData();
+
   return (
     <ResponsiveReactGridLayout
       onLayoutChange={handleLayoutChange}
@@ -48,7 +51,7 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
       rowHeight={10}
     >
       {tiles.map((tile) => (
-        <div key={tile.content.id} className={styles.tile}>
+        <div key={tile.content.id} className={styles.tile(appData.preferences.generalPreferences.theme)}>
           <Tile tile={tile} onDelete={handleDelete} />
         </div>
       ))}
@@ -60,9 +63,9 @@ const styles = {
   layout: css`
     height: calc(100vh - 3rem);
   `,
-  tile: css`
-    background-color: #fff;
-    border: 1px solid #ddd;
+  tile: (theme: string) => css`
+    background-color: ${theme === 'light' ? '#fff' : '#393939'};
+    border: 1px solid ${theme === 'light' ? '#ddd' : '#505050'};
     padding: 0;
   `,
 };

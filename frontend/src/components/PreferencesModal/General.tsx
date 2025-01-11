@@ -1,14 +1,33 @@
+import { RadioTile, TileGroup } from '@carbon/react';
 import { css } from '@emotion/css';
-import { GeneralSettings } from '../../types/preferences';
+import { persistence } from '../../../wailsjs/go/models';
 
 interface Props {
-  onChange: (value: GeneralSettings) => void;
-  value: GeneralSettings;
+  onChange: (value: persistence.GeneralPreferences) => void;
+  value: persistence.GeneralPreferences;
 }
 1;
 
 export const General = ({ value, onChange }: Props): JSX.Element => {
-  return <div></div>;
+  const handleThemeChange = (theme: 'light' | 'dark') => {
+    onChange({
+      ...value,
+      theme,
+    });
+  };
+
+  return (
+    <div>
+      <TileGroup defaultSelected={value.theme} onChange={handleThemeChange} valueSelected={value.theme} legend="Theme" name="Theme">
+        <RadioTile id="light" value="light" className={styles.mb(0.5)}>
+          Light
+        </RadioTile>
+        <RadioTile id="dark" value="dark">
+          Dark
+        </RadioTile>
+      </TileGroup>
+    </div>
+  );
 };
 
 const styles = {

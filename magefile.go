@@ -9,10 +9,13 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-func Dev() error {
+func DevBrowser() error {
 	return sh.RunV("wails", "dev", "-browser", "-loglevel", "info")
 }
 
+func Dev() error {
+	return sh.RunV("wails", "dev", "-loglevel", "info")
+}
 func Build() error {
 	return sh.RunV("wails", "build", "-devtools", "-o", "delta.exe")
 }

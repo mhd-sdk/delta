@@ -1,9 +1,10 @@
 import { Modal, TreeNode, TreeView } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useState } from 'react';
-import { AppearanceSettings, GeneralSettings } from '../../types/preferences';
+import { persistence } from '../../../wailsjs/go/models';
+import { useAppData } from '../../hooks/useAppData';
 import { Separator } from '../Separator';
-import { Appearance } from './Appearance';
+import { Account } from './Account';
 import { General } from './General';
 
 interface Props {
@@ -13,52 +14,61 @@ interface Props {
 
 enum PreferenceTabs {
   General = 'general',
-  Appearance = 'appearance',
+  Account = 'account',
 }
 
 export const PreferenceModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
-  //   const menuTargetref = useRef(null);
   const [selected, setSelected] = useState(PreferenceTabs.General);
+  const [isDirty, setIsDirty] = useState(false);
+  const { appData, onSave } = useAppData();
 
-  const [generalSettings, setGeneralSettings] = useState<GeneralSettings>({} as GeneralSettings);
-  const [appearanceSettings, setAppearanceSettings] = useState<AppearanceSettings>({} as AppearanceSettings);
+  const [generalPreferences, setGeneralPreferences] = useState<persistence.GeneralPreferences>(appData.preferences.generalPreferences);
 
-  const handleChangeGeneral = (value: GeneralSettings) => {};
-  const handleChangeAppearance = (value: AppearanceSettings) => {};
+  const handleChangeGeneral = (value: persistence.GeneralPreferences) => {
+    setIsDirty(true);
+    setGeneralPreferences(value);
+  };
 
-  // useEffect(() => {
-  //   // const preferences = LoadAppData();
-  //   GetProducts()
-  //     .then((products) => {
-  //       console.log(products);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  //   // setGeneralSettings();
-  // }, []);
+  const handleSubmit = () => {
+    onSave({
+      ...appData,
+      preferences: {
+        ...appData.preferences,
+        generalPreferences,
+      },
+    } as persistence.AppData);
+    setIsDirty(false);
+  };
+
+  const handleCancel = () => {
+    setGeneralPreferences(appData.preferences.generalPreferences);
+    setIsDirty(false);
+    setIsOpen(false);
+  };
 
   const renderContent = (tab: PreferenceTabs) => {
     switch (tab) {
       case PreferenceTabs.General:
-        return <General onChange={handleChangeGeneral} value={generalSettings} />;
-      case PreferenceTabs.Appearance:
-        return <Appearance onChange={handleChangeAppearance} value={appearanceSettings} />;
+        return <General onChange={handleChangeGeneral} value={generalPreferences} />;
+      case PreferenceTabs.Account:
+        return <Account />;
     }
   };
   return (
     <Modal
       className={styles.modal}
       open={isOpen}
-      onRequestClose={() => setIsOpen(false)}
+      onRequestClose={handleCancel}
+      onRequestSubmit={handleSubmit}
       modalHeading="Preferences"
-      primaryButtonText="Add"
+      primaryButtonText="Apply"
+      primaryButtonDisabled={!isDirty}
       secondaryButtonText="Cancel"
     >
       <div className={styles.modal}>
         <TreeView active={selected} selected={[selected]} label={''} className={styles.treeView}>
           <TreeNode id={PreferenceTabs.General} label="General" onClick={() => setSelected(PreferenceTabs.General)} />
-          <TreeNode id={PreferenceTabs.Appearance} label="Appearance" onClick={() => setSelected(PreferenceTabs.Appearance)} />
+          <TreeNode id={PreferenceTabs.Account} label="Account" onClick={() => setSelected(PreferenceTabs.Account)} />
         </TreeView>
         <Separator className={styles.divider} />
         <div className={styles.content}>

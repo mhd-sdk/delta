@@ -2,12 +2,13 @@ import { ChartCandlestick, Locked, Settings, Switcher, Unlocked } from '@carbon/
 import { Content, GlobalTheme, Header, HeaderGlobalAction, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import { AuthModal } from './components/AuthModal/AuthModal';
 import { Grid } from './components/Grid/Grid';
 import { Notifications } from './components/Notifications/Notifications';
 import { PreferenceModal } from './components/PreferencesModal/PreferencesModal';
 import { Separator } from './components/Separator';
+import { useAppData } from './hooks/useAppData';
 import { NotificationInterface } from './types/notifications';
 import { TileEnum, TileInterface } from './types/tiles';
 
@@ -20,15 +21,14 @@ const genId = (Tiles: TileInterface[]): string => {
 };
 
 function App() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  const themeCode = theme === 'light' ? 'g10' : 'g90';
+  const { appData } = useAppData();
+  const themeCode = appData.preferences.generalPreferences.theme === 'light' ? 'g10' : 'g90';
 
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
 
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
 
-  const [isDatafeedOpen, setIsDatafeedOpen] = useState(true);
+  const [isDatafeedOpen, setIsDatafeedOpen] = useState(false);
 
   const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
@@ -48,11 +48,6 @@ function App() {
   ]);
 
   const lockLabel = isLayoutLocked ? 'Unlock layout' : 'Lock layout';
-
-  const handleToggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-  };
 
   const toggleLock = () => setIsLayoutLocked(!isLayoutLocked);
 
@@ -76,7 +71,7 @@ function App() {
     document.documentElement.dataset.carbonTheme = themeCode;
   }, [themeCode]);
 
-  const notify = () => toast('Wow so easy !');
+  // const notify = () => toast('Wow so easy !');
 
   return (
     <GlobalTheme theme={themeCode}>
@@ -103,9 +98,9 @@ function App() {
 
             <OverflowMenu renderIcon={Settings} size="lg" flipped aria-label="overflow-menu">
               <OverflowMenuItem itemText="Preferences" onClick={() => setIsPreferencesOpen(true)} />
-              <OverflowMenuItem itemText="Switch theme" onClick={handleToggleTheme} />
-              <OverflowMenuItem itemText="Account infos" />
-              <OverflowMenuItem hasDivider itemText="Disconnect" isDelete />
+              <OverflowMenuItem itemText="Load Workspace" />
+              <OverflowMenuItem itemText="Save workspace as" />
+              <OverflowMenuItem hasDivider itemText="Quit" isDelete />
             </OverflowMenu>
           </div>
         </Header>

@@ -17,18 +17,19 @@ type App struct {
 	Persistence *persistence.Persistence
 }
 
-// NewApp creates a new App application struct
 func NewApp() *App {
 	p, err := persistence.New("delta")
 	if err != nil {
 		slog.Info("erreur")
 	}
+
 	slog.SetDefault(slog.New(
 		tint.NewHandler(os.Stderr, &tint.Options{
 			Level:      slog.LevelDebug,
 			TimeFormat: time.Kitchen,
 		}),
 	))
+
 	slog.Info("Starting DeltΔ...")
 
 	return &App{

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/kr/pretty"
 )
 
 // Get standard config directory for the current OS
@@ -34,6 +36,7 @@ func (p *Persistence) Save(data AppData) error {
 	if err != nil {
 		return err
 	}
+	pretty.Println(data)
 	p.CachedData = data
 	return os.WriteFile(p.filePath, file, 0644)
 }
@@ -62,7 +65,13 @@ func New(appName string) (*Persistence, error) {
 		filePath: saveFile,
 	}
 
-	DefaultData := AppData{}
+	DefaultData := AppData{
+		Preferences: Preferences{
+			GeneralPreferences{
+				Theme: LightTheme,
+			},
+		},
+	}
 
 	_, err = p.Load()
 	// If file not found, create it
