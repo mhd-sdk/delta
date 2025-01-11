@@ -9,5 +9,14 @@
   "author": {
     "name": "mehdi seddik",
     "email": "mhdi.seddik@gmail.com"
+  },
+  "info": {
+    "protocols": [
+      {
+        "scheme": "delta",
+        "description": "Alpaca OAuth2",
+        "role": "Editor"
+      }
+    ]
   }
 }

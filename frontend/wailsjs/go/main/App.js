@@ -6,18 +6,6 @@ export function GetAppData() {
   return window['go']['main']['App']['GetAppData']();
 }
 
-export function GetProducts() {
-  return window['go']['main']['App']['GetProducts']();
-}
-
-export function GetSystems() {
-  return window['go']['main']['App']['GetSystems']();
-}
-
-export function Login(arg1) {
-  return window['go']['main']['App']['Login'](arg1);
-}
-
 export function Ping() {
   return window['go']['main']['App']['Ping']();
 }

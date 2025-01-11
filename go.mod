@@ -5,7 +5,6 @@ go 1.21
 toolchain go1.21.2
 
 require (
-	github.com/gorilla/websocket v1.5.3
 	github.com/leaanthony/u v1.1.0
 	github.com/lmittmann/tint v1.0.6
 	github.com/magefile/mage v1.15.0

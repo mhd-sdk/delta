@@ -1,5 +1,5 @@
 import { ChartCandlestick, Locked, Settings, Switcher, Unlocked } from '@carbon/icons-react';
-import { Button, Content, GlobalTheme, Header, HeaderGlobalAction, OverflowMenu, OverflowMenuItem } from '@carbon/react';
+import { Content, GlobalTheme, Header, HeaderGlobalAction, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
@@ -20,7 +20,7 @@ const genId = (Tiles: TileInterface[]): string => {
 };
 
 function App() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const themeCode = theme === 'light' ? 'g10' : 'g90';
 
@@ -82,7 +82,7 @@ function App() {
     <GlobalTheme theme={themeCode}>
       <div id="App">
         <Header aria-label="Delta">
-          <Button onClick={notify}>Notify !</Button>
+          {/* <Button onClick={notify}>Notify !</Button> */}
           <div className={styles.ml(0.5)}>
             <HeaderGlobalAction aria-label="Tiles" tooltipAlignment="end" isActive={isToolBoxOpen} onClick={toggleToolBox}>
               <Switcher />

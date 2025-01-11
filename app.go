@@ -2,21 +2,19 @@ package main
 
 import (
 	"context"
-	"delta/pkg/generated/rti"
 	"delta/pkg/persistence"
-	"delta/pkg/rithmic"
 	"log/slog"
 	"os"
 	"time"
 
 	"github.com/lmittmann/tint"
+	"github.com/wailsapp/wails/v2/pkg/options"
 )
 
 // App struct
 type App struct {
 	ctx         context.Context
 	Persistence *persistence.Persistence
-	RithmicWs   *rithmic.RithmicWS
 }
 
 // NewApp creates a new App application struct
@@ -33,17 +31,8 @@ func NewApp() *App {
 	))
 	slog.Info("Starting DeltΔ...")
 
-	url := "wss://rituz00100.rithmic.com:443"
-	// url := "wss://rprotocol-de.rithmic.com:443"
-
-	r, err := rithmic.New(url)
-	if err != nil {
-		slog.Error("Error creating RithmicWS", "error", err)
-	}
-
 	return &App{
 		Persistence: p,
-		RithmicWs:   r,
 	}
 }
 
@@ -51,6 +40,10 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+}
+
+func (a *App) onSecondInstanceLaunch(secondInstanceData options.SecondInstanceData) {
+	slog.Info("Second instance launched")
 }
 
 func (a *App) Ping() string {
@@ -63,35 +56,4 @@ func (a *App) GetAppData() (persistence.AppData, error) {
 
 func (a *App) SaveAppData(data persistence.AppData) error {
 	return a.Persistence.Save(data)
-}
-
-func (a *App) GetProducts() ([]*rti.ResponseProductCodes, error) {
-	return a.RithmicWs.ListProducts()
-}
-
-func (a *App) GetSystems() (*rti.ResponseRithmicSystemInfo, error) {
-	return a.RithmicWs.ListSystems()
-}
-
-type loginArgs struct {
-	Username string
-	Password string
-	System   string
-}
-
-func (a *App) Login(args loginArgs) error {
-
-	// usr := "mhdi.seddik@gmail.com"
-	// usr := "xmhd"
-	// pwd := "lDIKLQCX"
-	// pwd := "TST563"
-	// system := "TopstepTrader"
-
-	connArgs := rithmic.ConnectionArgs{
-		User:       args.Username,
-		Password:   args.Password,
-		SystemName: args.System,
-	}
-
-	return a.RithmicWs.Login(connArgs)
 }

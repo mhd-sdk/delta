@@ -1,24 +1,3 @@
-export namespace main {
-	
-	export class loginArgs {
-	    Username: string;
-	    Password: string;
-	    System: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new loginArgs(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.Username = source["Username"];
-	        this.Password = source["Password"];
-	        this.System = source["System"];
-	    }
-	}
-
-}
-
 export namespace persistence {
 	
 	export class Tile {
@@ -160,61 +139,6 @@ export namespace persistence {
 	
 	
 	
-
-}
-
-export namespace rti {
-	
-	export class ResponseProductCodes {
-	    template_id?: number;
-	    user_msg?: string[];
-	    rq_handler_rp_code?: string[];
-	    rp_code?: string[];
-	    exchange?: string;
-	    symbol_name?: string;
-	    product_code?: string;
-	    timezone_time_of_interest?: string;
-	    begin_time_of_interest_msm?: number;
-	    end_time_of_interest_msm?: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new ResponseProductCodes(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.template_id = source["template_id"];
-	        this.user_msg = source["user_msg"];
-	        this.rq_handler_rp_code = source["rq_handler_rp_code"];
-	        this.rp_code = source["rp_code"];
-	        this.exchange = source["exchange"];
-	        this.symbol_name = source["symbol_name"];
-	        this.product_code = source["product_code"];
-	        this.timezone_time_of_interest = source["timezone_time_of_interest"];
-	        this.begin_time_of_interest_msm = source["begin_time_of_interest_msm"];
-	        this.end_time_of_interest_msm = source["end_time_of_interest_msm"];
-	    }
-	}
-	export class ResponseRithmicSystemInfo {
-	    template_id?: number;
-	    user_msg?: string[];
-	    rp_code?: string[];
-	    system_name?: string[];
-	    has_aggregated_quotes?: boolean[];
-	
-	    static createFrom(source: any = {}) {
-	        return new ResponseRithmicSystemInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.template_id = source["template_id"];
-	        this.user_msg = source["user_msg"];
-	        this.rp_code = source["rp_code"];
-	        this.system_name = source["system_name"];
-	        this.has_aggregated_quotes = source["has_aggregated_quotes"];
-	    }
-	}
 
 }
 

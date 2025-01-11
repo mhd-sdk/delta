@@ -1,8 +1,10 @@
+import { ArrowUpRight } from '@carbon/icons-react';
 import { Checkbox, Link, Modal } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
 import { GetAppData } from '../../../wailsjs/go/main/App';
 import { persistence } from '../../../wailsjs/go/models';
+import { BrowserOpenURL } from '../../../wailsjs/runtime/runtime';
 
 interface Props {
   isOpen: boolean;
@@ -31,8 +33,8 @@ export const AuthModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
       preventCloseOnClickOutside
       className={styles.modal}
       open={isOpen}
+      passiveModal
       modalHeading="Broker Authentication"
-      primaryButtonText="Connect"
       onRequestClose={() => setIsOpen(false)}
     >
       <p
@@ -41,12 +43,24 @@ export const AuthModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
         }}
       >
         Delta software use{' '}
-        <Link inline href="#">
+        <Link inline href="#" onClick={() => BrowserOpenURL('https://alpaca.markets/about-us')}>
           Alpaca
         </Link>{' '}
-        services for market data and trading. To use the application, you need to connect your Alpaca account.
+        services for market data and trading. To use the application, you need to{' '}
+        <Link
+          href="#"
+          onClick={() =>
+            BrowserOpenURL(
+              'https://app.alpaca.markets/oauth/authorize?response_type=code&client_id=6f5ab5debd23bc6da75c5f87a5fe3f58&redirect_uri=delta:&scope=account:write&scope=data&scope=trading'
+            )
+          }
+          renderIcon={() => <ArrowUpRight />}
+        >
+          connect your Alpaca account
+        </Link>
+        .
       </p>
-      <Checkbox labelText="Remember me" id="remember-me" value="remember-me" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
+      <Checkbox labelText="Keep logged in" id="remember-me" value="remember-me" checked={rememberMe} onChange={handleChangeRememberMe} />
     </Modal>
   );
 };
@@ -55,11 +69,9 @@ const styles = {
   modal: css`
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
     align-content: flex-start;
     overflow: hidden;
     @media (min-width: 768px) {
-      /* Règles appliquées pour les écrans d'au moins 768px */
       & .cds--modal-container {
         width: 600px !important;
       }
