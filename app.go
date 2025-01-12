@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"delta/pkg/persistence"
+	"errors"
 	"log/slog"
 	"os"
 	"time"
 
+	"github.com/alpacahq/alpaca-trade-api-go/v3/alpaca"
 	"github.com/lmittmann/tint"
 	"github.com/wailsapp/wails/v2/pkg/options"
 )
@@ -15,13 +17,27 @@ import (
 type App struct {
 	ctx         context.Context
 	Persistence *persistence.Persistence
+	Alpaca      *alpaca.Client
 }
 
 func NewApp() *App {
 	p, err := persistence.New("delta")
 	if err != nil {
-		slog.Info("erreur")
+		slog.Info("error initializing persistence", err.Error())
 	}
+
+	appData, err := p.Load()
+	if err != nil {
+		slog.Error("error loading app data", err.Error())
+	}
+
+	client := alpaca.NewClient(alpaca.ClientOpts{
+		// Alternatively you can set your key and secret using the
+		// APCA_API_KEY_ID and APCA_API_SECRET_KEY environment variables
+		APIKey:    appData.Keys.ApiKey,
+		APISecret: appData.Keys.SecretKey,
+		BaseURL:   "https://paper-api.alpaca.markets",
+	})
 
 	slog.SetDefault(slog.New(
 		tint.NewHandler(os.Stderr, &tint.Options{
@@ -34,6 +50,7 @@ func NewApp() *App {
 
 	return &App{
 		Persistence: p,
+		Alpaca:      client,
 	}
 }
 
@@ -47,8 +64,38 @@ func (a *App) onSecondInstanceLaunch(secondInstanceData options.SecondInstanceDa
 	slog.Info("Second instance launched")
 }
 
-func (a *App) Ping() string {
-	return "pong"
+func (a *App) TestCredentials(key string, secret string) bool {
+	client := alpaca.NewClient(alpaca.ClientOpts{
+		APIKey:    key,
+		APISecret: secret,
+		BaseURL:   "https://paper-api.alpaca.markets",
+	})
+
+	_, err := client.GetAccount()
+
+	if err != nil {
+		slog.Error("Login failed", err.Error())
+		return false
+	} else {
+		slog.Info("Login successful")
+		a.Alpaca = client
+		return true
+	}
+}
+
+func (a *App) Logout() {
+	a.Alpaca = nil
+}
+
+func (a *App) GetAccount() (*alpaca.Account, error) {
+	if a.Alpaca == nil {
+		return nil, errors.New("Not logged in")
+	}
+	acct, err := a.Alpaca.GetAccount()
+	if err != nil {
+		return nil, err
+	}
+	return acct, nil
 }
 
 func (a *App) GetAppData() (persistence.AppData, error) {

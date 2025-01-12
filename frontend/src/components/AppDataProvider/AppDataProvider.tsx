@@ -5,6 +5,7 @@ import { persistence } from '../../../wailsjs/go/models';
 export interface AppDataContextProps {
   appData: persistence.AppData;
   onSave: (value: persistence.AppData) => void;
+  refetch: () => void;
 }
 
 export const appDataCtx = createContext<AppDataContextProps | undefined>(undefined);
@@ -26,11 +27,16 @@ const AppDataProvider = ({ children }: Props) => {
     SaveAppData(value);
   };
 
+  const refetch = async () => {
+    const appData = await GetAppData();
+    setAppData(appData);
+  };
+
   if (!appData) {
     return <div>Could not load app data</div>;
   }
 
-  return <appDataCtx.Provider value={{ appData, onSave }}>{children}</appDataCtx.Provider>;
+  return <appDataCtx.Provider value={{ appData, onSave, refetch }}>{children}</appDataCtx.Provider>;
 };
 
 export default AppDataProvider;

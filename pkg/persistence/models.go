@@ -55,6 +55,5 @@ const (
 )
 
 type Persistence struct {
-	filePath   string
-	CachedData AppData `json:"cachedData"`
+	filePath string
 }

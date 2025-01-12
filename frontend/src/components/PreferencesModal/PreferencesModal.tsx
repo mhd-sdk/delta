@@ -1,6 +1,6 @@
 import { Modal, TreeNode, TreeView } from '@carbon/react';
 import { css } from '@emotion/css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { persistence } from '../../../wailsjs/go/models';
 import { useAppData } from '../../hooks/useAppData';
 import { Separator } from '../Separator';
@@ -9,7 +9,8 @@ import { General } from './General';
 
 interface Props {
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  onClose: () => void;
+  onLogout: () => void;
 }
 
 enum PreferenceTabs {
@@ -17,12 +18,21 @@ enum PreferenceTabs {
   Account = 'account',
 }
 
-export const PreferenceModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
+export const PreferenceModal = ({ isOpen, onClose, onLogout }: Props): JSX.Element => {
+  const { appData, onSave } = useAppData();
   const [selected, setSelected] = useState(PreferenceTabs.General);
   const [isDirty, setIsDirty] = useState(false);
-  const { appData, onSave } = useAppData();
+  const [generalPreferences, setGeneralPreferences] = useState<persistence.GeneralPreferences>({
+    language: 'en',
+    theme: 'dark',
+  });
 
-  const [generalPreferences, setGeneralPreferences] = useState<persistence.GeneralPreferences>(appData.preferences.generalPreferences);
+  useEffect(() => {
+    const fetchAppData = async () => {
+      setGeneralPreferences(appData.preferences.generalPreferences);
+    };
+    fetchAppData();
+  }, [isOpen]);
 
   const handleChangeGeneral = (value: persistence.GeneralPreferences) => {
     setIsDirty(true);
@@ -40,10 +50,10 @@ export const PreferenceModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
     setIsDirty(false);
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     setGeneralPreferences(appData.preferences.generalPreferences);
     setIsDirty(false);
-    setIsOpen(false);
+    onClose();
   };
 
   const renderContent = (tab: PreferenceTabs) => {
@@ -51,7 +61,7 @@ export const PreferenceModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
       case PreferenceTabs.General:
         return <General onChange={handleChangeGeneral} value={generalPreferences} />;
       case PreferenceTabs.Account:
-        return <Account />;
+        return <Account onLogout={onLogout} />;
     }
   };
   return (
@@ -71,65 +81,7 @@ export const PreferenceModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
           <TreeNode id={PreferenceTabs.Account} label="Account" onClick={() => setSelected(PreferenceTabs.Account)} />
         </TreeView>
         <Separator className={styles.divider} />
-        <div className={styles.content}>
-          {renderContent(selected)}
-          {/* <TextInput
-            data-modal-primary-focus
-            id="text-input-1"
-            labelText="Domain name"
-            placeholder="e.g. github.com"
-            style={{
-              marginBottom: '1rem',
-            }}
-          />
-          <Select id="select-1" defaultValue="us-south" labelText="Region">
-            <SelectItem value="us-south" text="US South" />
-            <SelectItem value="us-east" text="US East" />
-          </Select>
-          <Dropdown
-            id="drop"
-            label="Dropdown"
-            titleText="Dropdown"
-            items={[
-              {
-                id: 'one',
-                label: 'one',
-                name: 'one',
-              },
-              {
-                id: 'two',
-                label: 'two',
-                name: 'two',
-              },
-            ]}
-          />
-          <br />
-          <div ref={menuTargetref}>
-            <MenuButton label="Actions" menuTarget={menuTargetref.current ?? undefined} menuAlignment={'top'}>
-              <MenuItem label="First action" />
-              <MenuItem label="Second action" />
-              <MenuItem label="Third action" />
-              <MenuItem label="Danger action" kind="danger" />
-            </MenuButton>
-          </div>
-          <br />
-          <MultiSelect
-            id="test"
-            label="Multiselect"
-            titleText="Multiselect"
-            items={[
-              {
-                id: 'downshift-1-item-0',
-                text: 'Option 1',
-              },
-              {
-                id: 'downshift-1-item-1',
-                text: 'Option 2',
-              },
-            ]}
-            itemToString={(item) => (item ? item.text : '')}
-          /> */}
-        </div>
+        {isOpen && <div className={styles.content}>{renderContent(selected)}</div>}
       </div>
     </Modal>
   );
@@ -157,7 +109,7 @@ const styles = {
     @media (min-width: 768px) {
       /* Règles appliquées pour les écrans d'au moins 768px */
       & .cds--modal-container {
-        width: 90% !important;
+        width: 75% !important;
       }
     }
 

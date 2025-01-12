@@ -1,8 +1,10 @@
 import { ChartCandlestick, Locked, Settings, Switcher, Unlocked } from '@carbon/icons-react';
-import { Content, GlobalTheme, Header, HeaderGlobalAction, OverflowMenu, OverflowMenuItem } from '@carbon/react';
+import { Content, GlobalTheme, Header, HeaderGlobalAction, Modal, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
+import { Logout, SaveAppData } from '../wailsjs/go/main/App';
+import { persistence } from '../wailsjs/go/models';
 import { AuthModal } from './components/AuthModal/AuthModal';
 import { Grid } from './components/Grid/Grid';
 import { Notifications } from './components/Notifications/Notifications';
@@ -33,6 +35,8 @@ function App() {
   const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
   const [isLayoutLocked, setIsLayoutLocked] = useState(false);
+
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const [tiles, setTiles] = useState<TileInterface[]>([
     {
@@ -65,6 +69,20 @@ function App() {
       h: 20,
     };
     setTiles([...tiles, newTile]);
+  };
+
+  const handleLogout = async () => {
+    setIsLogoutModalOpen(false);
+    setIsPreferencesOpen(false);
+    await SaveAppData({
+      ...appData,
+      keys: {
+        apiKey: '',
+        secretKey: '',
+      },
+    } as persistence.AppData);
+    setIsDatafeedOpen(true);
+    Logout();
   };
 
   useEffect(() => {
@@ -110,8 +128,22 @@ function App() {
         <Content className={styles.content}>
           <Grid isLocked={isLayoutLocked} tiles={tiles} onChange={setTiles} />
         </Content>
-        <PreferenceModal isOpen={isPreferencesOpen} setIsOpen={(isOpen) => setIsPreferencesOpen(isOpen)} />
+
+        <PreferenceModal onLogout={() => setIsLogoutModalOpen(true)} isOpen={isPreferencesOpen} onClose={() => setIsPreferencesOpen(false)} />
+
         <AuthModal isOpen={isDatafeedOpen} setIsOpen={(isOpen) => setIsDatafeedOpen(isOpen)} />
+
+        <Modal
+          open={isLogoutModalOpen}
+          onRequestClose={() => setIsLogoutModalOpen(false)}
+          danger
+          onRequestSubmit={handleLogout}
+          modalHeading="Are you sure you want to logout ?"
+          modalLabel="This action is irreversible"
+          primaryButtonText="Logout"
+          secondaryButtonText="Cancel"
+        />
+
         <ToastContainer />
       </div>
     </GlobalTheme>

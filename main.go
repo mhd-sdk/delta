@@ -42,7 +42,7 @@ func main() {
 			},
 		},
 
-		WindowStartState: options.Maximised,
+		WindowStartState: options.Minimised,
 		// WindowStartState: options.Minimised,
 
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},

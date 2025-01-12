@@ -1,3 +1,122 @@
+export namespace alpaca {
+	
+	export class Account {
+	    id: string;
+	    account_number: string;
+	    status: string;
+	    crypto_status: string;
+	    currency: string;
+	    // Go type: decimal
+	    buying_power: any;
+	    // Go type: decimal
+	    regt_buying_power: any;
+	    // Go type: decimal
+	    daytrading_buying_power: any;
+	    // Go type: decimal
+	    effective_buying_power: any;
+	    // Go type: decimal
+	    non_marginable_buying_power: any;
+	    // Go type: decimal
+	    bod_dtbp: any;
+	    // Go type: decimal
+	    cash: any;
+	    // Go type: decimal
+	    accrued_fees: any;
+	    // Go type: decimal
+	    portfolio_value: any;
+	    pattern_day_trader: boolean;
+	    trading_blocked: boolean;
+	    transfers_blocked: boolean;
+	    account_blocked: boolean;
+	    shorting_enabled: boolean;
+	    trade_suspended_by_user: boolean;
+	    // Go type: time
+	    created_at: any;
+	    // Go type: decimal
+	    multiplier: any;
+	    // Go type: decimal
+	    equity: any;
+	    // Go type: decimal
+	    last_equity: any;
+	    // Go type: decimal
+	    long_market_value: any;
+	    // Go type: decimal
+	    short_market_value: any;
+	    // Go type: decimal
+	    position_market_value: any;
+	    // Go type: decimal
+	    initial_margin: any;
+	    // Go type: decimal
+	    maintenance_margin: any;
+	    // Go type: decimal
+	    last_maintenance_margin: any;
+	    // Go type: decimal
+	    sma: any;
+	    daytrade_count: number;
+	    crypto_tier: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Account(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.account_number = source["account_number"];
+	        this.status = source["status"];
+	        this.crypto_status = source["crypto_status"];
+	        this.currency = source["currency"];
+	        this.buying_power = this.convertValues(source["buying_power"], null);
+	        this.regt_buying_power = this.convertValues(source["regt_buying_power"], null);
+	        this.daytrading_buying_power = this.convertValues(source["daytrading_buying_power"], null);
+	        this.effective_buying_power = this.convertValues(source["effective_buying_power"], null);
+	        this.non_marginable_buying_power = this.convertValues(source["non_marginable_buying_power"], null);
+	        this.bod_dtbp = this.convertValues(source["bod_dtbp"], null);
+	        this.cash = this.convertValues(source["cash"], null);
+	        this.accrued_fees = this.convertValues(source["accrued_fees"], null);
+	        this.portfolio_value = this.convertValues(source["portfolio_value"], null);
+	        this.pattern_day_trader = source["pattern_day_trader"];
+	        this.trading_blocked = source["trading_blocked"];
+	        this.transfers_blocked = source["transfers_blocked"];
+	        this.account_blocked = source["account_blocked"];
+	        this.shorting_enabled = source["shorting_enabled"];
+	        this.trade_suspended_by_user = source["trade_suspended_by_user"];
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.multiplier = this.convertValues(source["multiplier"], null);
+	        this.equity = this.convertValues(source["equity"], null);
+	        this.last_equity = this.convertValues(source["last_equity"], null);
+	        this.long_market_value = this.convertValues(source["long_market_value"], null);
+	        this.short_market_value = this.convertValues(source["short_market_value"], null);
+	        this.position_market_value = this.convertValues(source["position_market_value"], null);
+	        this.initial_margin = this.convertValues(source["initial_margin"], null);
+	        this.maintenance_margin = this.convertValues(source["maintenance_margin"], null);
+	        this.last_maintenance_margin = this.convertValues(source["last_maintenance_margin"], null);
+	        this.sma = this.convertValues(source["sma"], null);
+	        this.daytrade_count = source["daytrade_count"];
+	        this.crypto_tier = source["crypto_tier"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace persistence {
 	
 	export class Tile {

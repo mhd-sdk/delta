@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { createChart, IChartApi, ISeriesApi, Time, CandlestickData } from 'lightweight-charts';
+import { CandlestickData, createChart, IChartApi, ISeriesApi, Time } from 'lightweight-charts';
+import { useEffect, useRef } from 'react';
 import { VolumeProfile } from './VolumeProfile';
 
 interface VolumeProfileItem {
@@ -81,7 +81,6 @@ export const Graph = () => {
     };
 
     const volumeProfile = new VolumeProfile(chart, candlestickSeries, volumeProfileData);
-    console.log(volumeProfile);
     candlestickSeries.attachPrimitive(volumeProfile);
 
     // Clean up on component unmount

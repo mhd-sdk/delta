@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/kr/pretty"
 )
 
 // Get standard config directory for the current OS
@@ -36,8 +34,6 @@ func (p *Persistence) Save(data AppData) error {
 	if err != nil {
 		return err
 	}
-	pretty.Println(data)
-	p.CachedData = data
 	return os.WriteFile(p.filePath, file, 0644)
 }
 
@@ -48,7 +44,6 @@ func (p *Persistence) Load() (AppData, error) {
 		return data, err
 	}
 	err = json.Unmarshal(file, &data)
-	p.CachedData = data
 	return data, err
 }
 
