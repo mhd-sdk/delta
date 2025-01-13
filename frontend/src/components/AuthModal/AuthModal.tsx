@@ -46,6 +46,7 @@ export const AuthModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
     setSecret('');
     setKey('');
     setUseKeys(false);
+    setIsOpen(false);
   };
 
   const handleRequest = async () => {
