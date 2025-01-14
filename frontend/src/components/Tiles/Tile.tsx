@@ -1,8 +1,9 @@
 import { Menu, MenuItem, useContextMenu } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useRef } from 'react';
-import { TileInterface } from '../../types/tiles';
-import { ChartTile } from './ChartTile';
+import { TileEnum, TileInterface } from '../../types/tiles';
+import { AccountOverview } from './AccountOverview';
+import { Chart } from './Chart';
 
 interface Props {
   tile: TileInterface;
@@ -14,11 +15,36 @@ export const Tile = ({ tile, onDelete }: Props) => {
   const menuProps = useContextMenu(el);
   const renderTile = (tile: TileInterface) => {
     switch (tile.content.type) {
-      case 'Chart':
-        return <ChartTile />;
+      case TileEnum.Chart:
+        return <Chart config={tile.content.config} />;
+      case TileEnum.AccountOverview:
+        return <AccountOverview />;
       default:
         return null;
     }
+  };
+  const renderMenu = (type: TileEnum) => {
+    return (
+      <>
+        {type === TileEnum.Chart && (
+          <>
+            <MenuItem
+              label="Symbol Info"
+              onClick={(e) => {
+                console.log('Edit clicked');
+              }}
+            />
+            <MenuItem
+              label="Configure"
+              onClick={(e) => {
+                console.log('Edit clicked');
+              }}
+            />
+          </>
+        )}
+        <MenuItem label="Delete" kind="danger" onClick={() => onDelete(tile.content.id)} />
+      </>
+    );
   };
   return (
     <>
@@ -38,13 +64,7 @@ export const Tile = ({ tile, onDelete }: Props) => {
         mode="basic"
         onMouseDown={(e) => e.stopPropagation()} // Prevent drag activation
       >
-        <MenuItem
-          label="Edit"
-          onClick={(e) => {
-            console.log('Edit clicked');
-          }}
-        />
-        <MenuItem label="Delete" kind="danger" onClick={() => onDelete(tile.content.id)} />
+        {renderMenu(tile.content.type)}
       </Menu>
     </>
   );

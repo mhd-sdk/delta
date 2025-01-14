@@ -18,7 +18,7 @@ export const Account = ({ onLogout }: Props): JSX.Element => {
       setTimeout(async () => {
         const acc = await GetAccount();
         setAccount(acc);
-      }, 1000);
+      }, 500);
     };
     fetchAccount();
   }, []);

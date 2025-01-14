@@ -16,6 +16,7 @@
     "@carbon/themes": "^11.43.0",
     "@emotion/css": "^11.13.4",
     "@tanstack/react-query": "^5.64.0",
+    "dayjs": "^1.11.13",
     "fancy-canvas": "^2.1.0",
     "lightweight-charts": "^4.2.1",
     "motion": "^11.15.0",

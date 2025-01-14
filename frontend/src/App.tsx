@@ -24,7 +24,8 @@ const genId = (Tiles: TileInterface[]): string => {
 
 function App() {
   const { appData } = useAppData();
-  const themeCode = appData.preferences.generalPreferences.theme === 'light' ? 'g10' : 'g90';
+  const theme = appData.preferences.generalPreferences.theme;
+  const themeCode = theme === 'light' ? 'g10' : 'g90';
 
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
 
@@ -34,7 +35,7 @@ function App() {
 
   const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
-  const [isLayoutLocked, setIsLayoutLocked] = useState(false);
+  const [isLayoutLocked, setIsLayoutLocked] = useState(true);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
@@ -43,6 +44,12 @@ function App() {
       content: {
         id: '0',
         type: TileEnum.Chart,
+        config: {
+          endDate: '2021-09-01',
+          startDate: '2021-08-01',
+          symbol: 'AAPL',
+          timeframe: '1d',
+        },
       },
       x: 0,
       y: 0,
@@ -58,17 +65,28 @@ function App() {
   const toggleToolBox = () => setIsToolBoxOpen(!isToolBoxOpen);
 
   const handleNewTile = (type: TileEnum) => {
-    const newTile: TileInterface = {
-      content: {
-        id: genId(tiles),
-        type,
-      },
-      x: 0,
-      y: 0,
-      w: 20,
-      h: 20,
-    };
-    setTiles([...tiles, newTile]);
+    switch (type) {
+      case TileEnum.Chart:
+        setTiles([
+          ...tiles,
+          {
+            content: {
+              id: genId(tiles),
+              type,
+              config: {
+                symbol: 'AAPL',
+                timeframe: '1d',
+                startDate: '2021-08-01',
+                endDate: '2021-09-01',
+              },
+            },
+            x: 0,
+            y: 0,
+            w: 20,
+            h: 20,
+          },
+        ]);
+    }
   };
 
   const handleLogout = async () => {
@@ -93,7 +111,7 @@ function App() {
 
   return (
     <GlobalTheme theme={themeCode}>
-      <div id="App">
+      <div id="App" className={styles.app(theme)}>
         <Header aria-label="Delta">
           {/* <Button onClick={notify}>Notify !</Button> */}
           <div className={styles.ml(0.5)}>
@@ -123,7 +141,7 @@ function App() {
           </div>
         </Header>
 
-        <div className={styles.toolBox(isToolBoxOpen)}></div>
+        <div className={styles.toolBox(isToolBoxOpen, theme)}></div>
 
         <Content className={styles.content}>
           <Grid isLocked={isLayoutLocked} tiles={tiles} onChange={setTiles} />
@@ -151,6 +169,9 @@ function App() {
 }
 
 const styles = {
+  app: (theme: string) => css`
+    scrollbar-color: ${theme === 'light' ? '#d0d0d0 #fff' : '#606060 #303030'};
+  `,
   layout: css`
     height: calc(100vh - 3rem);
   `,
@@ -161,13 +182,13 @@ const styles = {
     overflow-x: hidden;
     overflow-y: auto;
   `,
-  toolBox: (isOpen: boolean) => css`
+  toolBox: (isOpen: boolean, theme: string) => css`
     margin-top: ${isOpen ? '3rem' : '0rem'};
     height: 3rem;
     transition: margin-top 0.3s;
-    border-bottom: 1px solid #d0d0d084;
+    border-bottom: 1px solid ${theme === 'light' ? '#d0d0d084' : '#333333'};
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: ${theme === 'light' ? '#f4f4f4' : '#393939'};
   `,
   header: css``,
   ml: (number: number) => css`
