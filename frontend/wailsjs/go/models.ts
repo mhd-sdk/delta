@@ -114,6 +114,42 @@ export namespace alpaca {
 		    return a;
 		}
 	}
+	export class Asset {
+	    id: string;
+	    class: string;
+	    exchange: string;
+	    symbol: string;
+	    name: string;
+	    status: string;
+	    tradable: boolean;
+	    marginable: boolean;
+	    maintenance_margin_requirement: number;
+	    shortable: boolean;
+	    easy_to_borrow: boolean;
+	    fractionable: boolean;
+	    attributes: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Asset(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.class = source["class"];
+	        this.exchange = source["exchange"];
+	        this.symbol = source["symbol"];
+	        this.name = source["name"];
+	        this.status = source["status"];
+	        this.tradable = source["tradable"];
+	        this.marginable = source["marginable"];
+	        this.maintenance_margin_requirement = source["maintenance_margin_requirement"];
+	        this.shortable = source["shortable"];
+	        this.easy_to_borrow = source["easy_to_borrow"];
+	        this.fractionable = source["fractionable"];
+	        this.attributes = source["attributes"];
+	    }
+	}
 
 }
 

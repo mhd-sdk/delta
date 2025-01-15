@@ -10,6 +10,10 @@ export function GetAppData() {
   return window['go']['main']['App']['GetAppData']();
 }
 
+export function GetSymbols() {
+  return window['go']['main']['App']['GetSymbols']();
+}
+
 export function Logout() {
   return window['go']['main']['App']['Logout']();
 }

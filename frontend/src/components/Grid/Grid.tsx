@@ -1,4 +1,5 @@
 import { css } from '@emotion/css';
+import { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useAppData } from '../../hooks/useAppData';
 import { TileInterface } from '../../types/tiles';
@@ -36,6 +37,8 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
 
   const { appData } = useAppData();
 
+  const [isGrabbing, setIsGrabbing] = useState(false);
+
   return (
     <ResponsiveReactGridLayout
       onLayoutChange={handleLayoutChange}
@@ -49,10 +52,18 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
       cols={{ lg: 50 }}
       autoSize={true}
       rowHeight={10}
+      onDragStart={() => setIsGrabbing(true)}
+      onDragStop={() => setIsGrabbing(false)}
     >
       {tiles.map((tile) => (
-        <div key={tile.content.id} className={styles.tile(appData.preferences.generalPreferences.theme)}>
-          <Tile tile={tile} onDelete={handleDelete} />
+        <div
+          style={{
+            cursor: !isLocked ? (isGrabbing ? 'grabbing' : 'grab') : 'default',
+          }}
+          key={tile.content.id}
+          className={styles.tile(appData.preferences.generalPreferences.theme)}
+        >
+          <Tile tile={tile} onDelete={handleDelete} isLocked={isLocked} />
         </div>
       ))}
     </ResponsiveReactGridLayout>

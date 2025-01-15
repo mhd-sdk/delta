@@ -74,7 +74,7 @@ func (a *App) TestCredentials(key string, secret string) bool {
 	_, err := client.GetAccount()
 
 	if err != nil {
-		slog.Error("Login failed", err.Error())
+		slog.Error("login failed", "error", err.Error())
 		return false
 	} else {
 		slog.Info("Login successful")
@@ -83,13 +83,30 @@ func (a *App) TestCredentials(key string, secret string) bool {
 	}
 }
 
+func (a *App) GetSymbols() (symbols []alpaca.Asset, err error) {
+	if a.Alpaca == nil {
+		return nil, errors.New("not logged in")
+	}
+
+	assets, err := a.Alpaca.GetAssets(alpaca.GetAssetsRequest{
+		Status:     "active",
+		AssetClass: "us_equity",
+	})
+	if err != nil {
+		slog.Error("error fetching assets", "error", err.Error())
+		return nil, err
+	}
+	return assets, nil
+}
+
 func (a *App) Logout() {
 	a.Alpaca = nil
 }
 
 func (a *App) GetAccount() (*alpaca.Account, error) {
 	if a.Alpaca == nil {
-		return nil, errors.New("Not logged in")
+		slog.Error("not logged in")
+		return nil, errors.New("not logged in")
 	}
 	acct, err := a.Alpaca.GetAccount()
 	if err != nil {
