@@ -5,6 +5,7 @@ export enum TileEnum {
 }
 
 export interface TileInterface {
+  id: string;
   x: number;
   y: number;
   w: number;
@@ -14,19 +15,18 @@ export interface TileInterface {
 
 export type TileContent =
   | {
-      id: string;
       type: TileEnum.Chart;
       config: ChartConfig;
     }
   | {
-      id: string;
       type: TileEnum.TimeAndSales;
-      settings: TimeAndSalesConfig;
+      config: TimeAndSalesConfig;
     }
   | {
-      id: string;
       type: TileEnum.AccountOverview;
     };
+
+export type Configs = ChartConfig | TimeAndSalesConfig;
 
 export interface ChartConfig {
   symbol: string;

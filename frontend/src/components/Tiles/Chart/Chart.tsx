@@ -1,25 +1,30 @@
 import { Dropdown, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { css } from '@emotion/css';
+import { useState } from 'react';
 import { ChartConfig } from '../../../types/tiles';
 import { SymbolSelect } from '../../SymbolSelect/SymbolSelect';
 
 interface Props {
   isLocked: boolean;
   config: ChartConfig;
+  onConfigChange: (config: ChartConfig) => void;
 }
 
-export const Chart = ({ config, isLocked }: Props): JSX.Element => {
+export const Chart = ({ config, isLocked, onConfigChange }: Props): JSX.Element => {
   const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d'];
-  const symbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'NFLX', 'FB', 'NVDA', 'INTC', 'AMD', 'CSCO', 'QCOM'];
+  const [isSymbolSearchOpen, setIsSymbolSearchOpen] = useState(false);
+  const handleSymbolChange = (symbol: string) => {
+    onConfigChange({ ...config, symbol });
+  };
+
+  const handleTimeframeChange = (timeframe: string) => {
+    onConfigChange({ ...config, timeframe });
+  };
+
   return (
-    <div>
+    <div className={styles.height100}>
       <div className={styles.header}>
-        {/* <IconButton align="bottom-left" label="Advanced search" kind="ghost" size="sm">
-          <Search />
-        </IconButton> */}
-        {/* <div className={styles.symbolWrapper}> */}
-        <SymbolSelect value={config.symbol} onChange={() => {}} />
-        {/* </div> */}
+        <SymbolSelect disabled={!isLocked} value={config.symbol} onChange={handleSymbolChange} />
         <Dropdown
           disabled={!isLocked}
           className={css`
@@ -32,10 +37,10 @@ export const Chart = ({ config, isLocked }: Props): JSX.Element => {
           // type="inline"
           items={timeframes}
           titleText={undefined}
+          onChange={({ selectedItem }) => selectedItem && handleTimeframeChange(selectedItem)}
         />
         <div className={styles.overflowMenu(isLocked)}>
           <OverflowMenu disabled={!isLocked} iconDescription="toto" direction="bottom" size="sm" flipped align="bottom">
-            <OverflowMenuItem itemText="Advanced search" />
             <OverflowMenuItem itemText="Symbol info" />
             <OverflowMenuItem itemText="Link" />
             <OverflowMenuItem hasDivider isDelete itemText="Delete" />
@@ -47,6 +52,9 @@ export const Chart = ({ config, isLocked }: Props): JSX.Element => {
 };
 
 const styles = {
+  height100: css`
+    height: 100%;
+  `,
   symbolWrapper: css`
     width: 120px;
   `,

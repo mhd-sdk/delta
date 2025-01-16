@@ -1,5 +1,5 @@
-import { Help } from '@carbon/icons-react';
-import { Button, CopyButton, Link, TextInput, TextInputSkeleton, Tooltip } from '@carbon/react';
+import { Information } from '@carbon/icons-react';
+import { Button, CopyButton, Link, TextInput, TextInputSkeleton, Toggletip, ToggletipButton, ToggletipContent, ToggletipLabel } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
 import { GetAccount } from '../../../wailsjs/go/main/App';
@@ -13,7 +13,6 @@ export const Account = ({ onLogout }: Props): JSX.Element => {
   const [account, setAccount] = useState<alpaca.Account>();
   const isLoading = account === undefined;
   useEffect(() => {
-    console.log('fetching account');
     const fetchAccount = async () => {
       setTimeout(async () => {
         const acc = await GetAccount();
@@ -52,23 +51,23 @@ export const Account = ({ onLogout }: Props): JSX.Element => {
             <TextInput
               id="multiplier"
               labelText={
-                <div className={styles.fieldLabel}>
-                  Multiplier
-                  <Tooltip
-                    align="bottom"
-                    label={
-                      <>
+                <>
+                  <ToggletipLabel>Toggletip label</ToggletipLabel>
+                  <Toggletip align={'right-top'}>
+                    <ToggletipButton label="Show information">
+                      <Information />
+                    </ToggletipButton>
+                    <ToggletipContent>
+                      <p>
                         Correspond to the allowed{' '}
                         <Link onClick={() => BrowserOpenURL('https://en.wikipedia.org/wiki/Leverage_(finance)')} href="#">
                           leverage
                         </Link>{' '}
                         for the account.
-                      </>
-                    }
-                  >
-                    <Help />
-                  </Tooltip>
-                </div>
+                      </p>
+                    </ToggletipContent>
+                  </Toggletip>
+                </>
               }
               value={account?.multiplier}
             />

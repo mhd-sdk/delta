@@ -11,17 +11,17 @@ interface Props {
   toggleToolBox: () => void;
   isLayoutLocked: boolean;
   toggleLock: () => void;
-  handleNewTile: (type: TileEnum) => void;
+  onNewTile: (type: TileEnum) => void;
   onOpenPreferences: () => void;
   notifications: NotificationInterface[];
 }
 
-export const Header = ({
+export const Headerbar = ({
   isLayoutLocked,
   isToolBoxOpen,
   toggleLock,
   toggleToolBox,
-  handleNewTile,
+  onNewTile,
   onOpenPreferences,
   notifications,
 }: Props): JSX.Element => {
@@ -35,7 +35,7 @@ export const Header = ({
       </div>
       <Separator />
       <div className={styles.favorites}>
-        <HeaderGlobalAction aria-label="Chart" tooltipAlignment="center" onClick={() => handleNewTile(TileEnum.Chart)}>
+        <HeaderGlobalAction aria-label="Chart" tooltipAlignment="center" onClick={() => onNewTile(TileEnum.Chart)}>
           <ChartCandlestick />
         </HeaderGlobalAction>
       </div>

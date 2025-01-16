@@ -1,6 +1,6 @@
 import { Menu, MenuItem, useContextMenu } from '@carbon/react';
 import { useRef } from 'react';
-import { TileEnum, TileInterface } from '../../types/tiles';
+import { ChartConfig, TileEnum, TileInterface } from '../../types/tiles';
 import { AccountOverview } from './AccountOverview';
 import { Chart } from './Chart/Chart';
 
@@ -8,15 +8,23 @@ interface Props {
   tile: TileInterface;
   onDelete: (id: string) => void;
   isLocked: boolean;
+  onConfigChange?: (tile: TileInterface) => void;
 }
 
-export const Tile = ({ tile, isLocked, onDelete }: Props) => {
+export const Tile = ({ tile, isLocked, onDelete, onConfigChange }: Props) => {
   const el = useRef<HTMLDivElement | null>(null);
   const menuProps = useContextMenu(el);
+
+  const handleChartChange = (config: ChartConfig) => {
+    if (tile.content.type === TileEnum.Chart) {
+      onConfigChange?.({ ...tile, content: { ...tile.content, config } });
+    }
+  };
+
   const renderTile = (tile: TileInterface) => {
     switch (tile.content.type) {
       case TileEnum.Chart:
-        return <Chart isLocked={isLocked} config={tile.content.config} />;
+        return <Chart isLocked={isLocked} config={tile.content.config} onConfigChange={handleChartChange} />;
       case TileEnum.AccountOverview:
         return <AccountOverview />;
       default:
@@ -29,12 +37,6 @@ export const Tile = ({ tile, isLocked, onDelete }: Props) => {
         {type === TileEnum.Chart && (
           <>
             <MenuItem
-              label="Advanced search"
-              onClick={() => {
-                console.log('Edit clicked');
-              }}
-            />
-            <MenuItem
               label="Symbol Info"
               onClick={() => {
                 console.log('Edit clicked');
@@ -43,12 +45,12 @@ export const Tile = ({ tile, isLocked, onDelete }: Props) => {
             <MenuItem
               label="Link"
               onClick={() => {
-                console.log('Edit clicked');
+                console.log('Link clicked');
               }}
             />
           </>
         )}
-        <MenuItem label="Delete" kind="danger" onClick={() => onDelete(tile.content.id)} />
+        <MenuItem label="Delete" kind="danger" onClick={() => onDelete(tile.id)} />
       </>
     );
   };

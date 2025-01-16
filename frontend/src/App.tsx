@@ -1,5 +1,4 @@
-import { ChartCandlestick, Locked, Settings, Switcher, Unlocked } from '@carbon/icons-react';
-import { Content, GlobalTheme, Header, HeaderGlobalAction, Modal, OverflowMenu, OverflowMenuItem } from '@carbon/react';
+import { Content, GlobalTheme, Modal } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
@@ -7,16 +6,16 @@ import { Logout, SaveAppData } from '../wailsjs/go/main/App';
 import { persistence } from '../wailsjs/go/models';
 import { AuthModal } from './components/AuthModal/AuthModal';
 import { Grid } from './components/Grid/Grid';
-import { Notifications } from './components/Notifications/Notifications';
+import { Headerbar } from './components/Headerbar/Headerbar';
 import { PreferenceModal } from './components/PreferencesModal/PreferencesModal';
-import { Separator } from './components/Separator';
 import { useAppData } from './hooks/useAppData';
 import { NotificationInterface } from './types/notifications';
 import { TileEnum, TileInterface } from './types/tiles';
+import { getThemeCode } from './utils/getThemeCode';
 
 const genId = (Tiles: TileInterface[]): string => {
   let id = 0;
-  while (Tiles.some((tile) => tile.content.id === id.toString())) {
+  while (Tiles.some((tile) => tile.id === id.toString())) {
     id++;
   }
   return id.toString();
@@ -25,7 +24,7 @@ const genId = (Tiles: TileInterface[]): string => {
 function App() {
   const { appData } = useAppData();
   const theme = appData.preferences.generalPreferences.theme;
-  const themeCode = theme === 'light' ? 'g10' : 'g90';
+  const themeCode = getThemeCode(theme);
 
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
 
@@ -41,8 +40,8 @@ function App() {
 
   const [tiles, setTiles] = useState<TileInterface[]>([
     {
+      id: '0',
       content: {
-        id: '0',
         type: TileEnum.Chart,
         config: {
           endDate: '2021-09-01',
@@ -58,8 +57,6 @@ function App() {
     },
   ]);
 
-  const lockLabel = isLayoutLocked ? 'Unlock layout' : 'Lock layout';
-
   const toggleLock = () => setIsLayoutLocked(!isLayoutLocked);
 
   const toggleToolBox = () => setIsToolBoxOpen(!isToolBoxOpen);
@@ -70,8 +67,8 @@ function App() {
         setTiles([
           ...tiles,
           {
+            id: genId(tiles),
             content: {
-              id: genId(tiles),
               type,
               config: {
                 symbol: 'AAPL',
@@ -112,34 +109,15 @@ function App() {
   return (
     <GlobalTheme theme={themeCode}>
       <div id="App" className={styles.app(theme)}>
-        <Header aria-label="Delta">
-          {/* <Button onClick={notify}>Notify !</Button> */}
-          <div className={styles.ml(0.5)}>
-            <HeaderGlobalAction aria-label="Tiles" tooltipAlignment="end" isActive={isToolBoxOpen} onClick={toggleToolBox}>
-              <Switcher />
-            </HeaderGlobalAction>
-          </div>
-          <Separator />
-          <div className={styles.favorites}>
-            <HeaderGlobalAction aria-label="Chart" tooltipAlignment="center" onClick={() => handleNewTile(TileEnum.Chart)}>
-              <ChartCandlestick />
-            </HeaderGlobalAction>
-          </div>
-          <Separator />
-          <div className={styles.rightActions}>
-            <HeaderGlobalAction onClick={toggleLock} aria-label={lockLabel} tooltipAlignment="center">
-              {isLayoutLocked ? <Locked /> : <Unlocked />}
-            </HeaderGlobalAction>
-            <Notifications notifications={notifications} />
-
-            <OverflowMenu renderIcon={Settings} size="lg" flipped aria-label="overflow-menu">
-              <OverflowMenuItem itemText="Preferences" onClick={() => setIsPreferencesOpen(true)} />
-              <OverflowMenuItem itemText="Load Workspace" />
-              <OverflowMenuItem itemText="Save workspace as" />
-              <OverflowMenuItem hasDivider itemText="Quit" isDelete />
-            </OverflowMenu>
-          </div>
-        </Header>
+        <Headerbar
+          isToolBoxOpen={isToolBoxOpen}
+          toggleToolBox={toggleToolBox}
+          isLayoutLocked={isLayoutLocked}
+          toggleLock={toggleLock}
+          onNewTile={handleNewTile}
+          onOpenPreferences={() => setIsPreferencesOpen(true)}
+          notifications={notifications}
+        />
 
         <div className={styles.toolBox(isToolBoxOpen, theme)}></div>
 

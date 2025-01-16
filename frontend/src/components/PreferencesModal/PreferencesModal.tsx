@@ -103,11 +103,8 @@ const styles = {
   modal: css`
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
-    align-content: flex-start;
     height: 100%;
     @media (min-width: 768px) {
-      /* Règles appliquées pour les écrans d'au moins 768px */
       & .cds--modal-container {
         width: 75% !important;
       }

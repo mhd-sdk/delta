@@ -14,7 +14,7 @@ const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
   const layouts = {
-    lg: tiles.map(({ content, x, y, h, w }) => ({ i: content.id, x, y, h, w })),
+    lg: tiles.map(({ x, y, h, w, id }) => ({ i: id, x, y, h, w })),
   };
 
   const handleLayoutChange = (l: ReactGridLayout.Layout[]) => {
@@ -23,15 +23,16 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
       y,
       h,
       w,
+      id: i,
       content: {
-        ...tiles.find((tile) => tile.content.id === i)!.content,
+        ...tiles.find((tile) => tile.id === i)!.content,
       },
     }));
     onChange?.(newTiles);
   };
 
   const handleDelete = (id: string) => {
-    const newTiles = tiles.filter((tile) => tile.content.id !== id);
+    const newTiles = tiles.filter((tile) => tile.id !== id);
     onChange?.(newTiles);
   };
 
@@ -60,7 +61,7 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
           style={{
             cursor: !isLocked ? (isGrabbing ? 'grabbing' : 'grab') : 'default',
           }}
-          key={tile.content.id}
+          key={tile.id}
           className={styles.tile(appData.preferences.generalPreferences.theme)}
         >
           <Tile tile={tile} onDelete={handleDelete} isLocked={isLocked} />
