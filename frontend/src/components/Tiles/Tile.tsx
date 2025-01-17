@@ -8,7 +8,7 @@ interface Props {
   tile: TileInterface;
   onDelete: (id: string) => void;
   isLocked: boolean;
-  onConfigChange?: (tile: TileInterface) => void;
+  onConfigChange: (tile: TileInterface) => void;
 }
 
 export const Tile = ({ tile, isLocked, onDelete, onConfigChange }: Props) => {
@@ -17,7 +17,7 @@ export const Tile = ({ tile, isLocked, onDelete, onConfigChange }: Props) => {
 
   const handleChartChange = (config: ChartConfig) => {
     if (tile.content.type === TileEnum.Chart) {
-      onConfigChange?.({ ...tile, content: { ...tile.content, config } });
+      onConfigChange({ ...tile, content: { type: TileEnum.Chart, config } });
     }
   };
 
@@ -37,7 +37,7 @@ export const Tile = ({ tile, isLocked, onDelete, onConfigChange }: Props) => {
         {type === TileEnum.Chart && (
           <>
             <MenuItem
-              label="Symbol Info"
+              label="Ticker Info"
               onClick={() => {
                 console.log('Edit clicked');
               }}

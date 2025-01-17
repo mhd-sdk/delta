@@ -10,7 +10,6 @@ require (
 	github.com/lmittmann/tint v1.0.6
 	github.com/magefile/mage v1.15.0
 	github.com/wailsapp/wails/v2 v2.9.2
-	google.golang.org/protobuf v1.35.2
 )
 
 require (

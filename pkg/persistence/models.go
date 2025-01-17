@@ -29,9 +29,10 @@ type Keys struct {
 }
 
 type AppData struct {
-	Keys        Keys        `json:"keys"`
-	Preferences Preferences `json:"preferences"`
-	Workspaces  []Workspace `json:"workspaces"`
+	Keys            Keys        `json:"keys"`
+	Preferences     Preferences `json:"preferences"`
+	Workspaces      []Workspace `json:"workspaces"`
+	FavoriteTickers []string    `json:"favoriteTickers"`
 }
 
 type Workspace struct {

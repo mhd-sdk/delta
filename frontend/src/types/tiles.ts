@@ -29,12 +29,11 @@ export type TileContent =
 export type Configs = ChartConfig | TimeAndSalesConfig;
 
 export interface ChartConfig {
-  symbol: string;
+  ticker: string;
   timeframe: string;
-  startDate: string;
-  endDate: string;
+  range: string;
 }
 
 export interface TimeAndSalesConfig {
-  symbol: string;
+  ticker: string;
 }

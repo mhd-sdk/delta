@@ -7,7 +7,7 @@ export function GetAccount():Promise<alpaca.Account>;
 
 export function GetAppData():Promise<persistence.AppData>;
 
-export function GetSymbols():Promise<Array<alpaca.Asset>>;
+export function GetAssets():Promise<Array<alpaca.Asset>>;
 
 export function Logout():Promise<void>;
 

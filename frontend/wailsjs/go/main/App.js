@@ -10,8 +10,8 @@ export function GetAppData() {
   return window['go']['main']['App']['GetAppData']();
 }
 
-export function GetSymbols() {
-  return window['go']['main']['App']['GetSymbols']();
+export function GetAssets() {
+  return window['go']['main']['App']['GetAssets']();
 }
 
 export function Logout() {

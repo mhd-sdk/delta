@@ -271,6 +271,7 @@ export namespace persistence {
 	    keys: Keys;
 	    preferences: Preferences;
 	    workspaces: Workspace[];
+	    favoriteTickers: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new AppData(source);
@@ -281,6 +282,7 @@ export namespace persistence {
 	        this.keys = this.convertValues(source["keys"], Keys);
 	        this.preferences = this.convertValues(source["preferences"], Preferences);
 	        this.workspaces = this.convertValues(source["workspaces"], Workspace);
+	        this.favoriteTickers = source["favoriteTickers"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

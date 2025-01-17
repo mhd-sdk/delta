@@ -44,9 +44,8 @@ function App() {
       content: {
         type: TileEnum.Chart,
         config: {
-          endDate: '2021-09-01',
-          startDate: '2021-08-01',
-          symbol: 'AAPL',
+          range: '1 month',
+          ticker: 'AAPL',
           timeframe: '1d',
         },
       },
@@ -71,10 +70,9 @@ function App() {
             content: {
               type,
               config: {
-                symbol: 'AAPL',
+                ticker: 'AAPL',
                 timeframe: '1d',
-                startDate: '2021-08-01',
-                endDate: '2021-09-01',
+                range: '1 month',
               },
             },
             x: 0,

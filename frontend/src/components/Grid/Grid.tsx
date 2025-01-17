@@ -8,7 +8,7 @@ import { Tile } from '../Tiles/Tile';
 interface Props {
   tiles: TileInterface[];
   isLocked: boolean;
-  onChange?: (tiles: TileInterface[]) => void;
+  onChange: (tiles: TileInterface[]) => void;
 }
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
@@ -33,7 +33,12 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
 
   const handleDelete = (id: string) => {
     const newTiles = tiles.filter((tile) => tile.id !== id);
-    onChange?.(newTiles);
+    onChange(newTiles);
+  };
+
+  const handleConfigChange = (tile: TileInterface) => {
+    const updatedTiles = tiles.map((t) => (t.id === tile.id ? tile : t));
+    onChange(updatedTiles);
   };
 
   const { appData } = useAppData();
@@ -64,7 +69,7 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
           key={tile.id}
           className={styles.tile(appData.preferences.generalPreferences.theme)}
         >
-          <Tile tile={tile} onDelete={handleDelete} isLocked={isLocked} />
+          <Tile tile={tile} onDelete={handleDelete} isLocked={isLocked} onConfigChange={handleConfigChange} />
         </div>
       ))}
     </ResponsiveReactGridLayout>

@@ -83,7 +83,7 @@ func (a *App) TestCredentials(key string, secret string) bool {
 	}
 }
 
-func (a *App) GetSymbols() (symbols []alpaca.Asset, err error) {
+func (a *App) GetAssets() (tickers []alpaca.Asset, err error) {
 	if a.Alpaca == nil {
 		return nil, errors.New("not logged in")
 	}
