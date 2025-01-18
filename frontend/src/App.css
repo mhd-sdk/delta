@@ -14,3 +14,7 @@
  }
 
 /* change all scrollbars backgrounds to black */
+
+#tv-attr-logo {
+    display: none;
+}

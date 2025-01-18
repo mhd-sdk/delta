@@ -48,8 +48,7 @@ export const Headerbar = ({
 
         <OverflowMenu renderIcon={Settings} size="lg" flipped aria-label="overflow-menu">
           <OverflowMenuItem itemText="Preferences" onClick={onOpenPreferences} />
-          <OverflowMenuItem itemText="Load Workspace" />
-          <OverflowMenuItem itemText="Save workspace as" />
+          <OverflowMenuItem itemText="Workspaces" />
           <OverflowMenuItem hasDivider itemText="Quit" isDelete />
         </OverflowMenu>
       </div>

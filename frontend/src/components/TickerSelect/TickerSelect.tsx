@@ -16,14 +16,12 @@ export const TickerSelect = ({ value, onChange, disabled = false }: Props): JSX.
   const [isOpen, setIsOpen] = useState(false);
   const handleOnKeyDown = (evt: React.KeyboardEvent) => {
     if (evt.key === 'Escape') {
-      console.log('Escape');
       setIsOpen(false);
     }
   };
 
   const handleSelect = (ticker: string) => {
     onChange(ticker);
-    console.log('handleSelect', ticker);
     setIsOpen(false);
   };
 

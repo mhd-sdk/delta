@@ -10,7 +10,7 @@ import { Headerbar } from './components/Headerbar/Headerbar';
 import { PreferenceModal } from './components/PreferencesModal/PreferencesModal';
 import { useAppData } from './hooks/useAppData';
 import { NotificationInterface } from './types/notifications';
-import { TileEnum, TileInterface } from './types/tiles';
+import { Range, TileEnum, TileInterface, Timeframe } from './types/tiles';
 import { getThemeCode } from './utils/getThemeCode';
 
 const genId = (Tiles: TileInterface[]): string => {
@@ -34,7 +34,7 @@ function App() {
 
   const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
-  const [isLayoutLocked, setIsLayoutLocked] = useState(true);
+  const [isLayoutLocked, setIsLayoutLocked] = useState(false);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
@@ -44,9 +44,9 @@ function App() {
       content: {
         type: TileEnum.Chart,
         config: {
-          range: '1 month',
+          range: Range.fiveYear,
           ticker: 'AAPL',
-          timeframe: '1d',
+          timeframe: Timeframe.oneDay,
         },
       },
       x: 0,
@@ -71,8 +71,8 @@ function App() {
               type,
               config: {
                 ticker: 'AAPL',
-                timeframe: '1d',
-                range: '1 month',
+                timeframe: Timeframe.oneDay,
+                range: Range.fiveYear,
               },
             },
             x: 0,

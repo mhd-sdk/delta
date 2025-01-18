@@ -153,6 +153,113 @@ export namespace alpaca {
 
 }
 
+export namespace main {
+	
+	export class TimeFrame {
+	    N: number;
+	    Unit: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TimeFrame(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.N = source["N"];
+	        this.Unit = source["Unit"];
+	    }
+	}
+	export class GetCandlesticksConfig {
+	    Ticker: string;
+	    // Go type: time
+	    Start: any;
+	    // Go type: time
+	    End: any;
+	    timeframe: TimeFrame;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetCandlesticksConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Ticker = source["Ticker"];
+	        this.Start = this.convertValues(source["Start"], null);
+	        this.End = this.convertValues(source["End"], null);
+	        this.timeframe = this.convertValues(source["timeframe"], TimeFrame);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace marketdata {
+	
+	export class Bar {
+	    // Go type: time
+	    t: any;
+	    o: number;
+	    h: number;
+	    l: number;
+	    c: number;
+	    v: number;
+	    n: number;
+	    vw: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Bar(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.t = this.convertValues(source["t"], null);
+	        this.o = source["o"];
+	        this.h = source["h"];
+	        this.l = source["l"];
+	        this.c = source["c"];
+	        this.v = source["v"];
+	        this.n = source["n"];
+	        this.vw = source["vw"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace persistence {
 	
 	export class Tile {

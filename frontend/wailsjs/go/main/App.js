@@ -14,6 +14,10 @@ export function GetAssets() {
   return window['go']['main']['App']['GetAssets']();
 }
 
+export function GetCandlesticks(arg1) {
+  return window['go']['main']['App']['GetCandlesticks'](arg1);
+}
+
 export function Logout() {
   return window['go']['main']['App']['Logout']();
 }

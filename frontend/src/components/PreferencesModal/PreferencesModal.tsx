@@ -73,7 +73,7 @@ export const PreferenceModal = ({ isOpen, onClose, onLogout }: Props): JSX.Eleme
       modalHeading="Preferences"
       primaryButtonText="Apply"
       primaryButtonDisabled={!isDirty}
-      secondaryButtonText="Cancel"
+      secondaryButtonText={isDirty ? 'Cancel' : 'Close'}
     >
       <div className={styles.modal}>
         <TreeView active={selected} selected={[selected]} label={''} className={styles.treeView}>

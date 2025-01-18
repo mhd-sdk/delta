@@ -64,7 +64,7 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
       {tiles.map((tile) => (
         <div
           style={{
-            cursor: !isLocked ? (isGrabbing ? 'grabbing' : 'grab') : 'default',
+            cursor: isLocked ? 'default' : isGrabbing ? 'grabbing' : 'grab',
           }}
           key={tile.id}
           className={styles.tile(appData.preferences.generalPreferences.theme)}

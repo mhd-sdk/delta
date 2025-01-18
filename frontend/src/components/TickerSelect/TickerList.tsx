@@ -14,7 +14,7 @@ interface Props {
 
 export const TickerList = ({ onSelect, onClose }: Props): JSX.Element => {
   const [assets, setAssets] = useState<alpaca.Asset[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<alpaca.Asset[]>([]);
 
@@ -44,11 +44,9 @@ export const TickerList = ({ onSelect, onClose }: Props): JSX.Element => {
 
   useEffect(() => {
     const fetchAssets = async () => {
-      setLoading(true);
       const res = await GetAssets();
       setAssets(res);
       setSearchResults(res);
-      setLoading(false);
     };
     fetchAssets();
   }, []);

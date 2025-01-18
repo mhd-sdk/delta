@@ -1,99 +1,305 @@
-import { Dropdown, OverflowMenu, OverflowMenuItem } from '@carbon/react';
+import { Loading } from '@carbon/react';
 import { css } from '@emotion/css';
-import { ChartConfig } from '../../../types/tiles';
-import { TickerSelect } from '../../TickerSelect/TickerSelect';
+import { CandlestickData, ColorType, createChart, CrosshairMode, IChartApi, ISeriesApi, UTCTimestamp, WhitespaceData } from 'lightweight-charts';
+import { useEffect, useRef, useState } from 'react';
+import { GetCandlesticks } from '../../../../wailsjs/go/main/App';
+import { main } from '../../../../wailsjs/go/models';
+import { useAppData } from '../../../hooks/useAppData';
+import { ChartConfig, Range, Timeframe } from '../../../types/tiles';
+import { Toolbar } from './Toolbar';
 
 interface Props {
   isLocked: boolean;
+  onDelete: () => void;
   config: ChartConfig;
+  setClickedPrice: (price: number) => void;
   onConfigChange: (config: ChartConfig) => void;
 }
 
-export const Chart = ({ config, isLocked, onConfigChange }: Props): JSX.Element => {
-  const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d'];
-  const ranges = ['1 day', '3 days', '1 week', '1 month', '3 months', '6 months', '1 year', '5 year'];
+export const Chart = ({ config, isLocked, onConfigChange, setClickedPrice, onDelete }: Props): JSX.Element => {
+  const [candlesticks, setCandlesticks] = useState<(CandlestickData<UTCTimestamp> | WhitespaceData<UTCTimestamp>)[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<IChartApi | null>(null);
+  const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
 
-  const handleTickerChange = (ticker: string) => {
-    onConfigChange({ ...config, ticker });
+  const { appData } = useAppData();
+
+  const isDarkMode = appData.preferences.generalPreferences.theme === 'dark';
+
+  const darkColors = {
+    backgroundColor: 'transparent',
+    textColor: 'white',
+    candleUpColor: '#ffffff', // Couleur des chandeliers haussiers
+    candleDownColor: '#5d606b', // Couleur des chandeliers baissiers
   };
 
-  const handleTimeframeChange = (timeframe: string) => {
-    onConfigChange({ ...config, timeframe });
+  const lightColors = {
+    backgroundColor: 'transparent',
+    textColor: 'black',
+    candleUpColor: '#4caf50', // Couleur des chandeliers haussiers
+    candleDownColor: '#f44336', // Couleur des chandeliers baissiers
   };
 
-  const handleRangeChange = (range: string) => {
-    onConfigChange({ ...config, range });
-  };
+  const colors = isDarkMode ? darkColors : lightColors;
+
+  useEffect(() => {
+    if (!chartContainerRef.current) {
+      return;
+    }
+
+    const chart = createChart(chartContainerRef.current, {
+      timeScale: {
+        timeVisible:
+          config.timeframe === Timeframe.oneMin ||
+          config.timeframe === Timeframe.fiveMin ||
+          config.timeframe === Timeframe.thirtyMin ||
+          config.timeframe === Timeframe.oneHour ||
+          config.timeframe === Timeframe.fourHour,
+      },
+      grid: {
+        horzLines: {
+          visible: false,
+        },
+        vertLines: {
+          visible: false,
+        },
+      },
+      autoSize: true,
+      layout: {
+        background: { type: ColorType.Solid, color: colors.backgroundColor },
+        textColor: colors.textColor,
+      },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+      },
+      width: chartContainerRef.current.clientWidth,
+      height: chartContainerRef.current.clientHeight,
+    });
+    chartRef.current = chart;
+
+    chart.timeScale().resetTimeScale();
+
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: colors.candleUpColor,
+      downColor: colors.candleDownColor,
+      borderVisible: false,
+      wickUpColor: colors.candleUpColor,
+      wickDownColor: colors.candleDownColor,
+    });
+    candleSeriesRef.current = candleSeries;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (chartContainerRef.current) {
+        chart.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+          height: chartContainerRef.current.clientHeight,
+        });
+      }
+      if (candleSeriesRef.current) {
+        candleSeriesRef.current.applyOptions({
+          borderVisible: false,
+          wickUpColor: colors.candleUpColor,
+          wickDownColor: colors.candleDownColor,
+        });
+      }
+    });
+
+    resizeObserver.observe(chartContainerRef.current);
+
+    // Ajouter un gestionnaire pour le clic droit
+    const handleRightClick = (event: MouseEvent) => {
+      if (event.button === 2 && chartContainerRef.current && chartRef.current) {
+        const rect = chartContainerRef.current.getBoundingClientRect();
+        const y = event.clientY - rect.top;
+
+        const price = candleSeriesRef.current?.coordinateToPrice(y);
+        // round to 2 decimal places
+
+        setClickedPrice(price ? Math.round(price * 100) / 100 : 0);
+        console.log('Prix cliqué (clic droit) :', price);
+      }
+    };
+
+    // Ajouter l'écouteur d'événement au conteneur du graphique
+    chartContainerRef.current.addEventListener('mousedown', handleRightClick);
+
+    return () => {
+      resizeObserver.disconnect();
+      chart.remove();
+      if (chartContainerRef.current) {
+        chartContainerRef.current.removeEventListener('mousedown', handleRightClick);
+      }
+    };
+  }, [config]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const actualDate = new Date();
+      const start = new Date();
+      switch (config.range) {
+        case Range.oneDay:
+          start.setDate(actualDate.getDate() - 1); // 1 jour en arrière par rapport à la date du jour
+          break;
+        case Range.threeDays:
+          start.setDate(actualDate.getDate() - 3); // 3 jours en arrière par rapport à la date du jour
+          break;
+        case Range.oneWeek:
+          start.setDate(actualDate.getDate() - 7); // 1 semaine en arrière par rapport à la date du jour
+          break;
+        case Range.oneMonth:
+          start.setMonth(actualDate.getMonth() - 1); // 1 mois en arrière par rapport à la date du jour
+          break;
+        case Range.threeMonths:
+          start.setMonth(actualDate.getMonth() - 3); // 3 mois en arrière par rapport à la date du jour
+          break;
+        case Range.sixMonths:
+          start.setMonth(actualDate.getMonth() - 6); // 6 mois en arrière par rapport à la date du jour
+          break;
+        case Range.oneYear:
+          start.setFullYear(actualDate.getFullYear() - 1); // 1 an en arrière par rapport à la date du jour
+          break;
+        case Range.fiveYear:
+          start.setFullYear(actualDate.getFullYear() - 5); // 5 ans en arrière par rapport à la date du jour
+          break;
+        default:
+          break;
+      }
+      let tf: main.TimeFrame = {
+        N: 1,
+        Unit: 'Min',
+      };
+      switch (config.timeframe) {
+        case Timeframe.oneMin:
+          tf = {
+            N: 1,
+            Unit: 'Min',
+          };
+          break;
+        case Timeframe.fiveMin:
+          tf = {
+            N: 5,
+            Unit: 'Min',
+          };
+          break;
+        case Timeframe.fifteenMin:
+          tf = {
+            N: 15,
+            Unit: 'Min',
+          };
+          break;
+        case Timeframe.thirtyMin:
+          tf = {
+            N: 30,
+            Unit: 'Min',
+          };
+          break;
+        case Timeframe.oneHour:
+          tf = {
+            N: 1,
+            Unit: 'Hour',
+          };
+          break;
+        case Timeframe.fourHour:
+          tf = {
+            N: 4,
+            Unit: 'Hour',
+          };
+          break;
+        case Timeframe.oneDay:
+          tf = {
+            N: 1,
+            Unit: 'Day',
+          };
+          break;
+        case Timeframe.oneWeek:
+          tf = {
+            N: 1,
+            Unit: 'Week',
+          };
+          break;
+        case Timeframe.oneMonth:
+          tf = {
+            N: 1,
+            Unit: 'Month',
+          };
+          break;
+        default:
+          break;
+      }
+      const params: main.GetCandlesticksConfig = {
+        Ticker: config.ticker,
+        Start: start,
+        End: actualDate.toISOString(),
+        timeframe: {
+          N: tf.N,
+          Unit: tf.Unit,
+        },
+      } as main.GetCandlesticksConfig;
+      const candles = await GetCandlesticks(params);
+      const newData = candles.map((candle) => ({
+        time: Math.floor(new Date(candle.t as string).getTime() / 1000) as UTCTimestamp,
+        open: candle.o,
+        high: candle.h,
+        low: candle.l,
+        close: candle.c,
+      }));
+
+      setCandlesticks(newData);
+      setIsLoading(false);
+    };
+    setIsLoading(true);
+    fetchData();
+  }, [config]);
+
+  useEffect(() => {
+    if (candleSeriesRef.current) {
+      candleSeriesRef.current.setData(candlesticks);
+      chartRef.current?.timeScale().resetTimeScale();
+    }
+  }, [candlesticks]);
+
+  useEffect(() => {
+    if (chartRef.current) {
+      chartRef.current.applyOptions({
+        layout: {
+          background: { type: ColorType.Solid, color: colors.backgroundColor },
+          textColor: colors.textColor,
+        },
+      });
+    }
+    if (candleSeriesRef.current) {
+      candleSeriesRef.current.applyOptions({
+        upColor: colors.candleUpColor,
+        downColor: colors.candleDownColor,
+        borderVisible: false,
+        wickUpColor: colors.candleUpColor,
+        wickDownColor: colors.candleDownColor,
+      });
+    }
+  }, [colors]);
 
   return (
     <div className={styles.height100}>
-      <div className={styles.header}>
-        <TickerSelect disabled={!isLocked} value={config.ticker} onChange={handleTickerChange} />
-        <Dropdown
-          disabled={!isLocked}
-          className={css`
-            width: 100px;
-          `}
-          size="sm"
-          id="inline"
-          initialSelectedItem={config.timeframe}
-          label="Timeframe"
-          // type="inline"
-          items={timeframes}
-          titleText={undefined}
-          onChange={({ selectedItem }) => selectedItem && handleTimeframeChange(selectedItem)}
-        />
-        <Dropdown
-          disabled={!isLocked}
-          className={styles.timeframeContainer}
-          size="sm"
-          id="inline"
-          initialSelectedItem={config.range}
-          label="range"
-          // type="inline"
-          items={ranges}
-          hideLabel
-          titleText={undefined}
-          onChange={({ selectedItem }) => selectedItem && handleRangeChange(selectedItem)}
-        />
-        <div className={styles.overflowMenu(isLocked)}>
-          <OverflowMenu disabled={!isLocked} iconDescription="toto" direction="bottom" size="sm" flipped align="bottom">
-            <OverflowMenuItem itemText="Ticker info" />
-            <OverflowMenuItem itemText="Link" />
-            <OverflowMenuItem hasDivider isDelete itemText="Delete" />
-          </OverflowMenu>
-        </div>
-      </div>
+      <Toolbar onDelete={onDelete} isLocked={isLocked} config={config} onConfigChange={onConfigChange} />
+      {isLoading && <Loading />}
+      <div ref={chartContainerRef} className={styles.chartContainer(isLoading)} />
     </div>
   );
 };
 
 const styles = {
+  loader: css`
+    /* vertically center */
+    margin-top: 20%;
+  `,
+  chartContainer: (isLoading: boolean) => css`
+    height: calc(100% - 2rem);
+    display: ${isLoading ? 'none' : 'block'};
+  `,
   height100: css`
     height: 100%;
-  `,
-  tickerContainer: css`
-    width: 120px;
-  `,
-  timeframeContainer: css`
-    width: 150px;
-  `,
-  overflowMenu: (isLocked: boolean) => css`
-    margin-left: auto;
-    /* if locked, opacity to 50% */
-    opacity: ${isLocked ? 1 : 0.3};
-  `,
-  header: css`
     display: flex;
-    width: 100%;
-    #symbol-combobox + .cds--list-box__selection {
-      display: none !important;
-    }
-
-    .cds--list-box {
-      border: 0px !important;
-      :hover {
-      }
-    }
+    flex-direction: column;
   `,
 };

@@ -9,15 +9,18 @@ import (
 	"time"
 
 	"github.com/alpacahq/alpaca-trade-api-go/v3/alpaca"
+	"github.com/alpacahq/alpaca-trade-api-go/v3/marketdata"
+	"github.com/kr/pretty"
 	"github.com/lmittmann/tint"
 	"github.com/wailsapp/wails/v2/pkg/options"
 )
 
 // App struct
 type App struct {
-	ctx         context.Context
-	Persistence *persistence.Persistence
-	Alpaca      *alpaca.Client
+	ctx              context.Context
+	Persistence      *persistence.Persistence
+	TradingClient    *alpaca.Client
+	MarketDataClient *marketdata.Client
 }
 
 func NewApp() *App {
@@ -31,12 +34,18 @@ func NewApp() *App {
 		slog.Error("error loading app data", err.Error())
 	}
 
-	client := alpaca.NewClient(alpaca.ClientOpts{
+	tradingClient := alpaca.NewClient(alpaca.ClientOpts{
 		// Alternatively you can set your key and secret using the
 		// APCA_API_KEY_ID and APCA_API_SECRET_KEY environment variables
 		APIKey:    appData.Keys.ApiKey,
 		APISecret: appData.Keys.SecretKey,
 		BaseURL:   "https://paper-api.alpaca.markets",
+	})
+
+	marketDataClient := marketdata.NewClient(marketdata.ClientOpts{
+		APIKey:    appData.Keys.ApiKey,
+		APISecret: appData.Keys.SecretKey,
+		BaseURL:   "https://data.alpaca.markets",
 	})
 
 	slog.SetDefault(slog.New(
@@ -49,8 +58,9 @@ func NewApp() *App {
 	slog.Info("Starting DeltΔ...")
 
 	return &App{
-		Persistence: p,
-		Alpaca:      client,
+		Persistence:      p,
+		TradingClient:    tradingClient,
+		MarketDataClient: marketDataClient,
 	}
 }
 
@@ -78,17 +88,17 @@ func (a *App) TestCredentials(key string, secret string) bool {
 		return false
 	} else {
 		slog.Info("Login successful")
-		a.Alpaca = client
+		a.TradingClient = client
 		return true
 	}
 }
 
 func (a *App) GetAssets() (tickers []alpaca.Asset, err error) {
-	if a.Alpaca == nil {
+	if a.TradingClient == nil {
 		return nil, errors.New("not logged in")
 	}
 
-	assets, err := a.Alpaca.GetAssets(alpaca.GetAssetsRequest{
+	assets, err := a.TradingClient.GetAssets(alpaca.GetAssetsRequest{
 		Status:     "active",
 		AssetClass: "us_equity",
 	})
@@ -100,15 +110,15 @@ func (a *App) GetAssets() (tickers []alpaca.Asset, err error) {
 }
 
 func (a *App) Logout() {
-	a.Alpaca = nil
+	a.TradingClient = nil
 }
 
 func (a *App) GetAccount() (*alpaca.Account, error) {
-	if a.Alpaca == nil {
+	if a.TradingClient == nil {
 		slog.Error("not logged in")
 		return nil, errors.New("not logged in")
 	}
-	acct, err := a.Alpaca.GetAccount()
+	acct, err := a.TradingClient.GetAccount()
 	if err != nil {
 		return nil, err
 	}
@@ -121,4 +131,39 @@ func (a *App) GetAppData() (persistence.AppData, error) {
 
 func (a *App) SaveAppData(data persistence.AppData) error {
 	return a.Persistence.Save(data)
+}
+
+type GetCandlesticksConfig struct {
+	Ticker    string
+	Start     time.Time
+	End       time.Time
+	Timeframe TimeFrame `json:"timeframe"`
+}
+
+type TimeFrame struct {
+	N    int
+	Unit string
+}
+
+func (a *App) GetCandlesticks(config GetCandlesticksConfig) (data []marketdata.Bar, err error) {
+	pretty.Println(config)
+	if a.MarketDataClient == nil {
+		return nil, errors.New("not logged in")
+	}
+	data, err = a.MarketDataClient.GetBars(config.Ticker, marketdata.GetBarsRequest{
+		TimeFrame: marketdata.TimeFrame{
+			N:    config.Timeframe.N,
+			Unit: marketdata.TimeFrameUnit(config.Timeframe.Unit),
+		},
+		Start: config.Start,
+		End:   config.End,
+		Feed:  marketdata.IEX,
+	})
+	slog.Info("fetched candlesticks")
+	if err != nil {
+		slog.Error("error fetching assets", "error", err.Error())
+		return nil, err
+	}
+
+	return data, nil
 }
