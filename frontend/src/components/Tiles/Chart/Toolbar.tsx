@@ -1,6 +1,6 @@
 import { Dropdown, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { css } from '@emotion/css';
-import { ChartConfig, Range, RangeOptions, Timeframe, TimeframeOptions } from '../../../types/tiles';
+import { ChartConfig, Range, Timeframe, TimeframeOptions } from '../../../types/tiles';
 import { TickerSelect } from '../../TickerSelect/TickerSelect';
 
 interface Props {
@@ -10,16 +10,39 @@ interface Props {
   onConfigChange: (config: ChartConfig) => void;
 }
 
+const getOptimalRange = (timeframe: Timeframe): Range => {
+  switch (timeframe) {
+    case Timeframe.oneMin:
+      return Range.oneWeek;
+    case Timeframe.fiveMin:
+      return Range.oneWeek;
+    case Timeframe.fifteenMin:
+      return Range.oneMonth;
+    case Timeframe.thirtyMin:
+      return Range.sixMonths;
+    case Timeframe.oneHour:
+      return Range.sixMonths;
+    case Timeframe.fourHour:
+      return Range.oneYear;
+    case Timeframe.oneDay:
+      return Range.fiveYear;
+    case Timeframe.oneWeek:
+      return Range.fiveYear;
+    case Timeframe.oneMonth:
+      return Range.fiveYear;
+    default:
+      return Range.oneDay;
+  }
+};
+
 export const Toolbar = ({ config, isLocked, onConfigChange, onDelete }: Props): JSX.Element => {
   const handleTickerChange = (ticker: string) => {
     onConfigChange({ ...config, ticker });
   };
   const handleTimeframeChange = (timeframe: Timeframe) => {
-    onConfigChange({ ...config, timeframe });
+    onConfigChange({ ...config, timeframe, range: getOptimalRange(timeframe) });
   };
-  const handleRangeChange = (range: Range) => {
-    onConfigChange({ ...config, range });
-  };
+
   return (
     <div className={styles.header}>
       <TickerSelect disabled={!isLocked} value={config.ticker} onChange={handleTickerChange} />
@@ -34,19 +57,7 @@ export const Toolbar = ({ config, isLocked, onConfigChange, onDelete }: Props): 
         titleText={undefined}
         onChange={({ selectedItem }) => selectedItem && handleTimeframeChange(selectedItem)}
       />
-      <Dropdown
-        disabled={!isLocked}
-        className={styles.timeframeContainer}
-        size="sm"
-        id="inline"
-        initialSelectedItem={config.range}
-        label="range"
-        items={RangeOptions}
-        hideLabel
-        titleText={undefined}
-        onChange={({ selectedItem }) => selectedItem && handleRangeChange(selectedItem)}
-        defaultValue={config.range}
-      />
+
       <div className={styles.overflowMenu(isLocked)}>
         <OverflowMenu disabled={!isLocked} iconDescription="toto" direction="bottom" size="sm" flipped align="bottom">
           <OverflowMenuItem itemText="Ticker info" />

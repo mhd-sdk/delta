@@ -34,7 +34,7 @@ function App() {
 
   const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
-  const [isLayoutLocked, setIsLayoutLocked] = useState(false);
+  const [isLayoutLocked, setIsLayoutLocked] = useState(true);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 

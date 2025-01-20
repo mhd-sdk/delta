@@ -76,3 +76,25 @@ func New(appName string) (*Persistence, error) {
 
 	return p, nil
 }
+
+func (p *Persistence) ResetPreferences() error {
+	old, err := p.Load()
+	if err != nil {
+		return err
+	}
+	DefaultData := AppData{
+		Keys: Keys{
+			ApiKey:    old.Keys.ApiKey,
+			SecretKey: old.Keys.SecretKey,
+		},
+		Preferences: Preferences{
+			GeneralPreferences{
+
+				Theme: LightTheme,
+			},
+		},
+		Workspaces:      []Workspace{},
+		FavoriteTickers: []string{},
+	}
+	return p.Save(DefaultData)
+}

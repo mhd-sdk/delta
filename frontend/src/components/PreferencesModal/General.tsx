@@ -1,12 +1,13 @@
-import { RadioTile, TileGroup } from '@carbon/react';
+import { Button, RadioTile, TileGroup } from '@carbon/react';
 import { css } from '@emotion/css';
+import { ResetPreferences } from '../../../wailsjs/go/main/App';
 import { persistence } from '../../../wailsjs/go/models';
+import { useAppData } from '../../hooks/useAppData';
 
 interface Props {
   onChange: (value: persistence.GeneralPreferences) => void;
   value: persistence.GeneralPreferences;
 }
-1;
 
 export const General = ({ value, onChange }: Props): JSX.Element => {
   const handleThemeChange = (theme: 'light' | 'dark') => {
@@ -15,6 +16,9 @@ export const General = ({ value, onChange }: Props): JSX.Element => {
       theme,
     });
   };
+
+  const { refetch } = useAppData();
+  console.log({ value });
 
   return (
     <div>
@@ -26,6 +30,14 @@ export const General = ({ value, onChange }: Props): JSX.Element => {
           Dark
         </RadioTile>
       </TileGroup>
+      <Button
+        onClick={async () => {
+          await ResetPreferences();
+          await refetch();
+        }}
+      >
+        Reset preferences
+      </Button>
     </div>
   );
 };

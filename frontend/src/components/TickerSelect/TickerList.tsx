@@ -22,6 +22,7 @@ export const TickerList = ({ onSelect, onClose }: Props): JSX.Element => {
   const favoriteTickers = appData.favoriteTickers;
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = useMemo(
     () =>
@@ -49,6 +50,12 @@ export const TickerList = ({ onSelect, onClose }: Props): JSX.Element => {
       setSearchResults(res);
     };
     fetchAssets();
+  }, []);
+
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
   }, []);
 
   const isFavorite = (ticker: string) => favoriteTickers.includes(ticker);
@@ -133,6 +140,7 @@ export const TickerList = ({ onSelect, onClose }: Props): JSX.Element => {
               className={styles.search}
               closeButtonLabelText="Clear search input"
               size="sm"
+              ref={searchInputRef} // Attach ref to the search input
             />
           }
           size="sm"

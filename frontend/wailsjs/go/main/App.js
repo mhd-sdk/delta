@@ -22,6 +22,10 @@ export function Logout() {
   return window['go']['main']['App']['Logout']();
 }
 
+export function ResetPreferences() {
+  return window['go']['main']['App']['ResetPreferences']();
+}
+
 export function SaveAppData(arg1) {
   return window['go']['main']['App']['SaveAppData'](arg1);
 }

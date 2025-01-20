@@ -32,7 +32,7 @@ export const PreferenceModal = ({ isOpen, onClose, onLogout }: Props): JSX.Eleme
       setGeneralPreferences(appData.preferences.generalPreferences);
     };
     fetchAppData();
-  }, [isOpen]);
+  }, [isOpen, appData]);
 
   const handleChangeGeneral = (value: persistence.GeneralPreferences) => {
     setIsDirty(true);

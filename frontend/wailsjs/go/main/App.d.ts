@@ -15,6 +15,8 @@ export function GetCandlesticks(arg1:main.GetCandlesticksConfig):Promise<Array<m
 
 export function Logout():Promise<void>;
 
+export function ResetPreferences():Promise<void>;
+
 export function SaveAppData(arg1:persistence.AppData):Promise<void>;
 
 export function TestCredentials(arg1:string,arg2:string):Promise<boolean>;

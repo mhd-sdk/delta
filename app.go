@@ -10,7 +10,6 @@ import (
 
 	"github.com/alpacahq/alpaca-trade-api-go/v3/alpaca"
 	"github.com/alpacahq/alpaca-trade-api-go/v3/marketdata"
-	"github.com/kr/pretty"
 	"github.com/lmittmann/tint"
 	"github.com/wailsapp/wails/v2/pkg/options"
 )
@@ -26,7 +25,7 @@ type App struct {
 func NewApp() *App {
 	p, err := persistence.New("delta")
 	if err != nil {
-		slog.Info("error initializing persistence", err.Error())
+		slog.Error("error initializing persistence", err.Error())
 	}
 
 	appData, err := p.Load()
@@ -87,7 +86,6 @@ func (a *App) TestCredentials(key string, secret string) bool {
 		slog.Error("login failed", "error", err.Error())
 		return false
 	} else {
-		slog.Info("Login successful")
 		a.TradingClient = client
 		return true
 	}
@@ -133,6 +131,10 @@ func (a *App) SaveAppData(data persistence.AppData) error {
 	return a.Persistence.Save(data)
 }
 
+func (a *App) ResetPreferences() error {
+	return a.Persistence.ResetPreferences()
+}
+
 type GetCandlesticksConfig struct {
 	Ticker    string
 	Start     time.Time
@@ -146,7 +148,6 @@ type TimeFrame struct {
 }
 
 func (a *App) GetCandlesticks(config GetCandlesticksConfig) (data []marketdata.Bar, err error) {
-	pretty.Println(config)
 	if a.MarketDataClient == nil {
 		return nil, errors.New("not logged in")
 	}
@@ -159,7 +160,6 @@ func (a *App) GetCandlesticks(config GetCandlesticksConfig) (data []marketdata.B
 		End:   config.End,
 		Feed:  marketdata.IEX,
 	})
-	slog.Info("fetched candlesticks")
 	if err != nil {
 		slog.Error("error fetching assets", "error", err.Error())
 		return nil, err

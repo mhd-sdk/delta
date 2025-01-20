@@ -283,7 +283,7 @@ export const Chart = ({ config, isLocked, onConfigChange, setClickedPrice, onDel
     <div className={styles.height100}>
       <Toolbar onDelete={onDelete} isLocked={isLocked} config={config} onConfigChange={onConfigChange} />
       {isLoading && <Loading />}
-      <div ref={chartContainerRef} className={styles.chartContainer(isLoading)} />
+      <div ref={chartContainerRef} className={styles.chartContainer} />
     </div>
   );
 };
@@ -293,9 +293,8 @@ const styles = {
     /* vertically center */
     margin-top: 20%;
   `,
-  chartContainer: (isLoading: boolean) => css`
+  chartContainer: css`
     height: calc(100% - 2rem);
-    display: ${isLoading ? 'none' : 'block'};
   `,
   height100: css`
     height: 100%;
