@@ -3,7 +3,7 @@ import { Button, ContainedList, ContainedListItem, InlineLoading, Search } from 
 import { css } from '@emotion/css';
 import { debounce } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { GetAssets } from '../../../wailsjs/go/main/App';
+import { GetAssets } from '../../../wailsjs/go/app/App';
 import { alpaca, persistence } from '../../../wailsjs/go/models';
 import { useAppData } from '../../hooks/useAppData';
 

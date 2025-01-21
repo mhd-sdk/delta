@@ -1,5 +1,4 @@
 import { css } from '@emotion/css';
-import { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useAppData } from '../../hooks/useAppData';
 import { TileInterface } from '../../types/tiles';
@@ -7,12 +6,11 @@ import { Tile } from '../Tiles/Tile';
 
 interface Props {
   tiles: TileInterface[];
-  isLocked: boolean;
   onChange: (tiles: TileInterface[]) => void;
 }
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
-export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
+export const Grid = ({ tiles, onChange }: Props): JSX.Element => {
   const layouts = {
     lg: tiles.map(({ x, y, h, w, id }) => ({ i: id, x, y, h, w })),
   };
@@ -43,33 +41,23 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
 
   const { appData } = useAppData();
 
-  const [isGrabbing, setIsGrabbing] = useState(false);
-
   return (
     <ResponsiveReactGridLayout
       onLayoutChange={handleLayoutChange}
       className={styles.layout}
       useCSSTransforms={true}
-      isDraggable={!isLocked}
-      isResizable={!isLocked}
       compactType="vertical"
       breakpoints={{ lg: 0 }}
       layouts={layouts}
       cols={{ lg: 50 }}
       autoSize={true}
       rowHeight={10}
-      onDragStart={() => setIsGrabbing(true)}
-      onDragStop={() => setIsGrabbing(false)}
+      draggableHandle=".drag-handle"
+      draggableCancel=".drag-cancel"
     >
       {tiles.map((tile) => (
-        <div
-          style={{
-            cursor: isLocked ? 'default' : isGrabbing ? 'grabbing' : 'grab',
-          }}
-          key={tile.id}
-          className={styles.tile(appData.preferences.generalPreferences.theme)}
-        >
-          <Tile tile={tile} onDelete={handleDelete} isLocked={isLocked} onConfigChange={handleConfigChange} />
+        <div key={tile.id} className={styles.tile(appData.preferences.generalPreferences.theme)}>
+          <Tile tile={tile} onDelete={handleDelete} onConfigChange={handleConfigChange} />
         </div>
       ))}
     </ResponsiveReactGridLayout>
@@ -78,7 +66,7 @@ export const Grid = ({ tiles, isLocked, onChange }: Props): JSX.Element => {
 
 const styles = {
   layout: css`
-    height: calc(100vh - 3rem);
+    height: calc(100vh - 3rem) !important;
   `,
   tile: (theme: string) => css`
     background-color: ${theme === 'light' ? '#fff' : '#393939'};

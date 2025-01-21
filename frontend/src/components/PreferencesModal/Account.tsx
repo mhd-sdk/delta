@@ -2,7 +2,7 @@ import { Information } from '@carbon/icons-react';
 import { Button, CopyButton, Link, TextInput, TextInputSkeleton, Toggletip, ToggletipButton, ToggletipContent, ToggletipLabel } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
-import { GetAccount } from '../../../wailsjs/go/main/App';
+import { GetAccount } from '../../../wailsjs/go/app/App';
 import { alpaca } from '../../../wailsjs/go/models';
 import { BrowserOpenURL } from '../../../wailsjs/runtime/runtime';
 interface Props {

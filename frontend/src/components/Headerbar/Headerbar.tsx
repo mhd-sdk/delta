@@ -1,4 +1,4 @@
-import { ChartCandlestick, Locked, Settings, Switcher, Unlocked } from '@carbon/icons-react';
+import { ChartCandlestick, Settings, Switcher } from '@carbon/icons-react';
 import { Header as Carbonheader, HeaderGlobalAction, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { css } from '@emotion/css';
 import { NotificationInterface } from '../../types/notifications';
@@ -9,23 +9,12 @@ import { Separator } from '../Separator';
 interface Props {
   isToolBoxOpen: boolean;
   toggleToolBox: () => void;
-  isLayoutLocked: boolean;
-  toggleLock: () => void;
   onNewTile: (type: TileEnum) => void;
   onOpenPreferences: () => void;
   notifications: NotificationInterface[];
 }
 
-export const Headerbar = ({
-  isLayoutLocked,
-  isToolBoxOpen,
-  toggleLock,
-  toggleToolBox,
-  onNewTile,
-  onOpenPreferences,
-  notifications,
-}: Props): JSX.Element => {
-  const lockLabel = isLayoutLocked ? 'Unlock layout' : 'Lock layout';
+export const Headerbar = ({ isToolBoxOpen, toggleToolBox, onNewTile, onOpenPreferences, notifications }: Props): JSX.Element => {
   return (
     <Carbonheader aria-label="Delta">
       <div className={styles.ml(0.5)}>
@@ -41,9 +30,9 @@ export const Headerbar = ({
       </div>
       <Separator />
       <div className={styles.rightActions}>
-        <HeaderGlobalAction onClick={toggleLock} aria-label={lockLabel} tooltipAlignment="center">
+        {/* <HeaderGlobalAction onClick={toggleLock} aria-label={lockLabel} tooltipAlignment="center">
           {isLayoutLocked ? <Locked /> : <Unlocked />}
-        </HeaderGlobalAction>
+        </HeaderGlobalAction> */}
         <Notifications notifications={notifications} />
 
         <OverflowMenu renderIcon={Settings} size="lg" flipped aria-label="overflow-menu">

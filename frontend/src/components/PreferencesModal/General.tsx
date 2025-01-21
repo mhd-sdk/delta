@@ -1,6 +1,6 @@
 import { Button, RadioTile, TileGroup } from '@carbon/react';
 import { css } from '@emotion/css';
-import { ResetPreferences } from '../../../wailsjs/go/main/App';
+import { ResetPreferences } from '../../../wailsjs/go/app/App';
 import { persistence } from '../../../wailsjs/go/models';
 import { useAppData } from '../../hooks/useAppData';
 

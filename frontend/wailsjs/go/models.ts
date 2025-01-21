@@ -153,7 +153,7 @@ export namespace alpaca {
 
 }
 
-export namespace main {
+export namespace app {
 	
 	export class TimeFrame {
 	    N: number;
@@ -256,6 +256,25 @@ export namespace marketdata {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace options {
+	
+	export class SecondInstanceData {
+	    Args: string[];
+	    WorkingDirectory: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SecondInstanceData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Args = source["Args"];
+	        this.WorkingDirectory = source["WorkingDirectory"];
+	    }
 	}
 
 }

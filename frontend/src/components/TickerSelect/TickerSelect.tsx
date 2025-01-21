@@ -1,5 +1,5 @@
 import { Button, Popover, PopoverContent } from '@carbon/react';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { useState } from 'react';
 import { useAppData } from '../../hooks/useAppData';
 import { TickerList } from './TickerList';
@@ -28,7 +28,7 @@ export const TickerSelect = ({ value, onChange, disabled = false }: Props): JSX.
   return (
     <Popover align="bottom-left" open={isOpen} onKeyDown={handleOnKeyDown} isTabTip dropShadow>
       <Button
-        className={styles.content(theme, disabled)}
+        className={cx('drag-cancel', styles.content(theme, disabled))}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         disabled={disabled}
@@ -46,5 +46,6 @@ const styles = {
   content: (theme: string, isDisabled: boolean) => css`
     color: ${theme === 'dark' ? '#f4f4f4' : '#161616'} !important;
     opacity: ${isDisabled ? 0.3 : 1};
+    background-color: ${theme === 'dark' ? '#393939' : '#ffffff'} !important;
   `,
 };

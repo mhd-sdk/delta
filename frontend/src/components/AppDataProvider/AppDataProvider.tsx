@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useEffect, useState } from 'react';
-import { GetAppData, SaveAppData } from '../../../wailsjs/go/main/App';
+import { GetAppData, SaveAppData } from '../../../wailsjs/go/app/App';
 import { persistence } from '../../../wailsjs/go/models';
 
 export interface AppDataContextProps {

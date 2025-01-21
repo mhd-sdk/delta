@@ -1,10 +1,10 @@
 import { Dropdown, OverflowMenu, OverflowMenuItem } from '@carbon/react';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
+import { useAppData } from '../../../hooks/useAppData';
 import { ChartConfig, Range, Timeframe, TimeframeOptions } from '../../../types/tiles';
 import { TickerSelect } from '../../TickerSelect/TickerSelect';
 
 interface Props {
-  isLocked: boolean;
   onDelete: () => void;
   config: ChartConfig;
   onConfigChange: (config: ChartConfig) => void;
@@ -35,7 +35,7 @@ const getOptimalRange = (timeframe: Timeframe): Range => {
   }
 };
 
-export const Toolbar = ({ config, isLocked, onConfigChange, onDelete }: Props): JSX.Element => {
+export const Toolbar = ({ config, onConfigChange, onDelete }: Props): JSX.Element => {
   const handleTickerChange = (ticker: string) => {
     onConfigChange({ ...config, ticker });
   };
@@ -43,12 +43,14 @@ export const Toolbar = ({ config, isLocked, onConfigChange, onDelete }: Props): 
     onConfigChange({ ...config, timeframe, range: getOptimalRange(timeframe) });
   };
 
+  const { appData } = useAppData();
+  const isDarkMode = appData.preferences.generalPreferences.theme === 'dark';
+
   return (
-    <div className={styles.header}>
-      <TickerSelect disabled={!isLocked} value={config.ticker} onChange={handleTickerChange} />
+    <div className={cx('drag-handle', styles.header(isDarkMode))}>
+      <TickerSelect value={config.ticker} onChange={handleTickerChange} />
       <Dropdown
-        disabled={!isLocked}
-        className={styles.timeframeContainer}
+        className={cx('drag-cancel', styles.timeframeContainer)}
         size="sm"
         id="inline"
         initialSelectedItem={config.timeframe}
@@ -58,8 +60,8 @@ export const Toolbar = ({ config, isLocked, onConfigChange, onDelete }: Props): 
         onChange={({ selectedItem }) => selectedItem && handleTimeframeChange(selectedItem)}
       />
 
-      <div className={styles.overflowMenu(isLocked)}>
-        <OverflowMenu disabled={!isLocked} iconDescription="toto" direction="bottom" size="sm" flipped align="bottom">
+      <div className={cx('drag-cancel', styles.overflowMenu)}>
+        <OverflowMenu iconDescription="toto" direction="bottom" size="sm" flipped align="bottom">
           <OverflowMenuItem itemText="Ticker info" />
           <OverflowMenuItem itemText="Link" />
           <OverflowMenuItem hasDivider isDelete itemText="Delete" onClick={onDelete} />
@@ -78,15 +80,18 @@ const styles = {
   `,
   timeframeContainer: css`
     width: 150px;
+    div {
+      background-color: transparent !important;
+    }
   `,
-  overflowMenu: (isLocked: boolean) => css`
+  overflowMenu: css`
     margin-left: auto;
     /* if locked, opacity to 50% */
-    opacity: ${isLocked ? 1 : 0.3};
   `,
-  header: css`
+  header: (isDarkMode: boolean) => css`
     display: flex;
     width: 100%;
+    background-color: ${isDarkMode ? '#4d4d4d' : '#d3d3d3'};
     #symbol-combobox + .cds--list-box__selection {
       display: none !important;
     }

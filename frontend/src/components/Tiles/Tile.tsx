@@ -7,11 +7,10 @@ import { Chart } from './Chart/Chart';
 interface Props {
   tile: TileInterface;
   onDelete: (id: string) => void;
-  isLocked: boolean;
   onConfigChange: (tile: TileInterface) => void;
 }
 
-export const Tile = ({ tile, isLocked, onDelete, onConfigChange }: Props) => {
+export const Tile = ({ tile, onDelete, onConfigChange }: Props) => {
   const [clickedPrice, setClickedPrice] = useState<number>(0);
   const el = useRef<HTMLDivElement | null>(null);
   const menuProps = useContextMenu(el);
@@ -28,15 +27,7 @@ export const Tile = ({ tile, isLocked, onDelete, onConfigChange }: Props) => {
   const renderTile = (tile: TileInterface) => {
     switch (tile.content.type) {
       case TileEnum.Chart:
-        return (
-          <Chart
-            onDelete={handleDelete}
-            isLocked={isLocked}
-            config={tile.content.config}
-            onConfigChange={handleChartChange}
-            setClickedPrice={setClickedPrice}
-          />
-        );
+        return <Chart onDelete={handleDelete} config={tile.content.config} onConfigChange={handleChartChange} setClickedPrice={setClickedPrice} />;
       case TileEnum.AccountOverview:
         return <AccountOverview />;
       default:

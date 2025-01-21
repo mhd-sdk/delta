@@ -1,6 +1,7 @@
 package main
 
 import (
+	"delta/pkg/app"
 	"embed"
 
 	"github.com/leaanthony/u"
@@ -16,7 +17,7 @@ var assets embed.FS
 
 func main() {
 	// Create an instance of the app structure
-	app := NewApp()
+	app := app.NewApp()
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -46,10 +47,10 @@ func main() {
 		// WindowStartState: options.Minimised,
 
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup:        app.startup,
+		OnStartup:        app.Startup,
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId:               "e3984e08-28dc-4e3d-b70a-45e961589cdc",
-			OnSecondInstanceLaunch: app.onSecondInstanceLaunch,
+			OnSecondInstanceLaunch: app.OnSecondInstanceLaunch,
 		},
 		Bind: []interface{}{
 			app,

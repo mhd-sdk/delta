@@ -2,7 +2,7 @@ import { ArrowUpRight } from '@carbon/icons-react';
 import { ComposedModal, Link, ModalBody, ModalFooter, ModalHeader, TextInput, Toggle } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
-import { SaveAppData, TestCredentials } from '../../../wailsjs/go/main/App';
+import { SaveAppData, TestCredentials } from '../../../wailsjs/go/app/App';
 import { persistence } from '../../../wailsjs/go/models';
 import { BrowserOpenURL } from '../../../wailsjs/runtime/runtime';
 import { useAppData } from '../../hooks/useAppData';

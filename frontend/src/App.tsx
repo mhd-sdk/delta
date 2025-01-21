@@ -2,7 +2,7 @@ import { Content, GlobalTheme, Modal } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
-import { Logout, SaveAppData } from '../wailsjs/go/main/App';
+import { Logout, SaveAppData } from '../wailsjs/go/app/App';
 import { persistence } from '../wailsjs/go/models';
 import { AuthModal } from './components/AuthModal/AuthModal';
 import { Grid } from './components/Grid/Grid';
@@ -34,8 +34,6 @@ function App() {
 
   const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
-  const [isLayoutLocked, setIsLayoutLocked] = useState(true);
-
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const [tiles, setTiles] = useState<TileInterface[]>([
@@ -55,8 +53,6 @@ function App() {
       h: 20,
     },
   ]);
-
-  const toggleLock = () => setIsLayoutLocked(!isLayoutLocked);
 
   const toggleToolBox = () => setIsToolBoxOpen(!isToolBoxOpen);
 
@@ -102,6 +98,10 @@ function App() {
     document.documentElement.dataset.carbonTheme = themeCode;
   }, [themeCode]);
 
+  useEffect(() => {
+    console.log({ tiles });
+  }, [tiles]);
+
   // const notify = () => toast('Wow so easy !');
 
   return (
@@ -110,8 +110,6 @@ function App() {
         <Headerbar
           isToolBoxOpen={isToolBoxOpen}
           toggleToolBox={toggleToolBox}
-          isLayoutLocked={isLayoutLocked}
-          toggleLock={toggleLock}
           onNewTile={handleNewTile}
           onOpenPreferences={() => setIsPreferencesOpen(true)}
           notifications={notifications}
@@ -120,7 +118,7 @@ function App() {
         <div className={styles.toolBox(isToolBoxOpen, theme)}></div>
 
         <Content className={styles.content}>
-          <Grid isLocked={isLayoutLocked} tiles={tiles} onChange={setTiles} />
+          <Grid tiles={tiles} onChange={setTiles} />
         </Content>
 
         <PreferenceModal onLogout={() => setIsLogoutModalOpen(true)} isOpen={isPreferencesOpen} onClose={() => setIsPreferencesOpen(false)} />

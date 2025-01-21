@@ -2,21 +2,20 @@ import { Loading } from '@carbon/react';
 import { css } from '@emotion/css';
 import { CandlestickData, ColorType, createChart, CrosshairMode, IChartApi, ISeriesApi, UTCTimestamp, WhitespaceData } from 'lightweight-charts';
 import { useEffect, useRef, useState } from 'react';
-import { GetCandlesticks } from '../../../../wailsjs/go/main/App';
-import { main } from '../../../../wailsjs/go/models';
+import { GetCandlesticks } from '../../../../wailsjs/go/app/App';
+import { app } from '../../../../wailsjs/go/models';
 import { useAppData } from '../../../hooks/useAppData';
 import { ChartConfig, Range, Timeframe } from '../../../types/tiles';
 import { Toolbar } from './Toolbar';
 
 interface Props {
-  isLocked: boolean;
   onDelete: () => void;
   config: ChartConfig;
   setClickedPrice: (price: number) => void;
   onConfigChange: (config: ChartConfig) => void;
 }
 
-export const Chart = ({ config, isLocked, onConfigChange, setClickedPrice, onDelete }: Props): JSX.Element => {
+export const Chart = ({ config, onConfigChange, setClickedPrice, onDelete }: Props): JSX.Element => {
   const [candlesticks, setCandlesticks] = useState<(CandlestickData<UTCTimestamp> | WhitespaceData<UTCTimestamp>)[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -165,7 +164,7 @@ export const Chart = ({ config, isLocked, onConfigChange, setClickedPrice, onDel
         default:
           break;
       }
-      let tf: main.TimeFrame = {
+      let tf: app.TimeFrame = {
         N: 1,
         Unit: 'Min',
       };
@@ -227,7 +226,7 @@ export const Chart = ({ config, isLocked, onConfigChange, setClickedPrice, onDel
         default:
           break;
       }
-      const params: main.GetCandlesticksConfig = {
+      const params: app.GetCandlesticksConfig = {
         Ticker: config.ticker,
         Start: start,
         End: actualDate.toISOString(),
@@ -235,7 +234,7 @@ export const Chart = ({ config, isLocked, onConfigChange, setClickedPrice, onDel
           N: tf.N,
           Unit: tf.Unit,
         },
-      } as main.GetCandlesticksConfig;
+      } as app.GetCandlesticksConfig;
       const candles = await GetCandlesticks(params);
       const newData = candles.map((candle) => ({
         time: Math.floor(new Date(candle.t as string).getTime() / 1000) as UTCTimestamp,
@@ -281,7 +280,7 @@ export const Chart = ({ config, isLocked, onConfigChange, setClickedPrice, onDel
 
   return (
     <div className={styles.height100}>
-      <Toolbar onDelete={onDelete} isLocked={isLocked} config={config} onConfigChange={onConfigChange} />
+      <Toolbar onDelete={onDelete} config={config} onConfigChange={onConfigChange} />
       {isLoading && <Loading />}
       <div ref={chartContainerRef} className={styles.chartContainer} />
     </div>
