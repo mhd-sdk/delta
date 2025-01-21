@@ -2,6 +2,9 @@ export enum TileEnum {
   Chart = 'Chart',
   TimeAndSales = 'TimeAndSales',
   AccountOverview = 'AccountOverview',
+  TickerInfo = 'TickerInfo',
+  Headlines = 'Headlines',
+  Scanner = 'Scanner',
 }
 
 export interface TileInterface {
@@ -29,14 +32,14 @@ export type TileContent =
 export type Configs = ChartConfig | TimeAndSalesConfig;
 
 export enum Range {
-  oneDay = '1 day',
-  threeDays = '3 days',
-  oneWeek = '1 week',
-  oneMonth = '1 month',
-  threeMonths = '3 months',
-  sixMonths = '6 months',
-  oneYear = '1 year',
-  fiveYear = '5 year',
+  oneDay = '1day',
+  threeDays = '3days',
+  oneWeek = '1week',
+  oneMonth = '1month',
+  threeMonths = '3months',
+  sixMonths = '6months',
+  oneYear = '1year',
+  fiveYear = '5year',
 }
 export const RangeOptions: Range[] = [
   Range.oneDay,

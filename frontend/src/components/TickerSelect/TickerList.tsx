@@ -1,6 +1,6 @@
 import { Star, StarFilled } from '@carbon/icons-react';
 import { Button, ContainedList, ContainedListItem, InlineLoading, Search } from '@carbon/react';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { debounce } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { GetAssets } from '../../../wailsjs/go/app/App';
@@ -124,7 +124,7 @@ export const TickerList = ({ onSelect, onClose }: Props): JSX.Element => {
   }, [onClose]);
 
   return (
-    <div ref={containerRef} className={styles.layout}>
+    <div ref={containerRef} className={cx('drag-cancel', styles.layout)}>
       <div className={styles.body}>
         <ContainedList
           kind="disclosed"

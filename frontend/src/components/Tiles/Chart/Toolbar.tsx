@@ -13,11 +13,11 @@ interface Props {
 const getOptimalRange = (timeframe: Timeframe): Range => {
   switch (timeframe) {
     case Timeframe.oneMin:
-      return Range.oneWeek;
-    case Timeframe.fiveMin:
-      return Range.oneWeek;
-    case Timeframe.fifteenMin:
       return Range.oneMonth;
+    case Timeframe.fiveMin:
+      return Range.oneMonth;
+    case Timeframe.fifteenMin:
+      return Range.sixMonths;
     case Timeframe.thirtyMin:
       return Range.sixMonths;
     case Timeframe.oneHour:

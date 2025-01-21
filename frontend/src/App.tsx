@@ -26,6 +26,8 @@ function App() {
   const theme = appData.preferences.generalPreferences.theme;
   const themeCode = getThemeCode(theme);
 
+  const [isWorkspaceDirty, setIsWorkspaceDirty] = useState(false);
+
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
 
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
@@ -99,7 +101,7 @@ function App() {
   }, [themeCode]);
 
   useEffect(() => {
-    console.log({ tiles });
+    setIsWorkspaceDirty(true);
   }, [tiles]);
 
   // const notify = () => toast('Wow so easy !');
@@ -108,6 +110,8 @@ function App() {
     <GlobalTheme theme={themeCode}>
       <div id="App" className={styles.app(theme)}>
         <Headerbar
+          isWorkspaceDirty={isWorkspaceDirty}
+          onSaveWorkspace={() => setIsWorkspaceDirty(false)}
           isToolBoxOpen={isToolBoxOpen}
           toggleToolBox={toggleToolBox}
           onNewTile={handleNewTile}

@@ -1,4 +1,4 @@
-import { ChartCandlestick, Settings, Switcher } from '@carbon/icons-react';
+import { ChartCandlestick, Save, Settings, Switcher } from '@carbon/icons-react';
 import { Header as Carbonheader, HeaderGlobalAction, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { css } from '@emotion/css';
 import { NotificationInterface } from '../../types/notifications';
@@ -12,9 +12,19 @@ interface Props {
   onNewTile: (type: TileEnum) => void;
   onOpenPreferences: () => void;
   notifications: NotificationInterface[];
+  isWorkspaceDirty: boolean;
+  onSaveWorkspace: () => void;
 }
 
-export const Headerbar = ({ isToolBoxOpen, toggleToolBox, onNewTile, onOpenPreferences, notifications }: Props): JSX.Element => {
+export const Headerbar = ({
+  isToolBoxOpen,
+  toggleToolBox,
+  onNewTile,
+  onOpenPreferences,
+  notifications,
+  isWorkspaceDirty,
+  onSaveWorkspace,
+}: Props): JSX.Element => {
   return (
     <Carbonheader aria-label="Delta">
       <div className={styles.ml(0.5)}>
@@ -30,9 +40,14 @@ export const Headerbar = ({ isToolBoxOpen, toggleToolBox, onNewTile, onOpenPrefe
       </div>
       <Separator />
       <div className={styles.rightActions}>
-        {/* <HeaderGlobalAction onClick={toggleLock} aria-label={lockLabel} tooltipAlignment="center">
-          {isLayoutLocked ? <Locked /> : <Unlocked />}
-        </HeaderGlobalAction> */}
+        <HeaderGlobalAction
+          className={styles.saveAction(isWorkspaceDirty)}
+          aria-label="Save workspace"
+          onClick={onSaveWorkspace}
+          tooltipAlignment="center"
+        >
+          <Save />
+        </HeaderGlobalAction>
         <Notifications notifications={notifications} />
 
         <OverflowMenu renderIcon={Settings} size="lg" flipped aria-label="overflow-menu">
@@ -46,6 +61,10 @@ export const Headerbar = ({ isToolBoxOpen, toggleToolBox, onNewTile, onOpenPrefe
 };
 
 const styles = {
+  saveAction: (isDirty: boolean) => css`
+    color: ${isDirty ? '#f4f4f4' : '#161616'};
+    opacity: ${isDirty ? 1 : 0.3};
+  `,
   layout: css`
     height: calc(100vh - 3rem);
   `,
