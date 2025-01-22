@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"delta/pkg/models"
 	"delta/pkg/persistence"
 	"errors"
 	"log/slog"
@@ -123,11 +124,11 @@ func (a *App) GetAccount() (*alpaca.Account, error) {
 	return acct, nil
 }
 
-func (a *App) GetAppData() (persistence.AppData, error) {
+func (a *App) GetAppData() (models.AppData, error) {
 	return a.Persistence.Load()
 }
 
-func (a *App) SaveAppData(data persistence.AppData) error {
+func (a *App) SaveAppData(data models.AppData) error {
 	return a.Persistence.Save(data)
 }
 
@@ -139,12 +140,7 @@ type GetCandlesticksConfig struct {
 	Ticker    string
 	Start     time.Time
 	End       time.Time
-	Timeframe TimeFrame `json:"timeframe"`
-}
-
-type TimeFrame struct {
-	N    int
-	Unit string
+	Timeframe models.TimeFrame `json:"timeframe"`
 }
 
 func (a *App) GetCandlesticks(config GetCandlesticksConfig) (data []marketdata.Bar, err error) {
@@ -157,8 +153,8 @@ func (a *App) GetCandlesticks(config GetCandlesticksConfig) (data []marketdata.B
 			Unit: marketdata.TimeFrameUnit(config.Timeframe.Unit),
 		},
 		Start: config.Start,
-		End:   config.End,
-		Feed:  marketdata.IEX,
+		// End:   config.End,
+		Feed: marketdata.IEX,
 	})
 	if err != nil {
 		slog.Error("error fetching assets", "error", err.Error())

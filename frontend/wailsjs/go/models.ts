@@ -155,27 +155,13 @@ export namespace alpaca {
 
 export namespace app {
 	
-	export class TimeFrame {
-	    N: number;
-	    Unit: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new TimeFrame(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.N = source["N"];
-	        this.Unit = source["Unit"];
-	    }
-	}
 	export class GetCandlesticksConfig {
 	    Ticker: string;
 	    // Go type: time
 	    Start: any;
 	    // Go type: time
 	    End: any;
-	    timeframe: TimeFrame;
+	    timeframe: models.TimeFrame;
 	
 	    static createFrom(source: any = {}) {
 	        return new GetCandlesticksConfig(source);
@@ -186,7 +172,7 @@ export namespace app {
 	        this.Ticker = source["Ticker"];
 	        this.Start = this.convertValues(source["Start"], null);
 	        this.End = this.convertValues(source["End"], null);
-	        this.timeframe = this.convertValues(source["timeframe"], TimeFrame);
+	        this.timeframe = this.convertValues(source["timeframe"], models.TimeFrame);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -260,34 +246,29 @@ export namespace marketdata {
 
 }
 
-export namespace options {
+export namespace models {
 	
-	export class SecondInstanceData {
-	    Args: string[];
-	    WorkingDirectory: string;
+	export class TileData {
+	    type: string;
+	    data: any;
 	
 	    static createFrom(source: any = {}) {
-	        return new SecondInstanceData(source);
+	        return new TileData(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.Args = source["Args"];
-	        this.WorkingDirectory = source["WorkingDirectory"];
+	        this.type = source["type"];
+	        this.data = source["data"];
 	    }
 	}
-
-}
-
-export namespace persistence {
-	
 	export class Tile {
-	    ID: string;
-	    Type: string;
-	    X: number;
-	    Y: number;
-	    W: number;
-	    H: number;
+	    id: string;
+	    x: number;
+	    y: number;
+	    w: number;
+	    h: number;
+	    data: TileData;
 	
 	    static createFrom(source: any = {}) {
 	        return new Tile(source);
@@ -295,13 +276,31 @@ export namespace persistence {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.ID = source["ID"];
-	        this.Type = source["Type"];
-	        this.X = source["X"];
-	        this.Y = source["Y"];
-	        this.W = source["W"];
-	        this.H = source["H"];
+	        this.id = source["id"];
+	        this.x = source["x"];
+	        this.y = source["y"];
+	        this.w = source["w"];
+	        this.h = source["h"];
+	        this.data = this.convertValues(source["data"], TileData);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class Workspace {
 	    name: string;
@@ -433,6 +432,40 @@ export namespace persistence {
 	
 	
 	
+	
+	export class TimeFrame {
+	    n: number;
+	    unit: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TimeFrame(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.n = source["n"];
+	        this.unit = source["unit"];
+	    }
+	}
+
+}
+
+export namespace options {
+	
+	export class SecondInstanceData {
+	    Args: string[];
+	    WorkingDirectory: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SecondInstanceData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Args = source["Args"];
+	        this.WorkingDirectory = source["WorkingDirectory"];
+	    }
+	}
 
 }
 

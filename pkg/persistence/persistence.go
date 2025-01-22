@@ -1,11 +1,16 @@
 package persistence
 
 import (
+	"delta/pkg/models"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 )
+
+type Persistence struct {
+	filePath string
+}
 
 // Get standard config directory for the current OS
 func GetPersistenceDir(appName string) (string, error) {
@@ -14,7 +19,7 @@ func GetPersistenceDir(appName string) (string, error) {
 	// Detect OS
 	configDir, err := os.UserConfigDir()
 	if err == nil {
-		// On Windows, returns %APPDATA%\<appName>
+		// On Windows, returns %models.APPDATA%\<appName>
 		// On Unix, returns ~/.config/<appName>
 		dir = filepath.Join(configDir, appName)
 	} else {
@@ -29,7 +34,7 @@ func GetPersistenceDir(appName string) (string, error) {
 	return dir, nil
 }
 
-func (p *Persistence) Save(data AppData) error {
+func (p *Persistence) Save(data models.AppData) error {
 	file, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return err
@@ -37,8 +42,8 @@ func (p *Persistence) Save(data AppData) error {
 	return os.WriteFile(p.filePath, file, 0644)
 }
 
-func (p *Persistence) Load() (AppData, error) {
-	var data AppData
+func (p *Persistence) Load() (models.AppData, error) {
+	var data models.AppData
 	file, err := os.ReadFile(p.filePath)
 	if err != nil {
 		return data, err
@@ -60,10 +65,10 @@ func New(appName string) (*Persistence, error) {
 		filePath: saveFile,
 	}
 
-	DefaultData := AppData{
-		Preferences: Preferences{
-			GeneralPreferences{
-				Theme: LightTheme,
+	DefaultData := models.AppData{
+		Preferences: models.Preferences{
+			GeneralPreferences: models.GeneralPreferences{
+				Theme: models.LightTheme,
 			},
 		},
 	}
@@ -72,6 +77,9 @@ func New(appName string) (*Persistence, error) {
 	// If file not found, create it
 	if err != nil {
 		err = p.Save(DefaultData)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return p, nil
@@ -82,18 +90,17 @@ func (p *Persistence) ResetPreferences() error {
 	if err != nil {
 		return err
 	}
-	DefaultData := AppData{
-		Keys: Keys{
+	DefaultData := models.AppData{
+		Keys: models.Keys{
 			ApiKey:    old.Keys.ApiKey,
 			SecretKey: old.Keys.SecretKey,
 		},
-		Preferences: Preferences{
-			GeneralPreferences{
-
-				Theme: LightTheme,
+		Preferences: models.Preferences{
+			GeneralPreferences: models.GeneralPreferences{
+				Theme: models.LightTheme,
 			},
 		},
-		Workspaces:      []Workspace{},
+		Workspaces:      []models.Workspace{},
 		FavoriteTickers: []string{},
 	}
 	return p.Save(DefaultData)

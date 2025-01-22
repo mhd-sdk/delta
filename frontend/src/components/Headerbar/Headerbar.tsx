@@ -2,14 +2,14 @@ import { ChartCandlestick, Save, Settings, Switcher } from '@carbon/icons-react'
 import { Header as Carbonheader, HeaderGlobalAction, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { css } from '@emotion/css';
 import { NotificationInterface } from '../../types/notifications';
-import { TileEnum } from '../../types/tiles';
+import { TileType } from '../../types/tiles';
 import { Notifications } from '../Notifications/Notifications';
 import { Separator } from '../Separator';
 
 interface Props {
   isToolBoxOpen: boolean;
   toggleToolBox: () => void;
-  onNewTile: (type: TileEnum) => void;
+  onNewTile: (type: TileType) => void;
   onOpenPreferences: () => void;
   notifications: NotificationInterface[];
   isWorkspaceDirty: boolean;
@@ -34,7 +34,7 @@ export const Headerbar = ({
       </div>
       <Separator />
       <div className={styles.favorites}>
-        <HeaderGlobalAction aria-label="Chart" tooltipAlignment="center" onClick={() => onNewTile(TileEnum.Chart)}>
+        <HeaderGlobalAction aria-label="Chart" tooltipAlignment="center" onClick={() => onNewTile(TileType.Chart)}>
           <ChartCandlestick />
         </HeaderGlobalAction>
       </div>

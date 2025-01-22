@@ -1,7 +1,8 @@
 import { Dropdown, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { css, cx } from '@emotion/css';
 import { useAppData } from '../../../hooks/useAppData';
-import { ChartConfig, Range, Timeframe, TimeframeOptions } from '../../../types/tiles';
+import { ChartConfig } from '../../../types/tiles';
+import { calcOptimizedRange, defaultTimeframes, Timeframe } from '../../../types/timeframe';
 import { TickerSelect } from '../../TickerSelect/TickerSelect';
 
 interface Props {
@@ -10,37 +11,12 @@ interface Props {
   onConfigChange: (config: ChartConfig) => void;
 }
 
-const getOptimalRange = (timeframe: Timeframe): Range => {
-  switch (timeframe) {
-    case Timeframe.oneMin:
-      return Range.oneMonth;
-    case Timeframe.fiveMin:
-      return Range.oneMonth;
-    case Timeframe.fifteenMin:
-      return Range.sixMonths;
-    case Timeframe.thirtyMin:
-      return Range.sixMonths;
-    case Timeframe.oneHour:
-      return Range.sixMonths;
-    case Timeframe.fourHour:
-      return Range.oneYear;
-    case Timeframe.oneDay:
-      return Range.fiveYear;
-    case Timeframe.oneWeek:
-      return Range.fiveYear;
-    case Timeframe.oneMonth:
-      return Range.fiveYear;
-    default:
-      return Range.oneDay;
-  }
-};
-
 export const Toolbar = ({ config, onConfigChange, onDelete }: Props): JSX.Element => {
   const handleTickerChange = (ticker: string) => {
     onConfigChange({ ...config, ticker });
   };
   const handleTimeframeChange = (timeframe: Timeframe) => {
-    onConfigChange({ ...config, timeframe, range: getOptimalRange(timeframe) });
+    onConfigChange({ ...config, timeframe, range: calcOptimizedRange(timeframe) });
   };
 
   const { appData } = useAppData();
@@ -55,8 +31,9 @@ export const Toolbar = ({ config, onConfigChange, onDelete }: Props): JSX.Elemen
         id="inline"
         initialSelectedItem={config.timeframe}
         label="Timeframe"
-        items={TimeframeOptions}
+        items={defaultTimeframes}
         titleText={undefined}
+        itemToString={(item: Timeframe) => `${item.n} ${item.unit}`}
         onChange={({ selectedItem }) => selectedItem && handleTimeframeChange(selectedItem)}
       />
 

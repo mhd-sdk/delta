@@ -14,7 +14,7 @@ func DevBrowser() error {
 }
 
 func Dev() error {
-	return sh.RunV("wails", "dev", "-loglevel", "info")
+	return sh.RunV("wails", "dev", "-loglevel", "error")
 }
 func Build() error {
 	return sh.RunV("wails", "build", "-devtools", "-o", "delta.exe")

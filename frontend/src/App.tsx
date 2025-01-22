@@ -10,7 +10,8 @@ import { Headerbar } from './components/Headerbar/Headerbar';
 import { PreferenceModal } from './components/PreferencesModal/PreferencesModal';
 import { useAppData } from './hooks/useAppData';
 import { NotificationInterface } from './types/notifications';
-import { Range, TileEnum, TileInterface, Timeframe } from './types/tiles';
+import { TileInterface, TileType } from './types/tiles';
+import { calcOptimizedRange, defaultTimeframes } from './types/timeframe';
 import { getThemeCode } from './utils/getThemeCode';
 
 const genId = (Tiles: TileInterface[]): string => {
@@ -41,12 +42,12 @@ function App() {
   const [tiles, setTiles] = useState<TileInterface[]>([
     {
       id: '0',
-      content: {
-        type: TileEnum.Chart,
+      data: {
+        type: TileType.Chart,
         config: {
-          range: Range.fiveYear,
+          range: calcOptimizedRange(defaultTimeframes[4]),
           ticker: 'AAPL',
-          timeframe: Timeframe.oneDay,
+          timeframe: defaultTimeframes[4],
         },
       },
       x: 0,
@@ -58,19 +59,19 @@ function App() {
 
   const toggleToolBox = () => setIsToolBoxOpen(!isToolBoxOpen);
 
-  const handleNewTile = (type: TileEnum) => {
+  const handleNewTile = (type: TileType) => {
     switch (type) {
-      case TileEnum.Chart:
+      case TileType.Chart:
         setTiles([
           ...tiles,
           {
             id: genId(tiles),
-            content: {
+            data: {
               type,
               config: {
                 ticker: 'AAPL',
-                timeframe: Timeframe.oneDay,
-                range: Range.fiveYear,
+                timeframe: defaultTimeframes[4],
+                range: calcOptimizedRange(defaultTimeframes[4]),
               },
             },
             x: 0,

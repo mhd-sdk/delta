@@ -1,26 +1,32 @@
-import { Loading } from '@carbon/react';
+import { Loading, Menu, MenuItem, useContextMenu } from '@carbon/react';
 import { css } from '@emotion/css';
 import { CandlestickData, ColorType, createChart, CrosshairMode, IChartApi, ISeriesApi, UTCTimestamp, WhitespaceData } from 'lightweight-charts';
 import { useEffect, useRef, useState } from 'react';
 import { GetCandlesticks } from '../../../../wailsjs/go/app/App';
 import { app } from '../../../../wailsjs/go/models';
 import { useAppData } from '../../../hooks/useAppData';
-import { ChartConfig, Range, Timeframe } from '../../../types/tiles';
+import { rangeToDates } from '../../../types/range';
+import { ChartConfig } from '../../../types/tiles';
+import { isIntraday } from '../../../types/timeframe';
 import { Toolbar } from './Toolbar';
 
 interface Props {
   onDelete: () => void;
   config: ChartConfig;
-  setClickedPrice: (price: number) => void;
   onConfigChange: (config: ChartConfig) => void;
 }
 
-export const Chart = ({ config, onConfigChange, setClickedPrice, onDelete }: Props): JSX.Element => {
+export const Chart = ({ config, onConfigChange, onDelete }: Props) => {
   const [candlesticks, setCandlesticks] = useState<(CandlestickData<UTCTimestamp> | WhitespaceData<UTCTimestamp>)[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [clickedPrice, setClickedPrice] = useState<number>(0);
+
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+
+  const el = useRef<HTMLDivElement | null>(null);
+  const menuProps = useContextMenu(el);
 
   const { appData } = useAppData();
 
@@ -29,15 +35,15 @@ export const Chart = ({ config, onConfigChange, setClickedPrice, onDelete }: Pro
   const darkColors = {
     backgroundColor: 'transparent',
     textColor: 'white',
-    candleUpColor: '#ffffff', // Couleur des chandeliers haussiers
-    candleDownColor: '#5d606b', // Couleur des chandeliers baissiers
+    candleUpColor: '#ffffff',
+    candleDownColor: '#5d606b',
   };
 
   const lightColors = {
     backgroundColor: 'transparent',
     textColor: 'black',
-    candleUpColor: '#4caf50', // Couleur des chandeliers haussiers
-    candleDownColor: '#f44336', // Couleur des chandeliers baissiers
+    candleUpColor: '#4caf50',
+    candleDownColor: '#f44336',
   };
 
   const colors = isDarkMode ? darkColors : lightColors;
@@ -49,12 +55,7 @@ export const Chart = ({ config, onConfigChange, setClickedPrice, onDelete }: Pro
 
     const chart = createChart(chartContainerRef.current, {
       timeScale: {
-        timeVisible:
-          config.timeframe === Timeframe.oneMin ||
-          config.timeframe === Timeframe.fiveMin ||
-          config.timeframe === Timeframe.thirtyMin ||
-          config.timeframe === Timeframe.oneHour ||
-          config.timeframe === Timeframe.fourHour,
+        timeVisible: isIntraday(config.timeframe),
       },
       grid: {
         horzLines: {
@@ -130,112 +131,20 @@ export const Chart = ({ config, onConfigChange, setClickedPrice, onDelete }: Pro
         chartContainerRef.current.removeEventListener('mousedown', handleRightClick);
       }
     };
-  }, [config]);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
-      const actualDate = new Date();
-      const start = new Date();
-      switch (config.range) {
-        case Range.oneDay:
-          start.setDate(actualDate.getDate() - 1); // 1 jour en arrière par rapport à la date du jour
-          break;
-        case Range.threeDays:
-          start.setDate(actualDate.getDate() - 3); // 3 jours en arrière par rapport à la date du jour
-          break;
-        case Range.oneWeek:
-          start.setDate(actualDate.getDate() - 7); // 1 semaine en arrière par rapport à la date du jour
-          break;
-        case Range.oneMonth:
-          start.setMonth(actualDate.getMonth() - 1); // 1 mois en arrière par rapport à la date du jour
-          break;
-        case Range.threeMonths:
-          start.setMonth(actualDate.getMonth() - 3); // 3 mois en arrière par rapport à la date du jour
-          break;
-        case Range.sixMonths:
-          start.setMonth(actualDate.getMonth() - 6); // 6 mois en arrière par rapport à la date du jour
-          break;
-        case Range.oneYear:
-          start.setFullYear(actualDate.getFullYear() - 1); // 1 an en arrière par rapport à la date du jour
-          break;
-        case Range.fiveYear:
-          start.setFullYear(actualDate.getFullYear() - 5); // 5 ans en arrière par rapport à la date du jour
-          break;
-        default:
-          break;
-      }
-      let tf: app.TimeFrame = {
-        N: 1,
-        Unit: 'Min',
-      };
-      switch (config.timeframe) {
-        case Timeframe.oneMin:
-          tf = {
-            N: 1,
-            Unit: 'Min',
-          };
-          break;
-        case Timeframe.fiveMin:
-          tf = {
-            N: 5,
-            Unit: 'Min',
-          };
-          break;
-        case Timeframe.fifteenMin:
-          tf = {
-            N: 15,
-            Unit: 'Min',
-          };
-          break;
-        case Timeframe.thirtyMin:
-          tf = {
-            N: 30,
-            Unit: 'Min',
-          };
-          break;
-        case Timeframe.oneHour:
-          tf = {
-            N: 1,
-            Unit: 'Hour',
-          };
-          break;
-        case Timeframe.fourHour:
-          tf = {
-            N: 4,
-            Unit: 'Hour',
-          };
-          break;
-        case Timeframe.oneDay:
-          tf = {
-            N: 1,
-            Unit: 'Day',
-          };
-          break;
-        case Timeframe.oneWeek:
-          tf = {
-            N: 1,
-            Unit: 'Week',
-          };
-          break;
-        case Timeframe.oneMonth:
-          tf = {
-            N: 1,
-            Unit: 'Month',
-          };
-          break;
-        default:
-          break;
-      }
+      const { start, end } = rangeToDates(config.range);
+
       const params: app.GetCandlesticksConfig = {
         Ticker: config.ticker,
-        Start: start,
-        End: actualDate.toISOString(),
-        timeframe: {
-          N: tf.N,
-          Unit: tf.Unit,
-        },
+        Start: start.toISOString(),
+        End: end.toISOString(),
+        timeframe: config.timeframe,
       } as app.GetCandlesticksConfig;
       const candles = await GetCandlesticks(params);
+
       const newData = candles.map((candle) => ({
         time: Math.floor(new Date(candle.t as string).getTime() / 1000) as UTCTimestamp,
         open: candle.o,
@@ -278,18 +187,35 @@ export const Chart = ({ config, onConfigChange, setClickedPrice, onDelete }: Pro
     }
   }, [colors]);
 
+  const handleResetView = () => {
+    if (chartRef.current) {
+      chartRef.current.timeScale().resetTimeScale();
+    }
+  };
+
+  const renderMenu = () => {
+    return (
+      <>
+        <MenuItem label={`Copy price: ${clickedPrice}`} onClick={() => {}} />
+        <MenuItem label={`Reset view`} onClick={handleResetView} />
+      </>
+    );
+  };
+
   return (
-    <div className={styles.height100}>
-      <Toolbar onDelete={onDelete} config={config} onConfigChange={onConfigChange} />
+    <div className={styles.height100} ref={el}>
       {isLoading && <Loading />}
+      <Toolbar onDelete={onDelete} config={config} onConfigChange={onConfigChange} />
       <div ref={chartContainerRef} className={styles.chartContainer} />
+      <Menu label="Tile menu" {...menuProps} mode="full">
+        {renderMenu()}
+      </Menu>
     </div>
   );
 };
 
 const styles = {
   loader: css`
-    /* vertically center */
     margin-top: 20%;
   `,
   chartContainer: css`

@@ -52,7 +52,7 @@ export const Account = ({ onLogout }: Props): JSX.Element => {
               id="multiplier"
               labelText={
                 <>
-                  <ToggletipLabel>Toggletip label</ToggletipLabel>
+                  <ToggletipLabel>Multiplier</ToggletipLabel>
                   <Toggletip align={'right-top'}>
                     <ToggletipButton label="Show information">
                       <Information />

@@ -22,8 +22,8 @@ export const Grid = ({ tiles, onChange }: Props): JSX.Element => {
       h,
       w,
       id: i,
-      content: {
-        ...tiles.find((tile) => tile.id === i)!.content,
+      data: {
+        ...tiles.find((tile) => tile.id === i)!.data,
       },
     }));
     onChange?.(newTiles);
