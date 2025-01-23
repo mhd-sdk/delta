@@ -8,14 +8,14 @@ import { AuthModal } from './components/AuthModal/AuthModal';
 import { Grid } from './components/Grid/Grid';
 import { Headerbar } from './components/Headerbar/Headerbar';
 import { PreferenceModal } from './components/PreferencesModal/PreferencesModal';
-import { WorkspaceModal } from './components/WorkspacesModal/WorkspacesModal';
+import { WorkspacesModal } from './components/WorkspacesModal/WorkspacesModal';
 import { useAppData } from './hooks/useAppData';
 import { NotificationInterface } from './types/notifications';
-import { TileInterface, TileType } from './types/tiles';
+import { TileType } from './types/tiles';
 import { calcOptimizedRange, defaultTimeframes } from './types/timeframe';
 import { getThemeCode } from './utils/getThemeCode';
 
-const genId = (Tiles: TileInterface[]): string => {
+const genId = (Tiles: models.Tile[]): string => {
   let id = 0;
   while (Tiles.some((tile) => tile.id === id.toString())) {
     id++;
@@ -40,20 +40,16 @@ function App() {
   const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-
-  const [tiles, setTiles] = useState<TileInterface[]>(appData.workspaces[0].layout as TileInterface[]);
+  const foundWorkspace = appData.workspaces.find((w) => w.name === appData.selectedWorkspace);
+  const defaultWorkspace = appData.workspaces.find((w) => w.name === 'Default');
+  const [currentWorkspace, setCurrentWorkspace] = useState(foundWorkspace ?? (defaultWorkspace as models.Workspace));
 
   const handleSaveWorkspace = () => {
+    const workspaces = appData.workspaces.map((w) => (w.name === currentWorkspace.name ? currentWorkspace : w));
     const newAppData: models.AppData = {
       ...appData,
-      workspaces: [
-        {
-          name: 'default',
-          layout: tiles as models.Tile[],
-        } as models.Workspace,
-      ],
+      workspaces,
     } as models.AppData;
-    console.log(newAppData);
     onSave(newAppData);
     setIsWorkspaceDirty(false);
   };
@@ -63,28 +59,35 @@ function App() {
   const handleNewTile = (type: TileType) => {
     switch (type) {
       case TileType.Chart:
-        setTiles([
-          ...tiles,
-          {
-            id: genId(tiles),
-            data: {
-              type,
-              config: {
-                ticker: 'AAPL',
-                timeframe: defaultTimeframes[4],
-                range: calcOptimizedRange(defaultTimeframes[4]),
+        setCurrentWorkspace({
+          name: currentWorkspace.name,
+          layout: [
+            ...currentWorkspace.layout,
+            {
+              id: genId(currentWorkspace.layout),
+              data: {
+                type,
+                config: {
+                  ticker: 'AAPL',
+                  timeframe: defaultTimeframes[4],
+                  range: calcOptimizedRange(defaultTimeframes[4]),
+                },
               },
+              x: 0,
+              y: 0,
+              w: 20,
+              h: 20,
             },
-            x: 0,
-            y: 0,
-            w: 20,
-            h: 20,
-          },
-        ]);
+          ],
+        } as models.Workspace);
     }
   };
-  const handleChangeTiles = (newTiles: TileInterface[]) => {
-    setTiles(newTiles);
+
+  const handleChangeLayout = (layout: models.Tile[]) => {
+    setCurrentWorkspace({
+      name: currentWorkspace.name,
+      layout: layout,
+    } as models.Workspace);
     setIsWorkspaceDirty(true);
   };
 
@@ -127,11 +130,11 @@ function App() {
         <div className={styles.toolBox(isToolBoxOpen, theme)}></div>
 
         <Content className={styles.content}>
-          <Grid tiles={tiles} onChange={handleChangeTiles} />
+          <Grid layout={currentWorkspace.layout} onChange={handleChangeLayout} />
         </Content>
 
         <PreferenceModal onLogout={() => setIsLogoutModalOpen(true)} isOpen={isPreferencesOpen} onClose={() => setIsPreferencesOpen(false)} />
-        <WorkspaceModal isOpen={isWorkspacesOpen} onClose={() => setIsWorkspacesOpen(false)} />
+        <WorkspacesModal isOpen={isWorkspacesOpen} onClose={() => setIsWorkspacesOpen(false)} />
 
         <AuthModal isOpen={isDatafeedOpen} setIsOpen={(isOpen) => setIsDatafeedOpen(isOpen)} />
 

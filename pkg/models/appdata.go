@@ -1,10 +1,11 @@
 package models
 
 type AppData struct {
-	Keys            Keys        `json:"keys"`
-	Preferences     Preferences `json:"preferences"`
-	Workspaces      []Workspace `json:"workspaces"`
-	FavoriteTickers []string    `json:"favoriteTickers"`
+	Keys              Keys        `json:"keys"`
+	Preferences       Preferences `json:"preferences"`
+	Workspaces        []Workspace `json:"workspaces"`
+	SelectedWorkspace string      `json:"selectedWorkspace"`
+	FavoriteTickers   []string    `json:"favoriteTickers"`
 }
 
 type Preferences struct {

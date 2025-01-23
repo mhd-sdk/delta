@@ -1,41 +1,41 @@
 import { css } from '@emotion/css';
 import { Responsive, WidthProvider } from 'react-grid-layout';
+import { models } from '../../../wailsjs/go/models';
 import { useAppData } from '../../hooks/useAppData';
-import { TileInterface } from '../../types/tiles';
 import { Tile } from '../Tiles/Tile';
 
 interface Props {
-  tiles: TileInterface[];
-  onChange: (tiles: TileInterface[]) => void;
+  layout: models.Tile[];
+  onChange: (tiles: models.Tile[]) => void;
 }
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
-export const Grid = ({ tiles, onChange }: Props): JSX.Element => {
+export const Grid = ({ layout, onChange }: Props): JSX.Element => {
   const layouts = {
-    lg: tiles.map(({ x, y, h, w, id }) => ({ i: id, x, y, h, w })),
+    lg: layout.map(({ x, y, h, w, id }) => ({ i: id, x, y, h, w })),
   };
 
   const handleLayoutChange = (l: ReactGridLayout.Layout[]) => {
-    const newTiles: TileInterface[] = l.map(({ i, x, y, h, w }) => ({
+    const newTiles: models.Tile[] = l.map(({ i, x, y, h, w }) => ({
       x,
       y,
       h,
       w,
       id: i,
       data: {
-        ...tiles.find((tile) => tile.id === i)!.data,
+        ...layout.find((tile) => tile.id === i)!.data,
       },
-    }));
+    })) as models.Tile[];
     onChange?.(newTiles);
   };
 
   const handleDelete = (id: string) => {
-    const newTiles = tiles.filter((tile) => tile.id !== id);
+    const newTiles = layout.filter((tile) => tile.id !== id);
     onChange(newTiles);
   };
 
-  const handleConfigChange = (tile: TileInterface) => {
-    const updatedTiles = tiles.map((t) => (t.id === tile.id ? tile : t));
+  const handleConfigChange = (tile: models.Tile) => {
+    const updatedTiles = layout.map((t) => (t.id === tile.id ? tile : t));
     onChange(updatedTiles);
   };
 
@@ -55,7 +55,7 @@ export const Grid = ({ tiles, onChange }: Props): JSX.Element => {
       draggableHandle=".drag-handle"
       draggableCancel=".drag-cancel"
     >
-      {tiles.map((tile) => (
+      {layout.map((tile) => (
         <div key={tile.id} className={styles.tile(appData.preferences.generalPreferences.theme)}>
           <Tile tile={tile} onDelete={handleDelete} onConfigChange={handleConfigChange} />
         </div>

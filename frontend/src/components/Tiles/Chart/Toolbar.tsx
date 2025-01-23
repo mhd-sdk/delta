@@ -32,7 +32,7 @@ export const Toolbar = ({ config, onConfigChange, onDelete }: Props): JSX.Elemen
         initialSelectedItem={config.timeframe}
         label="Timeframe"
         items={defaultTimeframes}
-        titleText={undefined}
+        titleText=""
         itemToString={(item: Timeframe) => `${item.n} ${item.unit}`}
         onChange={({ selectedItem }) => selectedItem && handleTimeframeChange(selectedItem)}
       />

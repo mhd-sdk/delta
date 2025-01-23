@@ -1,7 +1,7 @@
 import { Edit, TrashCan } from '@carbon/icons-react';
 import { Button, ContainedList, ContainedListItem, Modal, Search } from '@carbon/react';
 import { css } from '@emotion/css';
-import { createRef, useState } from 'react';
+import { createRef, useEffect, useState } from 'react';
 import { models } from '../../../wailsjs/go/models';
 import { useAppData } from '../../hooks/useAppData';
 import { EditableRow } from './EditableRow';
@@ -11,8 +11,9 @@ interface Props {
   onClose: () => void;
 }
 
-export const WorkspaceModal = ({ isOpen, onClose }: Props): JSX.Element => {
-  const [workspaces, setWorkspaces] = useState<string[]>(['w1', 'w2', 'w3']);
+export const WorkspacesModal = ({ isOpen, onClose }: Props): JSX.Element => {
+  const { appData, onSave } = useAppData();
+  const [workspaces, setWorkspaces] = useState<string[]>(appData.workspaces.map((w) => w.name));
   const [searchTerm, setSearchTerm] = useState('');
   const [editing, setEditing] = useState<string>();
   const [selected, setSelected] = useState<string>();
@@ -24,7 +25,6 @@ export const WorkspaceModal = ({ isOpen, onClose }: Props): JSX.Element => {
     setWorkspaces(newWorkspaces);
   };
 
-  const { appData, onSave } = useAppData();
   const theme = appData.preferences.generalPreferences.theme;
 
   const results = workspaces.filter((item) => item.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -49,6 +49,13 @@ export const WorkspaceModal = ({ isOpen, onClose }: Props): JSX.Element => {
       editRef.current?.focus();
     }, 100);
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelected(undefined);
+    }
+  }, [isOpen]);
+
   return (
     <Modal
       className={styles.modal}
@@ -61,14 +68,13 @@ export const WorkspaceModal = ({ isOpen, onClose }: Props): JSX.Element => {
       secondaryButtonText={'Close'}
     >
       <ContainedList
-        kind="on-page"
         action={
           <div className={styles.topbar}>
-            <Search id="search-default-1" labelText={undefined} size="lg" />
+            <Search id="search-default-1" labelText="" size="lg" onChange={(e) => setSearchTerm(e.target.value)} />
             <Button size="lg">New workspace</Button>
           </div>
         }
-        label={undefined}
+        label=""
       >
         {results.map((listItem, key) =>
           editing !== listItem ? (
@@ -141,15 +147,14 @@ const styles = {
     display: flex;
     flex-direction: row;
     height: 100%;
-    width: 100%;
     @media (min-width: 768px) {
       & .cds--modal-container {
-        width: 75% !important;
+        width: 55% !important;
       }
     }
 
     & .cds--modal-container {
-      height: 100% !important;
+      height: 60% !important;
     }
 
     & .cds--modal-content {

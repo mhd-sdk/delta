@@ -10,15 +10,6 @@ export enum TileType {
   Scanner = 'Scanner',
 }
 
-export interface TileInterface {
-  id: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  data: TileData;
-}
-
 export type TileData =
   | {
       type: TileType.Chart;

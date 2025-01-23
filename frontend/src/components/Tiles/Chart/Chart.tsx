@@ -4,6 +4,7 @@ import { CandlestickData, ColorType, createChart, CrosshairMode, IChartApi, ISer
 import { useEffect, useRef, useState } from 'react';
 import { GetCandlesticks } from '../../../../wailsjs/go/app/App';
 import { app } from '../../../../wailsjs/go/models';
+import { ClipboardSetText } from '../../../../wailsjs/runtime/runtime';
 import { useAppData } from '../../../hooks/useAppData';
 import { rangeToDates } from '../../../types/range';
 import { ChartConfig } from '../../../types/tiles';
@@ -132,6 +133,12 @@ export const Chart = ({ config, onConfigChange, onDelete }: Props) => {
   }, []);
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isLoading) {
+        setIsLoading(false);
+        console.error('Failed to load data');
+      }
+    }, 5000);
     const fetchData = async () => {
       const { start, end } = rangeToDates(config.range);
 
@@ -156,6 +163,9 @@ export const Chart = ({ config, onConfigChange, onDelete }: Props) => {
     };
     setIsLoading(true);
     fetchData();
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [config]);
 
   useEffect(() => {
@@ -194,7 +204,7 @@ export const Chart = ({ config, onConfigChange, onDelete }: Props) => {
   const renderMenu = () => {
     return (
       <>
-        <MenuItem label={`Copy price: ${clickedPrice}`} onClick={() => {}} />
+        <MenuItem label={`Copy price: ${clickedPrice}`} onClick={() => ClipboardSetText(clickedPrice.toString())} />
         <MenuItem label={`Reset view`} onClick={handleResetView} />
       </>
     );

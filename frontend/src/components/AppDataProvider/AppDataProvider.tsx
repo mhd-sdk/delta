@@ -22,9 +22,9 @@ const AppDataProvider = ({ children }: Props) => {
     });
   }, []);
 
-  const onSave = (value: models.AppData) => {
-    setAppData(value);
-    SaveAppData(value);
+  const onSave = async (value: models.AppData) => {
+    await SaveAppData(value);
+    refetch();
   };
 
   const refetch = async () => {

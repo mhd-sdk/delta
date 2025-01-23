@@ -396,6 +396,7 @@ export namespace models {
 	    keys: Keys;
 	    preferences: Preferences;
 	    workspaces: Workspace[];
+	    selectedWorkspace: string;
 	    favoriteTickers: string[];
 	
 	    static createFrom(source: any = {}) {
@@ -407,6 +408,7 @@ export namespace models {
 	        this.keys = this.convertValues(source["keys"], Keys);
 	        this.preferences = this.convertValues(source["preferences"], Preferences);
 	        this.workspaces = this.convertValues(source["workspaces"], Workspace);
+	        this.selectedWorkspace = source["selectedWorkspace"];
 	        this.favoriteTickers = source["favoriteTickers"];
 	    }
 	

@@ -71,6 +71,10 @@ func New(appName string) (*Persistence, error) {
 				Theme: models.LightTheme,
 			},
 		},
+		Keys:              models.Keys{},
+		FavoriteTickers:   []string{},
+		Workspaces:        []models.Workspace{},
+		SelectedWorkspace: "Default",
 	}
 
 	_, err = p.Load()
