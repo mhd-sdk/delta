@@ -10,8 +10,8 @@ type Tile struct {
 }
 
 type TileData struct {
-	Type TileType    `json:"type"`
-	Data interface{} `json:"data"`
+	Type   TileType    `json:"type"`
+	Config interface{} `json:"config"`
 }
 
 type TileType string

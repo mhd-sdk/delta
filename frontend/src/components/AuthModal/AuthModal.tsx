@@ -3,7 +3,7 @@ import { ComposedModal, Link, ModalBody, ModalFooter, ModalHeader, TextInput, To
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
 import { SaveAppData, TestCredentials } from '../../../wailsjs/go/app/App';
-import { persistence } from '../../../wailsjs/go/models';
+import { models } from '../../../wailsjs/go/models';
 import { BrowserOpenURL } from '../../../wailsjs/runtime/runtime';
 import { useAppData } from '../../hooks/useAppData';
 
@@ -40,7 +40,7 @@ export const AuthModal = ({ isOpen, setIsOpen }: Props): JSX.Element => {
         apiKey: useKeys ? key : appData.keys.apiKey,
         secretKey: useKeys ? secret : appData.keys.secretKey,
       },
-    } as persistence.AppData);
+    } as models.AppData);
     setIsOpen(false);
     setLoadingState('inactive');
     setSecret('');

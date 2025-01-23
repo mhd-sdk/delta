@@ -140,7 +140,7 @@ type GetCandlesticksConfig struct {
 	Ticker    string
 	Start     time.Time
 	End       time.Time
-	Timeframe models.TimeFrame `json:"timeframe"`
+	Timeframe models.Timeframe `json:"timeframe"`
 }
 
 func (a *App) GetCandlesticks(config GetCandlesticksConfig) (data []marketdata.Bar, err error) {

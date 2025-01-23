@@ -3,11 +3,12 @@ import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import { Logout, SaveAppData } from '../wailsjs/go/app/App';
-import { persistence } from '../wailsjs/go/models';
+import { models } from '../wailsjs/go/models';
 import { AuthModal } from './components/AuthModal/AuthModal';
 import { Grid } from './components/Grid/Grid';
 import { Headerbar } from './components/Headerbar/Headerbar';
 import { PreferenceModal } from './components/PreferencesModal/PreferencesModal';
+import { WorkspaceModal } from './components/WorkspacesModal/WorkspacesModal';
 import { useAppData } from './hooks/useAppData';
 import { NotificationInterface } from './types/notifications';
 import { TileInterface, TileType } from './types/tiles';
@@ -23,9 +24,10 @@ const genId = (Tiles: TileInterface[]): string => {
 };
 
 function App() {
-  const { appData } = useAppData();
+  const { appData, onSave } = useAppData();
   const theme = appData.preferences.generalPreferences.theme;
   const themeCode = getThemeCode(theme);
+  const [isWorkspacesOpen, setIsWorkspacesOpen] = useState(false);
 
   const [isWorkspaceDirty, setIsWorkspaceDirty] = useState(false);
 
@@ -39,23 +41,22 @@ function App() {
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  const [tiles, setTiles] = useState<TileInterface[]>([
-    {
-      id: '0',
-      data: {
-        type: TileType.Chart,
-        config: {
-          range: calcOptimizedRange(defaultTimeframes[4]),
-          ticker: 'AAPL',
-          timeframe: defaultTimeframes[4],
-        },
-      },
-      x: 0,
-      y: 0,
-      w: 20,
-      h: 20,
-    },
-  ]);
+  const [tiles, setTiles] = useState<TileInterface[]>(appData.workspaces[0].layout as TileInterface[]);
+
+  const handleSaveWorkspace = () => {
+    const newAppData: models.AppData = {
+      ...appData,
+      workspaces: [
+        {
+          name: 'default',
+          layout: tiles as models.Tile[],
+        } as models.Workspace,
+      ],
+    } as models.AppData;
+    console.log(newAppData);
+    onSave(newAppData);
+    setIsWorkspaceDirty(false);
+  };
 
   const toggleToolBox = () => setIsToolBoxOpen(!isToolBoxOpen);
 
@@ -82,6 +83,10 @@ function App() {
         ]);
     }
   };
+  const handleChangeTiles = (newTiles: TileInterface[]) => {
+    setTiles(newTiles);
+    setIsWorkspaceDirty(true);
+  };
 
   const handleLogout = async () => {
     setIsLogoutModalOpen(false);
@@ -92,7 +97,7 @@ function App() {
         apiKey: '',
         secretKey: '',
       },
-    } as persistence.AppData);
+    } as models.AppData);
     setIsDatafeedOpen(true);
     Logout();
   };
@@ -101,9 +106,7 @@ function App() {
     document.documentElement.dataset.carbonTheme = themeCode;
   }, [themeCode]);
 
-  useEffect(() => {
-    setIsWorkspaceDirty(true);
-  }, [tiles]);
+  useEffect(() => {}, []);
 
   // const notify = () => toast('Wow so easy !');
 
@@ -112,10 +115,11 @@ function App() {
       <div id="App" className={styles.app(theme)}>
         <Headerbar
           isWorkspaceDirty={isWorkspaceDirty}
-          onSaveWorkspace={() => setIsWorkspaceDirty(false)}
+          onSaveWorkspace={handleSaveWorkspace}
           isToolBoxOpen={isToolBoxOpen}
           toggleToolBox={toggleToolBox}
           onNewTile={handleNewTile}
+          onOpenWorkspaces={() => setIsWorkspacesOpen(true)}
           onOpenPreferences={() => setIsPreferencesOpen(true)}
           notifications={notifications}
         />
@@ -123,10 +127,11 @@ function App() {
         <div className={styles.toolBox(isToolBoxOpen, theme)}></div>
 
         <Content className={styles.content}>
-          <Grid tiles={tiles} onChange={setTiles} />
+          <Grid tiles={tiles} onChange={handleChangeTiles} />
         </Content>
 
         <PreferenceModal onLogout={() => setIsLogoutModalOpen(true)} isOpen={isPreferencesOpen} onClose={() => setIsPreferencesOpen(false)} />
+        <WorkspaceModal isOpen={isWorkspacesOpen} onClose={() => setIsWorkspacesOpen(false)} />
 
         <AuthModal isOpen={isDatafeedOpen} setIsOpen={(isOpen) => setIsDatafeedOpen(isOpen)} />
 

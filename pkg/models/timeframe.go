@@ -1,6 +1,6 @@
 package models
 
-type TimeFrame struct {
+type Timeframe struct {
 	N    int    `json:"n"`
 	Unit string `json:"unit"`
 }

@@ -1,7 +1,7 @@
 import { Modal, TreeNode, TreeView } from '@carbon/react';
 import { css } from '@emotion/css';
 import { useEffect, useState } from 'react';
-import { persistence } from '../../../wailsjs/go/models';
+import { models } from '../../../wailsjs/go/models';
 import { useAppData } from '../../hooks/useAppData';
 import { Separator } from '../Separator';
 import { Account } from './Account';
@@ -22,7 +22,7 @@ export const PreferenceModal = ({ isOpen, onClose, onLogout }: Props): JSX.Eleme
   const { appData, onSave } = useAppData();
   const [selected, setSelected] = useState(PreferenceTabs.General);
   const [isDirty, setIsDirty] = useState(false);
-  const [generalPreferences, setGeneralPreferences] = useState<persistence.GeneralPreferences>({
+  const [generalPreferences, setGeneralPreferences] = useState<models.GeneralPreferences>({
     language: 'en',
     theme: 'dark',
   });
@@ -34,7 +34,7 @@ export const PreferenceModal = ({ isOpen, onClose, onLogout }: Props): JSX.Eleme
     fetchAppData();
   }, [isOpen, appData]);
 
-  const handleChangeGeneral = (value: persistence.GeneralPreferences) => {
+  const handleChangeGeneral = (value: models.GeneralPreferences) => {
     setIsDirty(true);
     setGeneralPreferences(value);
   };
@@ -46,7 +46,7 @@ export const PreferenceModal = ({ isOpen, onClose, onLogout }: Props): JSX.Eleme
         ...appData.preferences,
         generalPreferences,
       },
-    } as persistence.AppData);
+    } as models.AppData);
     setIsDirty(false);
   };
 

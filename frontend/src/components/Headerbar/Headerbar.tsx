@@ -14,6 +14,7 @@ interface Props {
   notifications: NotificationInterface[];
   isWorkspaceDirty: boolean;
   onSaveWorkspace: () => void;
+  onOpenWorkspaces: () => void;
 }
 
 export const Headerbar = ({
@@ -24,6 +25,7 @@ export const Headerbar = ({
   notifications,
   isWorkspaceDirty,
   onSaveWorkspace,
+  onOpenWorkspaces,
 }: Props): JSX.Element => {
   return (
     <Carbonheader aria-label="Delta">
@@ -52,7 +54,7 @@ export const Headerbar = ({
 
         <OverflowMenu renderIcon={Settings} size="lg" flipped aria-label="overflow-menu">
           <OverflowMenuItem itemText="Preferences" onClick={onOpenPreferences} />
-          <OverflowMenuItem itemText="Workspaces" />
+          <OverflowMenuItem itemText="Workspaces" onClick={onOpenWorkspaces} />
           <OverflowMenuItem hasDivider itemText="Quit" isDelete />
         </OverflowMenu>
       </div>

@@ -6,6 +6,7 @@ import (
 
 	"github.com/leaanthony/u"
 	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/menu/keys"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
@@ -18,7 +19,7 @@ var assets embed.FS
 func main() {
 	// Create an instance of the app structure
 	app := app.NewApp()
-
+	keys.CmdOrCtrl("escape")
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "DeltΔ",
@@ -30,11 +31,10 @@ func main() {
 		},
 		Windows: &windows.Options{
 			IsZoomControlEnabled: false,
-			WebviewGpuIsDisabled: false,
+			WebviewGpuIsDisabled: true,
 		},
 
 		Mac: &mac.Options{
-
 			DisableZoom: false,
 			Preferences: &mac.Preferences{
 				TabFocusesLinks:        u.True,

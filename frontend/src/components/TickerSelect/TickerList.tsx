@@ -4,7 +4,7 @@ import { css, cx } from '@emotion/css';
 import { debounce } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { GetAssets } from '../../../wailsjs/go/app/App';
-import { alpaca, persistence } from '../../../wailsjs/go/models';
+import { alpaca, models } from '../../../wailsjs/go/models';
 import { useAppData } from '../../hooks/useAppData';
 
 interface Props {
@@ -104,9 +104,9 @@ export const TickerList = ({ onSelect, onClose }: Props): JSX.Element => {
 
   const handleAddToFav = (ticker: string) => {
     if (isFavorite(ticker)) {
-      onSave({ ...appData, favoriteTickers: favoriteTickers.filter((fav) => fav !== ticker) } as persistence.AppData);
+      onSave({ ...appData, favoriteTickers: favoriteTickers.filter((fav) => fav !== ticker) } as models.AppData);
     } else {
-      onSave({ ...appData, favoriteTickers: [...favoriteTickers, ticker] } as persistence.AppData);
+      onSave({ ...appData, favoriteTickers: [...favoriteTickers, ticker] } as models.AppData);
     }
   };
 

@@ -100,7 +100,12 @@ func (p *Persistence) ResetPreferences() error {
 				Theme: models.LightTheme,
 			},
 		},
-		Workspaces:      []models.Workspace{},
+		Workspaces: []models.Workspace{
+			{
+				Name:   "Default",
+				Layout: []models.Tile{},
+			},
+		},
 		FavoriteTickers: []string{},
 	}
 	return p.Save(DefaultData)

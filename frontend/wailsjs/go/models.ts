@@ -161,7 +161,7 @@ export namespace app {
 	    Start: any;
 	    // Go type: time
 	    End: any;
-	    timeframe: models.TimeFrame;
+	    timeframe: models.Timeframe;
 	
 	    static createFrom(source: any = {}) {
 	        return new GetCandlesticksConfig(source);
@@ -172,7 +172,7 @@ export namespace app {
 	        this.Ticker = source["Ticker"];
 	        this.Start = this.convertValues(source["Start"], null);
 	        this.End = this.convertValues(source["End"], null);
-	        this.timeframe = this.convertValues(source["timeframe"], models.TimeFrame);
+	        this.timeframe = this.convertValues(source["timeframe"], models.Timeframe);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -250,7 +250,7 @@ export namespace models {
 	
 	export class TileData {
 	    type: string;
-	    data: any;
+	    config: any;
 	
 	    static createFrom(source: any = {}) {
 	        return new TileData(source);
@@ -259,7 +259,7 @@ export namespace models {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.type = source["type"];
-	        this.data = source["data"];
+	        this.config = source["config"];
 	    }
 	}
 	export class Tile {
@@ -433,12 +433,12 @@ export namespace models {
 	
 	
 	
-	export class TimeFrame {
+	export class Timeframe {
 	    n: number;
 	    unit: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new TimeFrame(source);
+	        return new Timeframe(source);
 	    }
 	
 	    constructor(source: any = {}) {

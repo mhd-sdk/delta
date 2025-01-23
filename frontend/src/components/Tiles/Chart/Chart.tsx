@@ -114,10 +114,8 @@ export const Chart = ({ config, onConfigChange, onDelete }: Props) => {
         const y = event.clientY - rect.top;
 
         const price = candleSeriesRef.current?.coordinateToPrice(y);
-        // round to 2 decimal places
 
         setClickedPrice(price ? Math.round(price * 100) / 100 : 0);
-        console.log('Prix cliqué (clic droit) :', price);
       }
     };
 

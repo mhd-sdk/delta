@@ -1,10 +1,10 @@
 import { ReactNode, createContext, useEffect, useState } from 'react';
 import { GetAppData, SaveAppData } from '../../../wailsjs/go/app/App';
-import { persistence } from '../../../wailsjs/go/models';
+import { models } from '../../../wailsjs/go/models';
 
 export interface AppDataContextProps {
-  appData: persistence.AppData;
-  onSave: (value: persistence.AppData) => void;
+  appData: models.AppData;
+  onSave: (value: models.AppData) => void;
   refetch: () => void;
 }
 
@@ -14,7 +14,7 @@ interface Props {
   children?: ReactNode;
 }
 const AppDataProvider = ({ children }: Props) => {
-  const [appData, setAppData] = useState<persistence.AppData>();
+  const [appData, setAppData] = useState<models.AppData>();
 
   useEffect(() => {
     GetAppData().then((data) => {
@@ -22,7 +22,7 @@ const AppDataProvider = ({ children }: Props) => {
     });
   }, []);
 
-  const onSave = (value: persistence.AppData) => {
+  const onSave = (value: models.AppData) => {
     setAppData(value);
     SaveAppData(value);
   };
