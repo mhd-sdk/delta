@@ -40,9 +40,16 @@ function App() {
   const [notifications] = useState<NotificationInterface[]>([{ title: 'notif 1', type: 'info', subtitle: 'subtitle' }]);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
   const foundWorkspace = appData.workspaces.find((w) => w.name === appData.selectedWorkspace);
   const defaultWorkspace = appData.workspaces.find((w) => w.name === 'Default');
   const [currentWorkspace, setCurrentWorkspace] = useState(foundWorkspace ?? (defaultWorkspace as models.Workspace));
+
+  const handleSelectWorkspace = (workspace: string) => {
+    const foundWorkspace = appData.workspaces.find((w) => w.name === workspace);
+    setCurrentWorkspace(foundWorkspace as models.Workspace);
+    setIsWorkspacesOpen(false);
+  };
 
   const handleSaveWorkspace = () => {
     const workspaces = appData.workspaces.map((w) => (w.name === currentWorkspace.name ? currentWorkspace : w));
@@ -134,7 +141,12 @@ function App() {
         </Content>
 
         <PreferenceModal onLogout={() => setIsLogoutModalOpen(true)} isOpen={isPreferencesOpen} onClose={() => setIsPreferencesOpen(false)} />
-        <WorkspacesModal isOpen={isWorkspacesOpen} onClose={() => setIsWorkspacesOpen(false)} />
+        <WorkspacesModal
+          isOpen={isWorkspacesOpen}
+          onClose={() => setIsWorkspacesOpen(false)}
+          onSelect={handleSelectWorkspace}
+          selectedWorkspace={currentWorkspace.name}
+        />
 
         <AuthModal isOpen={isDatafeedOpen} setIsOpen={(isOpen) => setIsDatafeedOpen(isOpen)} />
 

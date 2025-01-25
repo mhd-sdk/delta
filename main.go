@@ -3,10 +3,13 @@ package main
 import (
 	"delta/pkg/app"
 	"embed"
+	"log/slog"
+	"os"
+	"time"
 
 	"github.com/leaanthony/u"
+	"github.com/lmittmann/tint"
 	"github.com/wailsapp/wails/v2"
-	"github.com/wailsapp/wails/v2/pkg/menu/keys"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
@@ -17,9 +20,15 @@ import (
 var assets embed.FS
 
 func main() {
+	slog.SetDefault(slog.New(
+		tint.NewHandler(os.Stderr, &tint.Options{
+			Level:      slog.LevelDebug,
+			TimeFormat: time.Kitchen,
+		}),
+	))
 	// Create an instance of the app structure
 	app := app.NewApp()
-	keys.CmdOrCtrl("escape")
+
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "DeltΔ",
@@ -57,7 +66,6 @@ func main() {
 		},
 		Logger: nil,
 	})
-
 	if err != nil {
 		println("Error:", err.Error())
 	}

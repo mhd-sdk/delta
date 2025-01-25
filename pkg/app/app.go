@@ -6,12 +6,11 @@ import (
 	"delta/pkg/persistence"
 	"errors"
 	"log/slog"
-	"os"
+	"os/exec"
 	"time"
 
 	"github.com/alpacahq/alpaca-trade-api-go/v3/alpaca"
 	"github.com/alpacahq/alpaca-trade-api-go/v3/marketdata"
-	"github.com/lmittmann/tint"
 	"github.com/wailsapp/wails/v2/pkg/options"
 )
 
@@ -21,6 +20,7 @@ type App struct {
 	Persistence      *persistence.Persistence
 	TradingClient    *alpaca.Client
 	MarketDataClient *marketdata.Client
+	ollamaProcess    *exec.Cmd
 }
 
 func NewApp() *App {
@@ -47,15 +47,6 @@ func NewApp() *App {
 		APISecret: appData.Keys.SecretKey,
 		BaseURL:   "https://data.alpaca.markets",
 	})
-
-	slog.SetDefault(slog.New(
-		tint.NewHandler(os.Stderr, &tint.Options{
-			Level:      slog.LevelDebug,
-			TimeFormat: time.Kitchen,
-		}),
-	))
-
-	slog.Info("Starting DeltΔ...")
 
 	return &App{
 		Persistence:      p,

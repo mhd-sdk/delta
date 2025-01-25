@@ -9,30 +9,56 @@ import { EditableRow } from './EditableRow';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onSelect: (workspace: string) => void;
+  selectedWorkspace: string;
 }
 
-export const WorkspacesModal = ({ isOpen, onClose }: Props): JSX.Element => {
+export const WorkspacesModal = ({ isOpen, onClose, onSelect, selectedWorkspace }: Props): JSX.Element => {
   const { appData, onSave } = useAppData();
-  const [workspaces, setWorkspaces] = useState<string[]>(appData.workspaces.map((w) => w.name));
   const [searchTerm, setSearchTerm] = useState('');
   const [editing, setEditing] = useState<string>();
+  const [creating, setCreating] = useState<boolean>(false);
   const [selected, setSelected] = useState<string>();
   const editRef = createRef<HTMLInputElement>();
 
   const handleEditWorkspace = (idx: number, newWorkspace: string) => {
-    const newWorkspaces = [...workspaces];
-    newWorkspaces[idx] = newWorkspace;
-    setWorkspaces(newWorkspaces);
+    onSave({
+      ...appData,
+      workspaces: appData.workspaces.map((w, i) => (i === idx ? { ...w, name: newWorkspace } : w)),
+    } as models.AppData);
+  };
+
+  const handleDeleteWorkspace = (name: string) => {
+    onSave({
+      ...appData,
+      workspaces: appData.workspaces.filter((w) => w.name !== name),
+    } as models.AppData);
+  };
+
+  const handleCreateWorkspace = (name: string) => {
+    onSave({
+      ...appData,
+      workspaces: [
+        ...appData.workspaces,
+        {
+          name,
+          tiles: [],
+          layout: [],
+        },
+      ],
+    } as models.AppData);
+    setCreating(false);
   };
 
   const theme = appData.preferences.generalPreferences.theme;
 
-  const results = workspaces.filter((item) => item.toLowerCase().includes(searchTerm.toLowerCase()));
+  const results = appData.workspaces.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const handleSubmit = () => {
-    onSave({
-      ...appData,
-    } as models.AppData);
+  const handleSelect = () => {
+    if (selected) {
+      onSelect(selected);
+      onClose();
+    }
   };
 
   const handleCancel = async () => {
@@ -61,7 +87,7 @@ export const WorkspacesModal = ({ isOpen, onClose }: Props): JSX.Element => {
       className={styles.modal}
       open={isOpen}
       onRequestClose={handleCancel}
-      onRequestSubmit={handleSubmit}
+      onRequestSubmit={handleSelect}
       modalHeading="Workspaces"
       primaryButtonText="Open"
       primaryButtonDisabled={selected === undefined}
@@ -71,39 +97,54 @@ export const WorkspacesModal = ({ isOpen, onClose }: Props): JSX.Element => {
         action={
           <div className={styles.topbar}>
             <Search id="search-default-1" labelText="" size="lg" onChange={(e) => setSearchTerm(e.target.value)} />
-            <Button size="lg">New workspace</Button>
+            <Button size="lg" onClick={() => setCreating(true)}>
+              New workspace
+            </Button>
           </div>
         }
         label=""
       >
-        {results.map((listItem, key) =>
-          editing !== listItem ? (
+        {results.map((wp, key) =>
+          editing !== wp.name ? (
             <ContainedListItem
-              className={styles.item(isSelected(listItem), theme === 'dark')}
+              disabled={selectedWorkspace === wp.name}
+              className={styles.item(isSelected(wp.name), theme === 'dark')}
               key={key}
               onClick={() => {
-                setSelected(listItem);
+                setSelected(wp.name);
               }}
               action={
                 <div className={styles.actions}>
                   <Button
-                    onClick={() => handleOpenEditing(listItem)}
+                    onClick={() => handleOpenEditing(wp.name)}
                     kind="ghost"
                     iconDescription="Edit"
                     hasIconOnly
                     renderIcon={Edit}
                     aria-label="Edit"
+                    disabled={selectedWorkspace === wp.name}
                   />
-                  <Button kind="danger--ghost" iconDescription="Delete" hasIconOnly renderIcon={TrashCan} aria-label="Delete" />
+                  <Button
+                    kind="danger--ghost"
+                    iconDescription="Delete"
+                    hasIconOnly
+                    renderIcon={TrashCan}
+                    aria-label="Delete"
+                    disabled={selectedWorkspace === wp.name}
+                    onClick={() => handleDeleteWorkspace(wp.name)}
+                  />
                 </div>
               }
             >
-              <div>{listItem}</div>
+              <div>
+                {wp.name} {selectedWorkspace === wp.name && '(Currently selected)'}
+              </div>
             </ContainedListItem>
           ) : (
             <EditableRow
+              uniqueMode="edit"
               key={key}
-              previousName={listItem}
+              previousName={wp.name}
               onSave={(value) => {
                 handleEditWorkspace(key, value);
                 setEditing(undefined);
@@ -112,6 +153,7 @@ export const WorkspacesModal = ({ isOpen, onClose }: Props): JSX.Element => {
             />
           )
         )}
+        {creating && <EditableRow uniqueMode="new" previousName="New Workspace" onSave={handleCreateWorkspace} onCancel={() => setCreating(false)} />}
       </ContainedList>
     </Modal>
   );
@@ -131,6 +173,7 @@ const styles = {
     ${isSelected && `background-color: ${isDarkMode ? '#606060' : '#e4e4e4'};`}
   `,
   actions: css`
+    z-index: 1;
     margin-left: auto;
     display: flex;
   `,
