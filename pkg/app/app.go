@@ -6,7 +6,6 @@ import (
 	"delta/pkg/persistence"
 	"errors"
 	"log/slog"
-	"os/exec"
 	"time"
 
 	"github.com/alpacahq/alpaca-trade-api-go/v3/alpaca"
@@ -20,7 +19,6 @@ type App struct {
 	Persistence      *persistence.Persistence
 	TradingClient    *alpaca.Client
 	MarketDataClient *marketdata.Client
-	ollamaProcess    *exec.Cmd
 }
 
 func NewApp() *App {

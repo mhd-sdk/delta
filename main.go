@@ -12,6 +12,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 )
@@ -24,6 +25,7 @@ func main() {
 		tint.NewHandler(os.Stderr, &tint.Options{
 			Level:      slog.LevelDebug,
 			TimeFormat: time.Kitchen,
+			AddSource:  true,
 		}),
 	))
 	// Create an instance of the app structure
@@ -53,8 +55,9 @@ func main() {
 		},
 
 		WindowStartState: options.Minimised,
-		// WindowStartState: options.Minimised,
-
+		Linux: &linux.Options{
+			ProgramName: "delta",
+		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.Startup,
 		SingleInstanceLock: &options.SingleInstanceLock{
