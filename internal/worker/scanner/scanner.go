@@ -124,17 +124,19 @@ func (s *Scanner) Start() {
 				}
 			}
 			wg.Add(1)
-			go computeStats(&wg, &mu, s.scanResults, &asset, bars, snapshots[symbol])
+			go s.computeStats(&wg, &mu, s.scanResults, &asset, bars, snapshots[symbol])
 		}
 
 		wg.Wait()
 		s.Notify()
+
 		time.Sleep(5 * time.Second)
 	}
 }
 
-func computeStats(wg *sync.WaitGroup, mu *sync.Mutex, scanResults *ScanResults, asset *alpaca.Asset, bars []marketdata.Bar, snapshot *marketdata.Snapshot) {
-	if snapshot.DailyBar.Timestamp.Day() != time.Now().Day() {
+func (s *Scanner) computeStats(wg *sync.WaitGroup, mu *sync.Mutex, scanResults *ScanResults, asset *alpaca.Asset, bars []marketdata.Bar, snapshot *marketdata.Snapshot) {
+	// || snapshot.DailyBar.Timestamp.Day() != time.Now().Day()
+	if snapshot == nil {
 		wg.Done()
 		return
 	}

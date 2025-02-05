@@ -7,12 +7,14 @@ import (
 	"github.com/alpacahq/alpaca-trade-api-go/v3/alpaca"
 	"github.com/alpacahq/alpaca-trade-api-go/v3/marketdata"
 	"github.com/delta/internal/client"
+	"github.com/delta/internal/filelogger"
 	"github.com/delta/internal/worker/scanner"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 type Server struct {
+	fileLogger       *filelogger.FileLogger
 	routingClient    *alpaca.Client
 	marketDataClient *marketdata.Client
 	fiberServer      *fiber.App
@@ -25,6 +27,12 @@ func New() *Server {
 	secretKey := os.Getenv("SECRET_KEY")
 	marketDataUrl := os.Getenv("MARKET_DATA_URL")
 	routingUrl := os.Getenv("ROUTING_URL")
+
+	fileLoger, err := filelogger.NewLogger("delta.log")
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
 
 	routingClient := alpaca.NewClient(alpaca.ClientOpts{
 		APIKey:    apiKey,
@@ -51,8 +59,11 @@ func New() *Server {
 		routingClient:    routingClient,
 		fiberServer:      fiberServer,
 		scanner:          scanner,
+		fileLogger:       fileLoger,
 	}
 	initHandlers(s)
+
+	s.scanner.Subscribe(fileLoger)
 
 	return s
 }
