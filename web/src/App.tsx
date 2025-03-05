@@ -57,6 +57,7 @@ function App() {
       ...appData,
       workspaces,
     } as models.AppData;
+
     onSave(newAppData);
     setIsWorkspaceDirty(false);
   };
@@ -89,7 +90,7 @@ function App() {
         } as models.Workspace);
     }
   };
-
+  const mydiv = <div></div>;
   const handleChangeLayout = (layout: models.Tile[]) => {
     setCurrentWorkspace({
       name: currentWorkspace.name,

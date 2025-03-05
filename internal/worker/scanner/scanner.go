@@ -135,8 +135,8 @@ func (s *Scanner) Start() {
 }
 
 func (s *Scanner) computeStats(wg *sync.WaitGroup, mu *sync.Mutex, scanResults *ScanResults, asset *alpaca.Asset, bars []marketdata.Bar, snapshot *marketdata.Snapshot) {
-	// || snapshot.DailyBar.Timestamp.Day() != time.Now().Day()
-	if snapshot == nil {
+
+	if snapshot == nil || snapshot.DailyBar.Timestamp.Day() != time.Now().Day() {
 		wg.Done()
 		return
 	}
