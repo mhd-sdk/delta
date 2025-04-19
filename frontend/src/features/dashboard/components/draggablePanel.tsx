@@ -1,6 +1,6 @@
 import { ChartConfig, Panel, PanelType } from '../panel';
 import { AccountInfo } from './AccountInfo';
-import { Chart } from './chart';
+import { Chart } from './chart/chart';
 
 interface Props {
   panel: Panel;

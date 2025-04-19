@@ -1,14 +1,17 @@
-import { StrictMode } from 'react';
-import ReactDOM from 'react-dom/client';
-import { AxiosError } from 'axios';
-import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider, createRouter } from '@tanstack/react-router';
-import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
 import { handleServerError } from '@/utils/handle-server-error';
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RouterProvider, createRouter } from '@tanstack/react-router';
+import { AxiosError } from 'axios';
+import { StrictMode } from 'react';
+import ReactDOM from 'react-dom/client';
+import { toast } from 'sonner';
 import { FontProvider } from './context/font-context';
 import { ThemeProvider } from './context/theme-context';
 import './index.css';
+import '/node_modules/react-grid-layout/css/styles.css';
+import '/node_modules/react-resizable/css/styles.css';
+
 // Generated Routes
 import { routeTree } from './routeTree.gen';
 

@@ -1,5 +1,5 @@
 import { JSX } from 'react';
-import ReactGridLayout from 'react-grid-layout';
+import RGL, { WidthProvider } from 'react-grid-layout';
 import { Panel } from '../panel';
 import { DraggablePanel } from './draggablePanel';
 
@@ -7,15 +7,24 @@ interface Props {
   panels: Panel[];
   onChange: (panels: Panel[]) => void;
 }
+const ReactGridLayout = WidthProvider(RGL);
 
 export const Grid = ({ panels, onChange }: Props): JSX.Element => {
   const handleLayoutChange = (layout: ReactGridLayout.Layout[]) => {
-    const newPanels = panels.map((panel) => {
-      const newLayout = layout.find((l: ReactGridLayout.Layout) => l.i === panel.id);
-      if (newLayout) {
-        return { ...panel, x: newLayout.x, y: newLayout.y, w: newLayout.w, h: newLayout.h };
+    console.log('layout', layout);
+    const newPanels: Panel[] = [];
+    layout.forEach((item) => {
+      const panel = panels.find((p) => p.id === item.i);
+      if (panel) {
+        newPanels.push({
+          ...panel,
+          x: item.x,
+          y: item.y,
+          width: item.w,
+          height: item.h,
+        });
       }
-      return panel;
+      return null;
     });
     onChange(newPanels);
   };
@@ -30,7 +39,7 @@ export const Grid = ({ panels, onChange }: Props): JSX.Element => {
     onChange(updatedPanels);
   };
 
-  const layout = panels.map((panel) => ({ i: panel.id, x: panel.x, y: panel.y, w: panel.width, h: panel.height }));
+  const layout = panels.map((panel) => ({ i: panel.id, x: panel.x, y: panel.y, w: panel.width, h: panel.height, minW: 5, minH: 3 }));
 
   return (
     <ReactGridLayout
@@ -38,15 +47,16 @@ export const Grid = ({ panels, onChange }: Props): JSX.Element => {
       onLayoutChange={handleLayoutChange}
       useCSSTransforms={true}
       compactType="vertical"
-      cols={50}
+      cols={10}
       autoSize={true}
-      rowHeight={10}
-      // draggableHandle=".drag-handle"
+      rowHeight={50}
+      draggableHandle=".drag-handle"
       draggableCancel=".drag-cancel"
     >
       {panels.map((panel) => (
-        <div key={panel.id}>
-          <DraggablePanel panel={panel} onDelete={handleDelete} onConfigChange={handleConfigChange} />
+        // <Chart onDelete={() => handleDelete(panel.id)} config={panel.data.config as ChartConfig} onConfigChange={handleConfigChange} />
+        <div key={panel.id} data-grid={{ i: panel.id, x: panel.x, y: panel.y, w: panel.width, h: panel.height }}>
+          <DraggablePanel onDelete={() => handleDelete(panel.id)} onConfigChange={handleConfigChange} panel={panel} />
         </div>
       ))}
     </ReactGridLayout>

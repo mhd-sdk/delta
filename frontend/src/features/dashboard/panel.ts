@@ -41,6 +41,7 @@ export type PanelData =
     }
   | {
       type: PanelType.AccountInfo;
+      config: null;
     };
 
 export type Configs = ChartConfig | TimeAndSalesConfig;

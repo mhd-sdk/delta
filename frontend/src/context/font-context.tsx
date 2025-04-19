@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
 import { fonts } from '@/config/fonts';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Font = (typeof fonts)[number];
 
@@ -33,7 +33,7 @@ export const FontProvider: React.FC<{ children: React.ReactNode }> = ({ children
     _setFont(font);
   };
 
-  return <FontContext value={{ font, setFont }}>{children}</FontContext>;
+  return <FontContext.Provider value={{ font, setFont }}>{children}</FontContext.Provider>;
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
