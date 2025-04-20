@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTheme } from '@/context/theme-context';
 import { CandlestickData, ColorType, createChart, CrosshairMode, IChartApi, ISeriesApi, UTCTimestamp, WhitespaceData } from 'lightweight-charts';
@@ -40,15 +40,10 @@ const Toolbar = ({ config, onConfigChange }: ToolbarProps) => {
     });
   };
 
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
   return (
     <div
       className="drag-handle flex flex-row items-center justify-between w-full space-x-2"
       style={{
-        backgroundColor: isDark ? '#333' : '#f0f0f0',
-        borderBottom: `1px solid ${isDark ? '#444' : '#ddd'}`,
         borderRadius: '0.375rem 0.375rem 0 0',
         padding: '0.5rem',
       }}
@@ -90,7 +85,6 @@ export const Chart = ({ config, onDelete, onConfigChange }: Props) => {
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-
   const el = useRef<HTMLDivElement | null>(null);
 
   const { theme } = useTheme();
@@ -218,31 +212,25 @@ export const Chart = ({ config, onDelete, onConfigChange }: Props) => {
     }
   }, [colors]);
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-  };
-
   return (
-    <Card className="h-full w-full py-0" ref={cardRef} onContextMenu={handleContextMenu}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className="h-full w-full" onContextMenu={(e) => e.preventDefault()}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0">
-              <Toolbar config={config} onConfigChange={onConfigChange} />
-            </CardHeader>
-            <CardContent className="h-[calc(100%-3rem)] pt-2">
-              <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} ref={el}>
-                {isLoading && <div>Loading...</div>}
-                {error && <div>Error loading chart data</div>}
-                <div ref={chartContainerRef} style={{ height: 'calc(100% - 2rem)' }} />
-              </div>
-            </CardContent>
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={onDelete}>Delete Panel</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </Card>
+    <ContextMenu>
+      <ContextMenuTrigger>
+        <Card className="h-full w-full py-0" ref={cardRef}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0">
+            <Toolbar config={config} onConfigChange={onConfigChange} />
+          </CardHeader>
+          <CardContent className="h-[calc(100%-3rem)] pt-2">
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} ref={el}>
+              {isLoading && <div>Loading...</div>}
+              {error && <div>Error loading chart data</div>}
+              <div ref={chartContainerRef} style={{ height: 'calc(100% - 2rem)' }} />
+            </div>
+          </CardContent>
+        </Card>
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-64">
+        <ContextMenuItem onClick={onDelete}>Delete Panel</ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 };

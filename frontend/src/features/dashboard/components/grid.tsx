@@ -47,11 +47,12 @@ export const Grid = ({ panels, onChange }: Props): JSX.Element => {
       onLayoutChange={handleLayoutChange}
       useCSSTransforms={true}
       compactType="vertical"
-      cols={10}
+      cols={20}
       autoSize={true}
       rowHeight={50}
       draggableHandle=".drag-handle"
       draggableCancel=".drag-cancel"
+      className="w-full"
     >
       {panels.map((panel) => (
         // <Chart onDelete={() => handleDelete(panel.id)} config={panel.data.config as ChartConfig} onConfigChange={handleConfigChange} />

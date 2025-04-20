@@ -86,7 +86,6 @@ export default function Dashboard() {
           style={{
             transition: 'margin-left 0.3s',
             width: '100%',
-
             position: 'absolute',
           }}
         >

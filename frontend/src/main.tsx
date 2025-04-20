@@ -1,9 +1,9 @@
-import { useAuthStore } from '@/stores/authStore';
+import { useWebAuthnStore } from '@/stores/webAuthnStore';
 import { handleServerError } from '@/utils/handle-server-error';
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { AxiosError } from 'axios';
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { toast } from 'sonner';
 import { FontProvider } from './context/font-context';
@@ -12,7 +12,7 @@ import './index.css';
 import '/node_modules/react-grid-layout/css/styles.css';
 import '/node_modules/react-resizable/css/styles.css';
 
-// Generated Routes
+// Import generated routes
 import { routeTree } from './routeTree.gen';
 
 const queryClient = new QueryClient({
@@ -47,9 +47,8 @@ const queryClient = new QueryClient({
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
           toast.error('Session expired!');
-          useAuthStore.getState().auth.reset();
-          const redirect = `${router.history.location.href}`;
-          router.navigate({ to: '/sign-in', search: { redirect } });
+          useWebAuthnStore.getState().logout();
+          router.navigate({ to: '/login' });
         }
         if (error.response?.status === 500) {
           toast.error('Internal Server Error!');
@@ -78,6 +77,38 @@ declare module '@tanstack/react-router' {
   }
 }
 
+// Auth token checker component
+const AuthChecker = () => {
+  const { checkAuth } = useWebAuthnStore();
+
+  useEffect(() => {
+    // Initial auth check
+    const initialCheck = async () => {
+      await checkAuth();
+    };
+    initialCheck();
+
+    // Check auth every 2 hours
+    const interval = setInterval(
+      async () => {
+        const isStillValid = await checkAuth();
+        if (!isStillValid) {
+          const pathname = window.location.pathname;
+          if (pathname !== '/login' && pathname !== '/register') {
+            router.navigate({ to: '/login' });
+            toast.error('Session expired. Please login again.');
+          }
+        }
+      },
+      2 * 60 * 60 * 1000
+    ); // 2 hours
+
+    return () => clearInterval(interval);
+  }, [checkAuth]);
+
+  return null;
+};
+
 // Render the app
 const rootElement = document.getElementById('root')!;
 if (!rootElement.innerHTML) {
@@ -87,6 +118,7 @@ if (!rootElement.innerHTML) {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <FontProvider>
+            <AuthChecker />
             <RouterProvider router={router} />
           </FontProvider>
         </ThemeProvider>
