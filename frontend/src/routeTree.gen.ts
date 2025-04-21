@@ -30,6 +30,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedUsersIndexImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTasksIndexImport } from './routes/_authenticated/tasks/index'
 import { Route as AuthenticatedSettingsIndexImport } from './routes/_authenticated/settings/index'
+import { Route as AuthenticatedDashboardIndexImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedAlgorithmsIndexImport } from './routes/_authenticated/algorithms/index'
 import { Route as AuthenticatedAlertsIndexImport } from './routes/_authenticated/alerts/index'
 import { Route as AuthenticatedSettingsNotificationsImport } from './routes/_authenticated/settings/notifications'
@@ -154,6 +155,13 @@ const AuthenticatedSettingsIndexRoute = AuthenticatedSettingsIndexImport.update(
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any,
 )
+
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 const AuthenticatedAlgorithmsIndexRoute =
   AuthenticatedAlgorithmsIndexImport.update({
@@ -354,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAlgorithmsIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/settings/': {
       id: '/_authenticated/settings/'
       path: '/'
@@ -431,6 +446,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedAlertsIndexRoute: typeof AuthenticatedAlertsIndexRoute
   AuthenticatedAlgorithmsIndexRoute: typeof AuthenticatedAlgorithmsIndexRoute
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
 }
@@ -439,6 +455,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedAlertsIndexRoute: AuthenticatedAlertsIndexRoute,
   AuthenticatedAlgorithmsIndexRoute: AuthenticatedAlgorithmsIndexRoute,
+  AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
 }
@@ -468,6 +485,7 @@ export interface FileRoutesByFullPath {
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/alerts': typeof AuthenticatedAlertsIndexRoute
   '/algorithms': typeof AuthenticatedAlgorithmsIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
@@ -494,6 +512,7 @@ export interface FileRoutesByTo {
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/alerts': typeof AuthenticatedAlertsIndexRoute
   '/algorithms': typeof AuthenticatedAlgorithmsIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
@@ -523,6 +542,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/alerts/': typeof AuthenticatedAlertsIndexRoute
   '/_authenticated/algorithms/': typeof AuthenticatedAlgorithmsIndexRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
@@ -552,6 +572,7 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/alerts'
     | '/algorithms'
+    | '/dashboard'
     | '/settings/'
     | '/tasks'
     | '/users'
@@ -577,6 +598,7 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/alerts'
     | '/algorithms'
+    | '/dashboard'
     | '/settings'
     | '/tasks'
     | '/users'
@@ -604,6 +626,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/notifications'
     | '/_authenticated/alerts/'
     | '/_authenticated/algorithms/'
+    | '/_authenticated/dashboard/'
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
@@ -673,6 +696,7 @@ export const routeTree = rootRoute
         "/_authenticated/settings",
         "/_authenticated/alerts/",
         "/_authenticated/algorithms/",
+        "/_authenticated/dashboard/",
         "/_authenticated/tasks/",
         "/_authenticated/users/"
       ]
@@ -753,6 +777,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/algorithms/": {
       "filePath": "_authenticated/algorithms/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/": {
+      "filePath": "_authenticated/dashboard/index.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/": {

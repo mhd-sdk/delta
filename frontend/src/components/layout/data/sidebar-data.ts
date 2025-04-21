@@ -4,7 +4,6 @@ import {
   IconBug,
   IconChecklist,
   IconError404,
-  IconHelp,
   IconLayoutDashboard,
   IconLock,
   IconLockAccess,
@@ -16,7 +15,7 @@ import {
   IconTool,
   IconUserCog,
   IconUserOff,
-  IconUsers,
+  IconUsers
 } from '@tabler/icons-react';
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react';
 import { type SidebarData } from '../types';
@@ -50,7 +49,7 @@ export const sidebarData: SidebarData = {
       items: [
         {
           title: 'Dashboard',
-          url: '/',
+          url: '/dashboard',
           icon: IconLayoutDashboard,
         },
         {

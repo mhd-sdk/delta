@@ -19,7 +19,6 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error) => {
-        // eslint-disable-next-line no-console
         if (import.meta.env.DEV) console.log({ failureCount, error });
 
         if (failureCount >= 0 && import.meta.env.DEV) return false;
@@ -55,6 +54,7 @@ const queryClient = new QueryClient({
           router.navigate({ to: '/500' });
         }
         if (error.response?.status === 403) {
+          console.error('Forbidden');
           // router.navigate("/forbidden", { replace: true });
         }
       }

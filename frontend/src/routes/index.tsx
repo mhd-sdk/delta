@@ -8,10 +8,10 @@ export const Route = createFileRoute('/')({
     if (authData) {
       const parsedAuth = JSON.parse(authData);
       if (parsedAuth?.isAuthenticated) {
-        return redirect({ to: '/_authenticated/' });
+        return redirect({ to: '/dashboard' });
       }
     }
-    return redirect({ to: '/login' });
+    return redirect({ to: '/sign-in' });
   },
   component: () => null,
 });
