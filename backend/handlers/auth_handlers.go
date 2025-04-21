@@ -21,10 +21,12 @@ var (
 func InitWebAuthn() error {
 	displayName := os.Getenv("WEBAUTHN_DISPLAY_NAME")
 	domain := os.Getenv("WEBAUTHN_DOMAIN")
+	origin := os.Getenv("WEBAUTHN_ORIGIN")
 
 	wconfig := &webauthn.Config{
 		RPDisplayName: displayName,
 		RPID:          domain,
+		RPOrigin:      origin,
 	}
 
 	var err error
@@ -104,9 +106,26 @@ func FinishRegistration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//  continuer ici...
+	// load the session data
+	sessionData, err := SessionStore.GetWebauthnSession("registration", r)
+	if err != nil {
+		log.Println(err)
+		jsonResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	jsonResponse(w, map[string]string{"status": "Registration successful"}, http.StatusOK)
+	credential, err := WebAuthn.FinishRegistration(user, sessionData, r)
+	if err != nil {
+		log.Println(err)
+		jsonResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user.AddCredential(*credential)
+
+	jsonResponse(w, "Registration Success", http.StatusOK)
+	return
+
 }
 
 func BeginLogin(w http.ResponseWriter, r *http.Request) {
