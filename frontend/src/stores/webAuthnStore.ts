@@ -1,12 +1,13 @@
 import { AuthResponse, AuthState, User } from '@/features/auth/types';
 import axios from 'axios';
+import { Buffer } from 'buffer';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 interface WebAuthnStore extends AuthState {
-  register: (username: string, email: string) => Promise<void>;
+  register: (username: string) => Promise<void>;
   login: (username: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<boolean>;
@@ -23,17 +24,24 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
       isLoading: false,
       error: null,
 
-      register: async (username: string, email: string) => {
+      register: async (username: string) => {
         try {
           set({ isLoading: true, error: null });
 
           // Step 1: Begin registration
-          const beginResponse = await axios.post(`${API_URL}/auth/register/begin`, {
-            username,
-            email,
-          });
+          const beginResponse = await axios.post(
+            `${API_URL}/auth/register/begin`,
+            { username },
+            {
+              withCredentials: true,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
 
-          const options = beginResponse.data;
+          const options = beginResponse.data.publicKey;
+          console.log({ beginResponse });
 
           // Step 2: Create credentials
           const credential = (await navigator.credentials.create({
@@ -54,21 +62,29 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
           // Step 3: Finish registration
           const attestationResponse = credential.response as AuthenticatorAttestationResponse;
 
-          const finishResponse = await axios.post(`${API_URL}/auth/register/finish`, {
-            id: credential.id,
-            rawId: bufferToBase64URL(Buffer.from(credential.rawId)),
-            type: credential.type,
-            response: {
-              clientDataJSON: bufferToBase64URL(Buffer.from(attestationResponse.clientDataJSON)),
-              attestationObject: bufferToBase64URL(Buffer.from(attestationResponse.attestationObject)),
+          const finishResponse = await axios.post(
+            `${API_URL}/auth/register/finish?username=${username}`,
+            {
+              id: credential.id,
+              rawId: bufferToBase64URL(Buffer.from(credential.rawId)),
+              type: credential.type,
+              response: {
+                clientDataJSON: bufferToBase64URL(Buffer.from(attestationResponse.clientDataJSON)),
+                attestationObject: bufferToBase64URL(Buffer.from(attestationResponse.attestationObject)),
+              },
             },
-          });
+            {
+              withCredentials: true,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
 
           const authData: AuthResponse = finishResponse.data;
 
           const user: User = {
             username: authData.username,
-            email: authData.email,
           };
 
           set({
@@ -92,9 +108,16 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
           set({ isLoading: true, error: null });
 
           // Step 1: Begin login
-          const beginResponse = await axios.post(`${API_URL}/auth/login/begin`, {
-            username,
-          });
+          const beginResponse = await axios.post(
+            `${API_URL}/auth/login/begin`,
+            { username },
+            {
+              withCredentials: true,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
 
           const options = beginResponse.data;
 
@@ -113,23 +136,31 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
           // Step 3: Finish login
           const assertionResponse = credential.response as AuthenticatorAssertionResponse;
 
-          const finishResponse = await axios.post(`${API_URL}/auth/login/finish`, {
-            id: credential.id,
-            rawId: bufferToBase64URL(Buffer.from(credential.rawId)),
-            type: credential.type,
-            response: {
-              clientDataJSON: bufferToBase64URL(Buffer.from(assertionResponse.clientDataJSON)),
-              authenticatorData: bufferToBase64URL(Buffer.from(assertionResponse.authenticatorData)),
-              signature: bufferToBase64URL(Buffer.from(assertionResponse.signature)),
-              userHandle: assertionResponse.userHandle ? bufferToBase64URL(Buffer.from(assertionResponse.userHandle)) : null,
+          const finishResponse = await axios.post(
+            `${API_URL}/auth/login/finish`,
+            {
+              id: credential.id,
+              rawId: bufferToBase64URL(Buffer.from(credential.rawId)),
+              type: credential.type,
+              response: {
+                clientDataJSON: bufferToBase64URL(Buffer.from(assertionResponse.clientDataJSON)),
+                authenticatorData: bufferToBase64URL(Buffer.from(assertionResponse.authenticatorData)),
+                signature: bufferToBase64URL(Buffer.from(assertionResponse.signature)),
+                userHandle: assertionResponse.userHandle ? bufferToBase64URL(Buffer.from(assertionResponse.userHandle)) : null,
+              },
             },
-          });
+            {
+              withCredentials: true,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
 
           const authData: AuthResponse = finishResponse.data;
 
           const user: User = {
             username: authData.username,
-            email: authData.email,
           };
 
           set({
@@ -169,8 +200,10 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
         try {
           // Verify token with backend
           const response = await axios.get(`${API_URL}/auth/verify`, {
+            withCredentials: true,
             headers: {
               Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
             },
           });
 
@@ -178,7 +211,6 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
 
           const user: User = {
             username: authData.username,
-            email: authData.email,
           };
 
           set({

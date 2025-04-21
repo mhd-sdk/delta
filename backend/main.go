@@ -2,96 +2,89 @@ package main
 
 import (
 	"context"
-	"delta/backend/db"
-	"delta/backend/handlers"
-	"delta/backend/services"
+	"delta/handlers"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Load environment variables
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: .env file not found")
 	}
 
-	// Initialize database
-	if err := db.InitDB(); err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
-	}
-	defer db.CloseDB()
-
-	// Initialize WebAuthn
-	if err := services.InitWebAuthn(); err != nil {
+	if err := handlers.InitWebAuthn(); err != nil {
 		log.Fatalf("Failed to initialize WebAuthn: %v", err)
 	}
 
-	// Create Fiber app
-	app := fiber.New(fiber.Config{
-		ReadTimeout:  60 * time.Second,
-		WriteTimeout: 60 * time.Second,
-		IdleTimeout:  60 * time.Second,
-	})
+	handlers.InitSessionStore()
 
-	// Middleware
-	app.Use(logger.New())
-	app.Use(recover.New())
+	// Create a new router
+	r := mux.NewRouter()
 
-	// CORS configuration
-	corsAllowedOrigins := strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",")
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     strings.Join(corsAllowedOrigins, ","),
-		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
-		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
-		AllowCredentials: true,
-		MaxAge:           300,
-	}))
+	// Apply global middlewares
+	r.Use(handlers.LoggingMiddleware)
+	r.Use(handlers.RecoveryMiddleware)
+	r.Use(handlers.CorsMiddleware)
 
 	// API Routes
-	api := app.Group("/api")
+	api := r.PathPrefix("/api").Subrouter()
 
 	// Auth routes
-	auth := api.Group("/auth")
-	auth.Post("/register/begin", handlers.BeginRegistration)
-	auth.Post("/register/finish", handlers.FinishRegistration)
-	auth.Post("/login/begin", handlers.BeginLogin)
-	auth.Post("/login/finish", handlers.FinishLogin)
-	auth.Get("/verify", handlers.VerifyToken)
-
-	// Protected routes
-	protected := api.Group("/")
-	protected.Use(authMiddleware)
-	// Add protected routes here
+	auth := api.PathPrefix("/auth").Subrouter()
+	auth.HandleFunc("/register/begin", handlers.BeginRegistration).Methods("POST")
+	auth.HandleFunc("/register/finish", handlers.FinishRegistration).Methods("POST")
+	auth.HandleFunc("/login/begin", handlers.BeginLogin).Methods("POST")
+	auth.HandleFunc("/login/finish", handlers.FinishLogin).Methods("POST")
+	auth.HandleFunc("/logout", handlers.Logout).Methods("POST")
+	
+	// Don't forget to add OPTIONS for preflight requests
+	auth.HandleFunc("/register/begin", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}).Methods("OPTIONS")
+	auth.HandleFunc("/register/finish", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}).Methods("OPTIONS")
+	auth.HandleFunc("/login/begin", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}).Methods("OPTIONS")
+	auth.HandleFunc("/login/finish", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}).Methods("OPTIONS")
+	auth.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}).Methods("OPTIONS")
 
 	// Health check route
-	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusOK).SendString("OK")
-	})
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	}).Methods("GET")
 
-	// Start server
+	// Create server
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	// Graceful shutdown setup
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: r,
+	}
+
+	// Start the server in a goroutine
 	go func() {
-		if err := app.Listen(":" + port); err != nil {
+		log.Printf("Server started on port %s", port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Server error: %v", err)
 		}
 	}()
-
-	log.Printf("Server started on port %s", port)
 
 	// Wait for interrupt signal to gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
@@ -103,42 +96,9 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := app.ShutdownWithContext(ctx); err != nil {
+	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
 
 	log.Println("Server exited gracefully")
-}
-
-func authMiddleware(c *fiber.Ctx) error {
-	// Get the Authorization header
-	authHeader := c.Get("Authorization")
-	if authHeader == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Authorization header required",
-		})
-	}
-
-	// Extract the token
-	tokenString := authHeader[7:] // Remove "Bearer " prefix
-
-	// Verify the token
-	user, err := services.GetUserFromToken(c.Context(), tokenString)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Invalid token",
-		})
-	}
-
-	// Check if token is expired
-	if services.IsTokenExpired(tokenString) {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Token expired",
-		})
-	}
-
-	// Set user in locals for downstream handlers
-	c.Locals("user", user)
-
-	return c.Next()
 }

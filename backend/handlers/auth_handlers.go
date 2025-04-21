@@ -1,279 +1,234 @@
 package handlers
 
 import (
-	"delta/backend/models"
-	"delta/backend/services"
-	"errors"
-	"time"
+	"delta/models"
+	"delta/repositories"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"strings"
 
-	"github.com/go-webauthn/webauthn/protocol"
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/duo-labs/webauthn.io/session"
+	"github.com/duo-labs/webauthn/webauthn"
 )
 
-type RegisterRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-}
+var (
+	WebAuthn *webauthn.WebAuthn
+)
 
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
+func InitWebAuthn() error {
+	displayName := os.Getenv("WEBAUTHN_DISPLAY_NAME")
+	domain := os.Getenv("WEBAUTHN_DOMAIN")
 
-type AuthResponse struct {
-	Token     string    `json:"token"`
-	ExpiresAt time.Time `json:"expires_at"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-}
-
-func BeginRegistration(c *fiber.Ctx) error {
-	var req RegisterRequest
-	if err := c.BodyParser(&req); err != nil {
-		return sendErrorResponse(c, "invalid request", fiber.StatusBadRequest)
+	wconfig := &webauthn.Config{
+		RPDisplayName: displayName,
+		RPID:          domain,
 	}
 
-	if req.Username == "" || req.Email == "" {
-		return sendErrorResponse(c, "username and email are required", fiber.StatusBadRequest)
-	}
-
-	// Check if user already exists
-	existingUser, err := models.GetUserByUsername(c.Context(), req.Username)
-	if err == nil && existingUser != nil {
-		// User exists, begin authentication instead
-		return beginAuthentication(c, existingUser)
-	} else if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return sendErrorResponse(c, "database error", fiber.StatusInternalServerError)
-	}
-
-	// Create new user
-	user, err := models.CreateUser(c.Context(), req.Username, req.Email)
+	var err error
+	WebAuthn, err = webauthn.New(wconfig)
 	if err != nil {
-		return sendErrorResponse(c, "failed to create user", fiber.StatusInternalServerError)
+		return fmt.Errorf("failed to create WebAuthn: %w", err)
 	}
 
-	// Generate WebAuthn credential creation options
-	options, sessionData, err := services.WebAuthn.BeginRegistration(user)
-	if err != nil {
-		return sendErrorResponse(c, "failed to begin registration: "+err.Error(), fiber.StatusInternalServerError)
-	}
-
-	// Store registration session data
-	sessionID := uuid.New().String()
-	services.Sessions[sessionID] = services.SessionData{
-		Registration: sessionData,
-	}
-
-	// Set session cookie
-	c.Cookie(&fiber.Cookie{
-		Name:     "session_id",
-		Value:    sessionID,
-		Path:     "/",
-		HTTPOnly: true,
-		Secure:   c.Protocol() == "https",
-		SameSite: "lax",
-		MaxAge:   int(time.Hour.Seconds()),
-	})
-
-	return c.JSON(options)
+	return nil
 }
 
-func FinishRegistration(c *fiber.Ctx) error {
-	// Get session cookie
-	sessionID := c.Cookies("session_id")
-	if sessionID == "" {
-		return sendErrorResponse(c, "session not found", fiber.StatusBadRequest)
-	}
+var SessionStore *session.Store
 
-	sessionData, exists := services.Sessions[sessionID]
-	if !exists || sessionData.Registration == nil {
-		return sendErrorResponse(c, "registration session not found", fiber.StatusBadRequest)
-	}
-
-	// Get user from the session data
-	user, err := models.GetUserByID(c.Context(), uuid.UUID(sessionData.Registration.UserID))
+func InitSessionStore() {
+	var err error
+	SessionStore, err = session.NewStore()
 	if err != nil {
-		return sendErrorResponse(c, "user not found", fiber.StatusInternalServerError)
+		log.Fatal("failed to create session store:", err)
 	}
-
-	// Finish registration using our helper function
-	credential, err := services.FinishWebAuthnRegistration(user, *sessionData.Registration, c.Body())
-	if err != nil {
-		return sendErrorResponse(c, "failed to complete registration: "+err.Error(), fiber.StatusBadRequest)
-	}
-
-	// Store credential in database
-	if err := user.AddCredential(c.Context(), credential); err != nil {
-		return sendErrorResponse(c, "failed to store credential", fiber.StatusInternalServerError)
-	}
-
-	// Delete session
-	delete(services.Sessions, sessionID)
-
-	// Generate JWT
-	token, err := services.GenerateJWT(user)
-	if err != nil {
-		return sendErrorResponse(c, "failed to generate token", fiber.StatusInternalServerError)
-	}
-
-	expiryTime, _ := services.GetTokenExpiryTime(token)
-
-	// Return the token
-	return c.JSON(AuthResponse{
-		Token:     token,
-		ExpiresAt: expiryTime,
-		Username:  user.Username,
-		Email:     user.Email,
-	})
 }
 
-func BeginLogin(c *fiber.Ctx) error {
-	var req RegisterRequest
-	if err := c.BodyParser(&req); err != nil {
-		return sendErrorResponse(c, "invalid request", fiber.StatusBadRequest)
+func BeginRegistration(w http.ResponseWriter, r *http.Request) {
+	// Parse JSON request
+	var requestData struct {
+		Username string `json:"username"`
 	}
 
-	if req.Username == "" {
-		return sendErrorResponse(c, "username is required", fiber.StatusBadRequest)
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&requestData); err != nil {
+		jsonResponse(w, map[string]string{"error": "Invalid request format"}, http.StatusBadRequest)
+		return
 	}
 
-	user, err := models.GetUserByUsername(c.Context(), req.Username)
+	if requestData.Username == "" {
+		jsonResponse(w, map[string]string{"error": "Username is required"}, http.StatusBadRequest)
+		return
+	}
+
+	// Get user
+	user, err := repositories.DB().GetUserByName(requestData.Username)
+	// User doesn't exist, create new user
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return sendErrorResponse(c, "user not found", fiber.StatusNotFound)
-		} else {
-			return sendErrorResponse(c, "database error", fiber.StatusInternalServerError)
-		}
+		displayName := strings.Split(requestData.Username, "@")[0]
+		user = models.NewUser(requestData.Username, displayName)
+		repositories.DB().PutUser(user)
 	}
 
-	return beginAuthentication(c, user)
-}
+	// Generate PublicKeyCredentialCreationOptions, session data
+	options, sessionData, err := WebAuthn.BeginRegistration(
+		user,
+	)
 
-func beginAuthentication(c *fiber.Ctx, user *models.User) error {
-	options, sessionData, err := services.WebAuthn.BeginLogin(user)
 	if err != nil {
-		return sendErrorResponse(c, "failed to begin authentication: "+err.Error(), fiber.StatusInternalServerError)
+		log.Println(err)
+		jsonResponse(w, map[string]string{"error": err.Error()}, http.StatusInternalServerError)
+		return
 	}
 
-	// Store authentication session data
-	sessionID := uuid.New().String()
-	services.Sessions[sessionID] = services.SessionData{
-		Authentication: sessionData,
-	}
-
-	// Set session cookie
-	c.Cookie(&fiber.Cookie{
-		Name:     "session_id",
-		Value:    sessionID,
-		Path:     "/",
-		HTTPOnly: true,
-		Secure:   c.Protocol() == "https",
-		SameSite: "lax",
-		MaxAge:   int(time.Hour.Seconds()),
-	})
-
-	return c.JSON(options)
-}
-
-func FinishLogin(c *fiber.Ctx) error {
-	// Get session cookie
-	sessionID := c.Cookies("session_id")
-	if sessionID == "" {
-		return sendErrorResponse(c, "session not found", fiber.StatusBadRequest)
-	}
-
-	sessionData, exists := services.Sessions[sessionID]
-	if !exists || sessionData.Authentication == nil {
-		return sendErrorResponse(c, "authentication session not found", fiber.StatusBadRequest)
-	}
-
-	// Get user from session data
-	user, err := models.GetUserByID(c.Context(), uuid.UUID(sessionData.Authentication.UserID))
+	// Store session data as marshaled JSON
+	err = SessionStore.SaveWebauthnSession("registration", sessionData, r, w)
 	if err != nil {
-		return sendErrorResponse(c, "user not found", fiber.StatusInternalServerError)
+		log.Println(err)
+		jsonResponse(w, map[string]string{"error": err.Error()}, http.StatusInternalServerError)
+		return
 	}
 
-	// Finish login using our helper function
-	credential, err := services.FinishWebAuthnLogin(user, *sessionData.Authentication, c.Body())
+	jsonResponse(w, options, http.StatusOK)
+}
+
+func FinishRegistration(w http.ResponseWriter, r *http.Request) {
+	username := r.URL.Query().Get("username")
+
+	// Get the user
+	user, err := repositories.DB().GetUserByName(username)
 	if err != nil {
-		return sendErrorResponse(c, "failed to complete authentication: "+err.Error(), fiber.StatusBadRequest)
+		jsonResponse(w, map[string]string{"error": "User not found"}, http.StatusBadRequest)
+		return
 	}
 
-	// Update credential sign count in database
-	if err := user.UpdateCredential(c.Context(), credential); err != nil {
-		return sendErrorResponse(c, "failed to update credential", fiber.StatusInternalServerError)
+	//  continuer ici...
+
+	jsonResponse(w, map[string]string{"status": "Registration successful"}, http.StatusOK)
+}
+
+func BeginLogin(w http.ResponseWriter, r *http.Request) {
+	// Parse JSON request
+	var requestData struct {
+		Username string `json:"username"`
 	}
 
-	// Delete session
-	delete(services.Sessions, sessionID)
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&requestData); err != nil {
+		jsonResponse(w, map[string]string{"error": "Invalid request format"}, http.StatusBadRequest)
+		return
+	}
 
-	// Generate JWT
-	token, err := services.GenerateJWT(user)
+	if requestData.Username == "" {
+		jsonResponse(w, map[string]string{"error": "Username is required"}, http.StatusBadRequest)
+		return
+	}
+
+	// Get the user
+	user, err := repositories.DB().GetUserByName(requestData.Username)
 	if err != nil {
-		return sendErrorResponse(c, "failed to generate token", fiber.StatusInternalServerError)
+		jsonResponse(w, map[string]string{"error": "User not found"}, http.StatusBadRequest)
+		return
 	}
 
-	expiryTime, _ := services.GetTokenExpiryTime(token)
-
-	// Return the token
-	return c.JSON(AuthResponse{
-		Token:     token,
-		ExpiresAt: expiryTime,
-		Username:  user.Username,
-		Email:     user.Email,
-	})
-}
-
-func VerifyToken(c *fiber.Ctx) error {
-	authHeader := c.Get("Authorization")
-	if authHeader == "" {
-		return sendErrorResponse(c, "authorization header required", fiber.StatusUnauthorized)
-	}
-
-	// Extract the token
-	tokenString := authHeader[7:] // Remove "Bearer " prefix
-
-	// Verify the token
-	user, err := services.GetUserFromToken(c.Context(), tokenString)
+	// Begin WebAuthn login
+	options, sessionData, err := WebAuthn.BeginLogin(user)
 	if err != nil {
-		return sendErrorResponse(c, "invalid token", fiber.StatusUnauthorized)
+		jsonResponse(w, map[string]string{"error": err.Error()}, http.StatusInternalServerError)
+		return
 	}
 
-	// Check if token is expired
-	if services.IsTokenExpired(tokenString) {
-		return sendErrorResponse(c, "token expired", fiber.StatusUnauthorized)
+	// Store session data
+	err = SessionStore.SaveWebauthnSession("authentication", sessionData, r, w)
+	if err != nil {
+		jsonResponse(w, map[string]string{"error": err.Error()}, http.StatusInternalServerError)
+		return
 	}
 
-	expiryTime, _ := services.GetTokenExpiryTime(tokenString)
-
-	// Return user information
-	return c.JSON(AuthResponse{
-		Token:     tokenString,
-		ExpiresAt: expiryTime,
-		Username:  user.Username,
-		Email:     user.Email,
-	})
+	jsonResponse(w, options, http.StatusOK)
 }
 
-// Utility function to send error responses
-func sendErrorResponse(c *fiber.Ctx, message string, statusCode int) error {
-	return c.Status(statusCode).JSON(ErrorResponse{
-		Error: message,
-	})
+func FinishLogin(w http.ResponseWriter, r *http.Request) {
+	// Parse JSON request
+	var requestData struct {
+		Username string `json:"username"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&requestData); err != nil {
+		jsonResponse(w, map[string]string{"error": "Invalid request format"}, http.StatusBadRequest)
+		return
+	}
+
+	if requestData.Username == "" {
+		jsonResponse(w, map[string]string{"error": "Username is required"}, http.StatusBadRequest)
+		return
+	}
+
+	// Get the user
+	user, err := repositories.DB().GetUserByName(requestData.Username)
+	if err != nil {
+		jsonResponse(w, map[string]string{"error": "User not found"}, http.StatusBadRequest)
+		return
+	}
+
+	// Get the session data
+	sessionData, err := SessionStore.GetWebauthnSession("authentication", r)
+	if err != nil {
+		jsonResponse(w, map[string]string{"error": "Session not found"}, http.StatusBadRequest)
+		return
+	}
+
+	// Complete the login
+	_, err = WebAuthn.FinishLogin(user, sessionData, r)
+	if err != nil {
+		jsonResponse(w, map[string]string{"error": err.Error()}, http.StatusBadRequest)
+		return
+	}
+
+	// Create session for the user
+	session, err := SessionStore.New(r, "auth-session")
+	if err != nil {
+		jsonResponse(w, map[string]string{"error": "Failed to create session"}, http.StatusInternalServerError)
+		return
+	}
+
+	// Save the username in the session
+	session.Values["username"] = user.Username
+	if err := session.Save(r, w); err != nil {
+		jsonResponse(w, map[string]string{"error": "Failed to save session"}, http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse(w, map[string]string{"status": "Login successful"}, http.StatusOK)
 }
 
-// A fake implementation to bridge between the parsed response and what webauthn expects
-type fakeResponse struct {
-	parsedCredCreation  *protocol.ParsedCredentialCreationData
-	parsedCredAssertion *protocol.ParsedCredentialAssertionData
+func Logout(w http.ResponseWriter, r *http.Request) {
+	// Get the session
+	session, err := SessionStore.Get(r, "auth-session")
+	if err != nil {
+		jsonResponse(w, map[string]string{"error": "Not logged in"}, http.StatusBadRequest)
+		return
+	}
+
+	// Clear the session
+	session.Values = map[interface{}]interface{}{}
+	if err := session.Save(r, w); err != nil {
+		jsonResponse(w, map[string]string{"error": "Failed to logout"}, http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse(w, map[string]string{"status": "Logout successful"}, http.StatusOK)
 }
 
-// Implement the necessary methods to satisfy the interface
-func (f *fakeResponse) ParsedAttestationResponse() *protocol.ParsedCredentialCreationData {
-	return f.parsedCredCreation
-}
-
-func (f *fakeResponse) ParsedAssertionResponse() *protocol.ParsedCredentialAssertionData {
-	return f.parsedCredAssertion
+func jsonResponse(w http.ResponseWriter, d interface{}, c int) {
+	dj, err := json.Marshal(d)
+	if err != nil {
+		http.Error(w, "Error creating JSON response", http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(c)
+	fmt.Fprintf(w, "%s", dj)
 }

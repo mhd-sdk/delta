@@ -1,6 +1,5 @@
 export interface User {
   username: string;
-  email: string;
 }
 
 export interface AuthState {
@@ -16,12 +15,10 @@ export interface AuthResponse {
   token: string;
   expires_at: string;
   username: string;
-  email: string;
 }
 
 export interface RegisterRequest {
   username: string;
-  email: string;
 }
 
 export interface LoginRequest {
