@@ -43,20 +43,24 @@ func main() {
 	auth.HandleFunc("/login/begin", handlers.BeginLogin).Methods("POST")
 	auth.HandleFunc("/login/finish", handlers.FinishLogin).Methods("POST")
 	auth.HandleFunc("/logout", handlers.Logout).Methods("POST")
-	
+
 	// Don't forget to add OPTIONS for preflight requests
 	auth.HandleFunc("/register/begin", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("OPTIONS")
+
 	auth.HandleFunc("/register/finish", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("OPTIONS")
+
 	auth.HandleFunc("/login/begin", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("OPTIONS")
+
 	auth.HandleFunc("/login/finish", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("OPTIONS")
+
 	auth.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("OPTIONS")

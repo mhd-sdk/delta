@@ -104,8 +104,21 @@ func CorsMiddleware(next http.Handler) http.Handler {
 			corsAllowedOrigins = "*" // Default to all origins if not specified
 		}
 
-		// Set CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		// Get the origin from the request
+		origin := r.Header.Get("Origin")
+
+		// Set CORS headers - use the actual origin if it's in our allowed list
+		if origin != "" && (corsAllowedOrigins == "*" || strings.Contains(corsAllowedOrigins, origin)) {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		} else {
+			// Fall back to the first allowed origin or default
+			if corsAllowedOrigins != "*" {
+				w.Header().Set("Access-Control-Allow-Origin", strings.Split(corsAllowedOrigins, ",")[0])
+			} else {
+				w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+			}
+		}
+
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")

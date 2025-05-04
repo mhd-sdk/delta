@@ -46,6 +46,13 @@ func (db *userdb) GetUserByID(id uint64) (*models.User, error) {
 	return nil, fmt.Errorf("error getting user with ID '%s': does not exist", id)
 }
 
+// GetUserByID returns a *User by the user's ID
+func (db *userdb) GetUsers() (map[string]*models.User, error) {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+	return db.users, nil
+}
+
 // PutUser stores a new user by the user's username
 func (db *userdb) PutUser(user *models.User) {
 	db.mu.Lock()

@@ -1,5 +1,5 @@
 import ViteLogo from '@/assets/vite.svg';
-import { UserAuthForm } from './components/user-auth-form';
+import { SignInForm } from './components/sign-in-form';
 
 export default function SignIn() {
   return (
@@ -23,14 +23,10 @@ export default function SignIn() {
         </div>
 
         <img src={ViteLogo} className="relative m-auto" width={301} height={60} alt="Vite" />
-
-
       </div>
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[350px]">
-
-          <UserAuthForm />
-
+          <SignInForm />
         </div>
       </div>
     </div>

@@ -52,7 +52,7 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
                 ...options.user,
                 id: base64URLToBuffer(options.user.id),
               },
-              excludeCredentials: options.excludeCredentials?.map((credential: any) => ({
+              excludeCredentials: options.excludeCredentials?.map((credential: { id: string }) => ({
                 ...credential,
                 id: base64URLToBuffer(credential.id),
               })),
@@ -126,7 +126,7 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
             publicKey: {
               ...options,
               challenge: base64URLToBuffer(options.challenge),
-              allowCredentials: options.allowCredentials?.map((credential: any) => ({
+              allowCredentials: options.allowCredentials?.map((credential: { id: string }) => ({
                 ...credential,
                 id: base64URLToBuffer(credential.id),
               })),
@@ -137,7 +137,7 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
           const assertionResponse = credential.response as AuthenticatorAssertionResponse;
 
           const finishResponse = await axios.post(
-            `${API_URL}/auth/login/finish`,
+            `${API_URL}/auth/login/finish?username=${username}`,
             {
               id: credential.id,
               rawId: bufferToBase64URL(Buffer.from(credential.rawId)),
@@ -221,7 +221,7 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
           });
 
           return true;
-        } catch (error) {
+        } catch {
           set({ isAuthenticated: false, user: null, token: null, expiresAt: null });
           return false;
         }
@@ -250,6 +250,11 @@ function bufferToBase64URL(buffer: ArrayBuffer): string {
 }
 
 function base64URLToBuffer(base64URL: string): ArrayBuffer {
+  if (!base64URL) {
+    console.error('base64URL is undefined or null');
+    return new ArrayBuffer(0); // Return empty buffer instead of throwing error
+  }
+
   const base64 = base64URL.replace(/-/g, '+').replace(/_/g, '/');
   const paddingLength = (4 - (base64.length % 4)) % 4;
   const padded = base64 + '='.repeat(paddingLength);

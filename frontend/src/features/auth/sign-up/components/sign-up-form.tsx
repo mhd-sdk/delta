@@ -17,7 +17,7 @@ const formSchema = z.object({
   username: z.string().min(1, { message: 'Please enter your username' }).min(3, { message: 'Username must be at least 3 characters' }),
 });
 
-export function SignUpForm({ className, ...props }: SignUpFormProps) {
+export const SignUpForm = ({ className, ...props }: SignUpFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     setError(null);
 
@@ -49,7 +49,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -78,4 +78,4 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
       </form>
     </Form>
   );
-}
+};

@@ -9,8 +9,10 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/duo-labs/webauthn.io/session"
+	"github.com/duo-labs/webauthn/protocol"
 	"github.com/duo-labs/webauthn/webauthn"
 )
 
@@ -72,13 +74,13 @@ func BeginRegistration(w http.ResponseWriter, r *http.Request) {
 		displayName := strings.Split(requestData.Username, "@")[0]
 		user = models.NewUser(requestData.Username, displayName)
 		repositories.DB().PutUser(user)
+	} else {
+		jsonResponse(w, map[string]string{"error": "User already exists"}, http.StatusBadRequest)
+		return
 	}
 
 	// Generate PublicKeyCredentialCreationOptions, session data
-	options, sessionData, err := WebAuthn.BeginRegistration(
-		user,
-	)
-
+	options, sessionData, err := WebAuthn.BeginRegistration(user)
 	if err != nil {
 		log.Println(err)
 		jsonResponse(w, map[string]string{"error": err.Error()}, http.StatusInternalServerError)
@@ -170,24 +172,9 @@ func BeginLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func FinishLogin(w http.ResponseWriter, r *http.Request) {
-	// Parse JSON request
-	var requestData struct {
-		Username string `json:"username"`
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&requestData); err != nil {
-		jsonResponse(w, map[string]string{"error": "Invalid request format"}, http.StatusBadRequest)
-		return
-	}
-
-	if requestData.Username == "" {
-		jsonResponse(w, map[string]string{"error": "Username is required"}, http.StatusBadRequest)
-		return
-	}
-
-	// Get the user
-	user, err := repositories.DB().GetUserByName(requestData.Username)
+	// get username from query params
+	username := r.URL.Query().Get("username")
+	user, err := repositories.DB().GetUserByName(username)
 	if err != nil {
 		jsonResponse(w, map[string]string{"error": "User not found"}, http.StatusBadRequest)
 		return
@@ -200,8 +187,9 @@ func FinishLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Complete the login
-	_, err = WebAuthn.FinishLogin(user, sessionData, r)
+	// Verify the assertion with WebAuthn
+	parsedResponse, err := protocol.ParseCredentialRequestResponseBody(r.Body)
+	_, err = WebAuthn.ValidateLogin(user, sessionData, parsedResponse)
 	if err != nil {
 		jsonResponse(w, map[string]string{"error": err.Error()}, http.StatusBadRequest)
 		return
@@ -214,6 +202,14 @@ func FinishLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Generate authentication response
+	authResponse := map[string]interface{}{
+		"status":     "Login successful",
+		"username":   user.Username,
+		"token":      "your-token-here", // Generate proper JWT or token
+		"expires_at": time.Now().Add(24 * time.Hour).Format(time.RFC3339),
+	}
+
 	// Save the username in the session
 	session.Values["username"] = user.Username
 	if err := session.Save(r, w); err != nil {
@@ -221,7 +217,7 @@ func FinishLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonResponse(w, map[string]string{"status": "Login successful"}, http.StatusOK)
+	jsonResponse(w, authResponse, http.StatusOK)
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
