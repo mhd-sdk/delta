@@ -39,12 +39,12 @@ export const SignUpForm = ({ className, ...props }: SignUpFormProps) => {
       toast.success('Registration successful', {
         description: "You've been successfully registered and logged in",
       });
-      navigate({ to: '/dashboard', replace: true });
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
+      // navigate({ to: '/dashboard', replace: true });
+    } catch (err: any) {
+      console.log(err);
+      setError(err.response.data.error);
       toast.error('Registration failed', {
-        description: err instanceof Error ? err.message : 'Registration failed. Please try again.',
+        description: err.response.data.error || 'An error occurred during registration. Please try again.',
       });
     } finally {
       setIsLoading(false);

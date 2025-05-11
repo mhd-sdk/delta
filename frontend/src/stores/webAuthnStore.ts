@@ -25,9 +25,8 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
       error: null,
 
       register: async (username: string) => {
+        set({ isLoading: true, error: null });
         try {
-          set({ isLoading: true, error: null });
-
           // Step 1: Begin registration
           const beginResponse = await axios.post(
             `${API_URL}/auth/register/begin`,
@@ -41,7 +40,6 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
           );
 
           const options = beginResponse.data.publicKey;
-          console.log({ beginResponse });
 
           // Step 2: Create credentials
           const credential = (await navigator.credentials.create({
@@ -61,7 +59,6 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
 
           // Step 3: Finish registration
           const attestationResponse = credential.response as AuthenticatorAttestationResponse;
-
           const finishResponse = await axios.post(
             `${API_URL}/auth/register/finish?username=${username}`,
             {
@@ -95,9 +92,22 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
             isAuthenticated: true,
           });
         } catch (error) {
+          let errorMessage = 'Registration failed';
+
+          // Récupérer le corps de l'erreur de l'API si disponible
+          if (axios.isAxiosError(error) && error.response) {
+            // Utiliser le message d'erreur du serveur s'il existe
+            errorMessage = error.response.data?.message || error.response.data || errorMessage;
+
+            // Vous pouvez aussi logger l'erreur complète pour le débogage
+            console.error('API Error:', error.response.data);
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Registration failed',
+            error: errorMessage,
           });
           throw error;
         }
@@ -171,11 +181,11 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
             isAuthenticated: true,
           });
         } catch (error) {
+          console.log(error);
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Login failed',
+            error: error.error,
           });
-          throw error;
         }
       },
 

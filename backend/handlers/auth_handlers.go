@@ -3,17 +3,15 @@ package handlers
 import (
 	"delta/models"
 	"delta/repositories"
+	"delta/sessionstore"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
-	"github.com/duo-labs/webauthn.io/session"
-	"github.com/duo-labs/webauthn/protocol"
-	"github.com/duo-labs/webauthn/webauthn"
+	"github.com/go-webauthn/webauthn/webauthn"
 )
 
 var (
@@ -28,7 +26,7 @@ func InitWebAuthn() error {
 	wconfig := &webauthn.Config{
 		RPDisplayName: displayName,
 		RPID:          domain,
-		RPOrigin:      origin,
+		RPOrigins:     []string{origin},
 	}
 
 	var err error
@@ -40,14 +38,10 @@ func InitWebAuthn() error {
 	return nil
 }
 
-var SessionStore *session.Store
+var SessionStore *sessionstore.SessionStore
 
 func InitSessionStore() {
-	var err error
-	SessionStore, err = session.NewStore()
-	if err != nil {
-		log.Fatal("failed to create session store:", err)
-	}
+	SessionStore = sessionstore.NewSessionStore()
 }
 
 func BeginRegistration(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +82,7 @@ func BeginRegistration(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Store session data as marshaled JSON
-	err = SessionStore.SaveWebauthnSession("registration", sessionData, r, w)
+	SessionStore.Set("registration", *sessionData)
 	if err != nil {
 		log.Println(err)
 		jsonResponse(w, map[string]string{"error": err.Error()}, http.StatusInternalServerError)
@@ -109,14 +103,14 @@ func FinishRegistration(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// load the session data
-	sessionData, err := SessionStore.GetWebauthnSession("registration", r)
-	if err != nil {
+	sessionData, ok := SessionStore.Get("registration")
+	if ok != true {
 		log.Println(err)
 		jsonResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	credential, err := WebAuthn.FinishRegistration(user, sessionData, r)
+	credential, err := WebAuthn.FinishRegistration(user, sessionData.(webauthn.SessionData), r)
 	if err != nil {
 		log.Println(err)
 		jsonResponse(w, err.Error(), http.StatusBadRequest)
@@ -125,8 +119,13 @@ func FinishRegistration(w http.ResponseWriter, r *http.Request) {
 
 	user.AddCredential(*credential)
 
-	jsonResponse(w, "Registration Success", http.StatusOK)
-	return
+	response := map[string]interface{}{
+		"status":  "Registration successful",
+		"user":    user,
+		"session": sessionData,
+	}
+
+	jsonResponse(w, response, http.StatusOK)
 
 }
 
@@ -162,11 +161,7 @@ func BeginLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Store session data
-	err = SessionStore.SaveWebauthnSession("authentication", sessionData, r, w)
-	if err != nil {
-		jsonResponse(w, map[string]string{"error": err.Error()}, http.StatusInternalServerError)
-		return
-	}
+	SessionStore.Set("authentication", *sessionData)
 
 	jsonResponse(w, options, http.StatusOK)
 }
@@ -181,24 +176,15 @@ func FinishLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the session data
-	sessionData, err := SessionStore.GetWebauthnSession("authentication", r)
-	if err != nil {
+	sessionData, ok := SessionStore.Get("authentication")
+	if ok != true {
 		jsonResponse(w, map[string]string{"error": "Session not found"}, http.StatusBadRequest)
 		return
 	}
 
-	// Verify the assertion with WebAuthn
-	parsedResponse, err := protocol.ParseCredentialRequestResponseBody(r.Body)
-	_, err = WebAuthn.ValidateLogin(user, sessionData, parsedResponse)
+	credential, err := WebAuthn.FinishLogin(user, sessionData.(webauthn.SessionData), r)
 	if err != nil {
 		jsonResponse(w, map[string]string{"error": err.Error()}, http.StatusBadRequest)
-		return
-	}
-
-	// Create session for the user
-	session, err := SessionStore.New(r, "auth-session")
-	if err != nil {
-		jsonResponse(w, map[string]string{"error": "Failed to create session"}, http.StatusInternalServerError)
 		return
 	}
 
@@ -206,36 +192,10 @@ func FinishLogin(w http.ResponseWriter, r *http.Request) {
 	authResponse := map[string]interface{}{
 		"status":     "Login successful",
 		"username":   user.Username,
-		"token":      "your-token-here", // Generate proper JWT or token
-		"expires_at": time.Now().Add(24 * time.Hour).Format(time.RFC3339),
-	}
-
-	// Save the username in the session
-	session.Values["username"] = user.Username
-	if err := session.Save(r, w); err != nil {
-		jsonResponse(w, map[string]string{"error": "Failed to save session"}, http.StatusInternalServerError)
-		return
+		"credential": credential,
 	}
 
 	jsonResponse(w, authResponse, http.StatusOK)
-}
-
-func Logout(w http.ResponseWriter, r *http.Request) {
-	// Get the session
-	session, err := SessionStore.Get(r, "auth-session")
-	if err != nil {
-		jsonResponse(w, map[string]string{"error": "Not logged in"}, http.StatusBadRequest)
-		return
-	}
-
-	// Clear the session
-	session.Values = map[interface{}]interface{}{}
-	if err := session.Save(r, w); err != nil {
-		jsonResponse(w, map[string]string{"error": "Failed to logout"}, http.StatusInternalServerError)
-		return
-	}
-
-	jsonResponse(w, map[string]string{"status": "Logout successful"}, http.StatusOK)
 }
 
 func jsonResponse(w http.ResponseWriter, d interface{}, c int) {
