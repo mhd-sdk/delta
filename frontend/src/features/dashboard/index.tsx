@@ -9,6 +9,7 @@ import { Panel, PanelType } from './panel';
 import { Range, Unit } from './timerange';
 
 export default function Dashboard() {
+  console.log('toto');
   const [panels, setPanels] = useState<Panel[]>([
     {
       data: {

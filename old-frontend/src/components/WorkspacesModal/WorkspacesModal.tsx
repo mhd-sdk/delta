@@ -1,5 +1,5 @@
 import { Edit, TrashCan } from '@carbon/icons-react';
-import { Button, ContainedList, ContainedListItem, Modal, Search } from '@carbon/react';
+import { Button, ContainedList, ContainedListItem, Modal } from '@carbon/react';
 import { css } from '@emotion/css';
 import { createRef, useEffect, useState } from 'react';
 import { models } from '../../../wailsjs/go/models';
@@ -96,7 +96,6 @@ export const WorkspacesModal = ({ isOpen, onClose, onSelect, selectedWorkspace }
       <ContainedList
         action={
           <div className={styles.topbar}>
-            <Search id="search-default-1" labelText="" size="lg" onChange={(e) => setSearchTerm(e.target.value)} />
             <Button size="lg" onClick={() => setCreating(true)}>
               New workspace
             </Button>

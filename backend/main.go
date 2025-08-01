@@ -13,6 +13,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/alpacahq/alpaca-trade-api-go/v3/alpaca"
+	"github.com/alpacahq/alpaca-trade-api-go/v3/marketdata"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -38,6 +40,11 @@ func main() {
 	dbName := os.Getenv("DB_NAME")
 	dbSSLMode := os.Getenv("DB_SSL_MODE")
 
+	apiKey := os.Getenv("API_KEY")
+	secretKey := os.Getenv("SECRET_KEY")
+	marketDataUrl := os.Getenv("MARKET_DATA_URL")
+	routingUrl := os.Getenv("ROUTING_URL")
+
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode)
 
@@ -48,6 +55,18 @@ func main() {
 
 	// Auto migrate the models
 	db.AutoMigrate(&models.Dashboard{}, &models.Panel{})
+
+	routingClient := alpaca.NewClient(alpaca.ClientOpts{
+		APIKey:    apiKey,
+		APISecret: secretKey,
+		BaseURL:   routingUrl,
+	})
+
+	marketDataClient := marketdata.NewClient(marketdata.ClientOpts{
+		APIKey:    apiKey,
+		APISecret: secretKey,
+		BaseURL:   marketDataUrl,
+	})
 
 	// Initialize repositories
 	dashboardRepo := repositories.NewDashboardRepository(db)

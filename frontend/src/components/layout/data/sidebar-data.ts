@@ -8,7 +8,6 @@ import {
   IconSettings,
   IconTool,
   IconUserCog,
-  IconUsers
 } from '@tabler/icons-react';
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react';
 import { type SidebarData } from '../types';
@@ -54,11 +53,6 @@ export const sidebarData: SidebarData = {
           title: 'Algorithms',
           url: '/algorithms',
           icon: IconPackages,
-        },
-        {
-          title: 'Users',
-          url: '/users',
-          icon: IconUsers,
         },
       ],
     },
