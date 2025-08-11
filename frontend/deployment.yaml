@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delta-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: delta-frontend
+  template:
+    metadata:
+      labels:
+        app: delta-frontend
+    spec:
+      containers:
+        - name: delta
+          image: ghcr.io/mhd-sdk/delta/frontend:latest 
+          ports:
+          - containerPort: 5173
+      restartPolicy: Always
+      tolerations:
+        - key: "node-role.kubernetes.io/control-plane"
+          operator: "Exists"
+          effect: "NoSchedule"
+      imagePullSecrets:
+        - name: ghcr-secret

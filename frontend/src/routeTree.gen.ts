@@ -21,9 +21,6 @@ import { Route as errors403Import } from './routes/(errors)/403'
 import { Route as errors401Import } from './routes/(errors)/401'
 import { Route as authSignUpImport } from './routes/(auth)/sign-up'
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
-import { Route as authRegisterImport } from './routes/(auth)/register'
-import { Route as authOtpImport } from './routes/(auth)/otp'
-import { Route as authLoginImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordImport } from './routes/(auth)/forgot-password'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings/route'
 import { Route as AuthenticatedTasksIndexImport } from './routes/_authenticated/tasks/index'
@@ -93,24 +90,6 @@ const authSignUpRoute = authSignUpImport.update({
 const authSignInRoute = authSignInImport.update({
   id: '/sign-in',
   path: '/sign-in',
-  getParentRoute: () => authRouteRoute,
-} as any)
-
-const authRegisterRoute = authRegisterImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => authRouteRoute,
-} as any)
-
-const authOtpRoute = authOtpImport.update({
-  id: '/otp',
-  path: '/otp',
-  getParentRoute: () => authRouteRoute,
-} as any)
-
-const authLoginRoute = authLoginImport.update({
-  id: '/login',
-  path: '/login',
   getParentRoute: () => authRouteRoute,
 } as any)
 
@@ -227,27 +206,6 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof authForgotPasswordImport
-      parentRoute: typeof authRouteImport
-    }
-    '/(auth)/login': {
-      id: '/(auth)/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof authLoginImport
-      parentRoute: typeof authRouteImport
-    }
-    '/(auth)/otp': {
-      id: '/(auth)/otp'
-      path: '/otp'
-      fullPath: '/otp'
-      preLoaderRoute: typeof authOtpImport
-      parentRoute: typeof authRouteImport
-    }
-    '/(auth)/register': {
-      id: '/(auth)/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof authRegisterImport
       parentRoute: typeof authRouteImport
     }
     '/(auth)/sign-in': {
@@ -369,18 +327,12 @@ declare module '@tanstack/react-router' {
 
 interface authRouteRouteChildren {
   authForgotPasswordRoute: typeof authForgotPasswordRoute
-  authLoginRoute: typeof authLoginRoute
-  authOtpRoute: typeof authOtpRoute
-  authRegisterRoute: typeof authRegisterRoute
   authSignInRoute: typeof authSignInRoute
   authSignUpRoute: typeof authSignUpRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
   authForgotPasswordRoute: authForgotPasswordRoute,
-  authLoginRoute: authLoginRoute,
-  authOtpRoute: authOtpRoute,
-  authRegisterRoute: authRegisterRoute,
   authSignInRoute: authSignInRoute,
   authSignUpRoute: authSignUpRoute,
 }
@@ -436,9 +388,6 @@ export interface FileRoutesByFullPath {
   '': typeof AuthenticatedRouteRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
-  '/login': typeof authLoginRoute
-  '/otp': typeof authOtpRoute
-  '/register': typeof authRegisterRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/401': typeof errors401Route
@@ -461,9 +410,6 @@ export interface FileRoutesByTo {
   '/': typeof authRouteRouteWithChildren
   '': typeof AuthenticatedRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
-  '/login': typeof authLoginRoute
-  '/otp': typeof authOtpRoute
-  '/register': typeof authRegisterRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/401': typeof errors401Route
@@ -489,9 +435,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
-  '/(auth)/login': typeof authLoginRoute
-  '/(auth)/otp': typeof authOtpRoute
-  '/(auth)/register': typeof authRegisterRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(errors)/401': typeof errors401Route
@@ -517,9 +460,6 @@ export interface FileRouteTypes {
     | ''
     | '/settings'
     | '/forgot-password'
-    | '/login'
-    | '/otp'
-    | '/register'
     | '/sign-in'
     | '/sign-up'
     | '/401'
@@ -541,9 +481,6 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/forgot-password'
-    | '/login'
-    | '/otp'
-    | '/register'
     | '/sign-in'
     | '/sign-up'
     | '/401'
@@ -567,9 +504,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/_authenticated/settings'
     | '/(auth)/forgot-password'
-    | '/(auth)/login'
-    | '/(auth)/otp'
-    | '/(auth)/register'
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
     | '/(errors)/401'
@@ -638,9 +572,6 @@ export const routeTree = rootRoute
       "filePath": "(auth)/route.tsx",
       "children": [
         "/(auth)/forgot-password",
-        "/(auth)/login",
-        "/(auth)/otp",
-        "/(auth)/register",
         "/(auth)/sign-in",
         "/(auth)/sign-up"
       ]
@@ -668,18 +599,6 @@ export const routeTree = rootRoute
     },
     "/(auth)/forgot-password": {
       "filePath": "(auth)/forgot-password.tsx",
-      "parent": "/(auth)"
-    },
-    "/(auth)/login": {
-      "filePath": "(auth)/login.tsx",
-      "parent": "/(auth)"
-    },
-    "/(auth)/otp": {
-      "filePath": "(auth)/otp.tsx",
-      "parent": "/(auth)"
-    },
-    "/(auth)/register": {
-      "filePath": "(auth)/register.tsx",
       "parent": "/(auth)"
     },
     "/(auth)/sign-in": {

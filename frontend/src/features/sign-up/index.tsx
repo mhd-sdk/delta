@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from '@tanstack/react-router';
-import AuthLayout from '../auth-layout';
+import AuthLayout from '../auth/auth-layout';
 import { SignUpForm } from './components/sign-up-form';
 
 export default function SignUp() {

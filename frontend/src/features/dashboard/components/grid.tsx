@@ -11,7 +11,6 @@ const ReactGridLayout = WidthProvider(RGL);
 
 export const Grid = ({ panels, onChange }: Props): JSX.Element => {
   const handleLayoutChange = (layout: ReactGridLayout.Layout[]) => {
-    console.log('layout', layout);
     const newPanels: Panel[] = [];
     layout.forEach((item) => {
       const panel = panels.find((p) => p.id === item.i);

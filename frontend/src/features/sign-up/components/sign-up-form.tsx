@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useWebAuthnStore } from '@/stores/webAuthnStore';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from '@tanstack/react-router';
 import { HTMLAttributes, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -19,7 +18,7 @@ const formSchema = z.object({
 
 export const SignUpForm = ({ className, ...props }: SignUpFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const { register } = useWebAuthnStore();
 
@@ -40,8 +39,9 @@ export const SignUpForm = ({ className, ...props }: SignUpFormProps) => {
         description: "You've been successfully registered and logged in",
       });
       // navigate({ to: '/dashboard', replace: true });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.log(err);
+      console.error(err);
       setError(err.response.data.error);
       toast.error('Registration failed', {
         description: err.response.data.error || 'An error occurred during registration. Please try again.',

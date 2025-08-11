@@ -47,7 +47,7 @@ const queryClient = new QueryClient({
         if (error.response?.status === 401) {
           toast.error('Session expired!');
           useWebAuthnStore.getState().logout();
-          router.navigate({ to: '/login' });
+          router.navigate({ to: '/sign-in' });
         }
         if (error.response?.status === 500) {
           toast.error('Internal Server Error!');
@@ -94,8 +94,8 @@ const AuthChecker = () => {
         const isStillValid = await checkAuth();
         if (!isStillValid) {
           const pathname = window.location.pathname;
-          if (pathname !== '/login' && pathname !== '/register') {
-            router.navigate({ to: '/login' });
+          if (pathname !== '/sign-in' && pathname !== '/sign-up') {
+            router.navigate({ to: '/sign-in' });
             toast.error('Session expired. Please login again.');
           }
         }

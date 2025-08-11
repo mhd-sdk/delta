@@ -11,7 +11,6 @@ const DashboardPage: FC = () => {
         <div className="flex items-center gap-4">
           <div className="text-sm">
             <span className="font-medium">Welcome, {user?.username}</span>
-            <p className="text-muted-foreground">{user?.email}</p>
           </div>
           <button onClick={logout} className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
             Logout

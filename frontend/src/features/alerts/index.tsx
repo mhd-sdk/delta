@@ -8,8 +8,8 @@ import { UsersDialogs } from './components/users-dialogs';
 import { UsersPrimaryButtons } from './components/users-primary-buttons';
 import { UsersTable } from './components/users-table';
 import UsersProvider from './context/users-context';
-import { userListSchema } from './data/schema';
 import { alertsMock } from './data/alertMocks';
+import { userListSchema } from './data/schema';
 
 export default function Alerts() {
   // Parse user list
@@ -28,8 +28,8 @@ export default function Alerts() {
       <Main>
         <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">User List</h2>
-            <p className="text-muted-foreground">Manage your users and their roles here.</p>
+            <h2 className="text-2xl font-bold tracking-tight">Alerts</h2>
+            <p className="text-muted-foreground">Configure your alerts.</p>
           </div>
           <UsersPrimaryButtons />
         </div>

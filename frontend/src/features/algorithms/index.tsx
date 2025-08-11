@@ -29,7 +29,7 @@ export default function Algorithms() {
         <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">User List</h2>
-            <p className="text-muted-foreground">Manage your users and their roles here.</p>
+            <p className="text-muted-foreground">Manage, configure and deploy your algorithms here.</p>
           </div>
           <UsersPrimaryButtons />
         </div>

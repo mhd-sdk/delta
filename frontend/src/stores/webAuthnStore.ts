@@ -181,10 +181,9 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
             isAuthenticated: true,
           });
         } catch (error) {
-          console.log(error);
+          console.error(error);
           set({
             isLoading: false,
-            error: error.error,
           });
         }
       },

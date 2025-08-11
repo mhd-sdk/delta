@@ -1,9 +1,9 @@
-import React from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { IconArrowRightDashed, IconDeviceLaptop, IconMoon, IconSun } from '@tabler/icons-react';
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command';
 import { useSearch } from '@/context/search-context';
 import { useTheme } from '@/context/theme-context';
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command';
+import { IconArrowRightDashed, IconDeviceLaptop, IconMoon, IconSun } from '@tabler/icons-react';
+import { useNavigate } from '@tanstack/react-router';
+import React from 'react';
 import { sidebarData } from './layout/data/sidebar-data';
 import { ScrollArea } from './ui/scroll-area';
 
@@ -71,7 +71,7 @@ export function CommandMenu() {
               <IconMoon className="scale-90" />
               <span>Dark</span>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => setTheme('system'))}>
+            <CommandItem onSelect={() => runCommand(() => setTheme('dark'))}>
               <IconDeviceLaptop />
               <span>System</span>
             </CommandItem>
