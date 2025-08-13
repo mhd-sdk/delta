@@ -4,9 +4,13 @@ on:
   release:
     types: [created]
 
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
@@ -35,9 +39,25 @@ jobs:
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBECONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Debug kubeconfig
+        run: |
+          echo "Kubeconfig content (without sensitive data):"
+          kubectl config view --minify
+          echo "Current context:"
+          kubectl config current-context
+          echo "Cluster info:"
+          kubectl cluster-info
+
+      - name: Test Kubernetes connection
+        run: |
+          kubectl version --client
+          kubectl cluster-info
+          kubectl get nodes
 
       - name: Update Kubernetes deployment
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}
-          kubectl set image deployment/<votre-deployment> <votre-container>=$IMAGE_NAME
-          kubectl rollout status deployment/<votre-deployment>
+          IMAGE_NAME=ghcr.io/${{ github.repository }}/frontend:${{ github.event.release.tag_name }}
+          kubectl set image deployment/delta-frontend delta=$IMAGE_NAME
+          kubectl rollout status deployment/delta-frontend --timeout=120s
