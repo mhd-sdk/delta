@@ -1,13 +1,12 @@
 import {
   IconBrowserCheck,
-  IconChecklist,
   IconLayoutDashboard,
   IconNotification,
   IconPackages,
   IconPalette,
   IconSettings,
   IconTool,
-  IconUserCog,
+  IconUserCog
 } from '@tabler/icons-react';
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react';
 import { type SidebarData } from '../types';
@@ -43,11 +42,6 @@ export const sidebarData: SidebarData = {
           title: 'Dashboard',
           url: '/dashboard',
           icon: IconLayoutDashboard,
-        },
-        {
-          title: 'Alerts',
-          url: '/alerts',
-          icon: IconChecklist,
         },
         {
           title: 'Algorithms',
