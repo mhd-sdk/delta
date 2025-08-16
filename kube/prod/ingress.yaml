@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: portfolio-ingress
+  namespace: delta-prod
+  resourceVersion: "3042731"
+  uid: 65a9c2a9-1819-4e33-8215-519be2045a5a
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: delta.mehdiseddik.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: delta-frontend-prod
+            port:
+              number: 5173
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.168.1.89

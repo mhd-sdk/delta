@@ -1,19 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: delta-frontend
+  name: delta-frontend-prod
+  namespace: delta-prod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: delta-frontend
+      app: delta-frontend-prod
   template:
     metadata:
       labels:
-        app: delta-frontend
+        app: delta-frontend-prod
     spec:
       containers:
-        - name: delta
+        - name: delta-frontend-prod
           image: ghcr.io/mhd-sdk/delta/frontend:latest 
           ports:
           - containerPort: 5173
