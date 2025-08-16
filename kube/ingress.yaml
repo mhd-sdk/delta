@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: delta-ingress
+  namespace: delta
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: delta-preprod.mehdiseddik.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: delta-frontend-preprod
+            port:
+              number: 5173
+  - host: delta.mehdiseddik.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: delta-frontend-prod
+            port:
+              number: 5173
