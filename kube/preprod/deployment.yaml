@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: delta-frontend-prod
+  name: delta-frontend-preprod
   namespace: delta
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: delta-frontend-prod
+      app: delta-frontend-preprod
   template:
     metadata:
       labels:
-        app: delta-frontend-prod
+        app: delta-frontend-preprod
     spec:
       containers:
-        - name: delta-frontend-prod
+        - name: delta-frontend-preprod
           image: ghcr.io/mhd-sdk/delta/frontend:latest 
           imagePullPolicy: Always
           ports:

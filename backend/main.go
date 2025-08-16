@@ -4,7 +4,6 @@ import (
 	"context"
 	"delta/handlers"
 	"delta/models"
-	"delta/repositories"
 	"fmt"
 	"log"
 	"net/http"
@@ -67,12 +66,6 @@ func main() {
 		APISecret: secretKey,
 		BaseURL:   marketDataUrl,
 	})
-
-	// Initialize repositories
-	dashboardRepo := repositories.NewDashboardRepository(db)
-
-	// Initialize handlers
-	dashboardHandler := handlers.NewDashboardHandler(dashboardRepo)
 
 	// Create a new router
 	r := mux.NewRouter()
