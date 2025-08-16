@@ -1,8 +1,8 @@
-import { ColumnDef } from '@tanstack/react-table';
-import { cn } from '@/lib/utils';
+import LongText from '@/components/long-text';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import LongText from '@/components/long-text';
+import { cn } from '@/lib/utils';
+import { ColumnDef } from '@tanstack/react-table';
 import { callTypes, userTypes } from '../data/data';
 import { User } from '../data/schema';
 import { DataTableColumnHeader } from './data-table-column-header';

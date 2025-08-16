@@ -1,6 +1,6 @@
-import { useWebAuthnStore } from '@/stores/webAuthnStore';
-import { Navigate } from '@tanstack/react-router';
-import { FC, ReactNode, useEffect, useState } from 'react';
+import { useWebAuthnStore } from "@/stores/webAuthnStore";
+import { Navigate } from "@tanstack/react-router";
+import { FC, ReactNode, useEffect, useState } from "react";
 
 type ProtectedRouteProps = {
   children: ReactNode;

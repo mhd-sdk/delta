@@ -1,6 +1,3 @@
-import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { Row } from '@tanstack/react-table';
-import { IconEdit, IconTrash } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,6 +7,9 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { IconEdit, IconTrash } from '@tabler/icons-react';
+import { Row } from '@tanstack/react-table';
 import { useUsers } from '../context/users-context';
 import { User } from '../data/schema';
 

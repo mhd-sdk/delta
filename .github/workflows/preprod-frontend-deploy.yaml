@@ -5,8 +5,6 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
-    
-
 
 jobs:
   build-and-deploy:
@@ -46,4 +44,4 @@ jobs:
 
       - name: Update Kubernetes deployment
         run: |
-          kubectl -n delta rollout restart deployment/delta-frontend-preprod --timeout=120s
+          kubectl -n delta rollout restart deployment/delta-frontend-preprod

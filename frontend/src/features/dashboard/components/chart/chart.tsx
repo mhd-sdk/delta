@@ -1,13 +1,35 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useTheme } from '@/context/theme-context';
-import { CandlestickData, ColorType, createChart, CrosshairMode, IChartApi, ISeriesApi, UTCTimestamp, WhitespaceData } from 'lightweight-charts';
-import { useEffect, useRef, useState } from 'react';
-import { ChartConfig } from '../../panel';
-import { useGetCandlesticks } from '../../queries';
-import { defaultTimeframes, isIntraday, Timeframe, Unit } from '../../timerange';
-import { calcOptimizedRange } from '../../utils';
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useTheme } from "@/context/theme-context";
+import {
+  ColorType,
+  createChart,
+  CrosshairMode,
+  IChartApi,
+  ISeriesApi,
+} from "lightweight-charts";
+import { useEffect, useRef, useState } from "react";
+import { ChartConfig } from "../../panel";
+import { useGetCandlesticks } from "../../queries";
+import {
+  defaultTimeframes,
+  isIntraday,
+  Timeframe,
+  Unit,
+} from "../../timerange";
+import { calcOptimizedRange } from "../../utils";
 
 interface Props {
   onDelete: () => void;
@@ -20,7 +42,16 @@ interface ToolbarProps {
   onConfigChange: (config: ChartConfig) => void;
 }
 
-const popularTickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'NFLX'];
+const popularTickers = [
+  "AAPL",
+  "MSFT",
+  "GOOGL",
+  "AMZN",
+  "NVDA",
+  "META",
+  "TSLA",
+  "NFLX",
+];
 
 const Toolbar = ({ config, onConfigChange }: ToolbarProps) => {
   const handleTickerChange = (value: string) => {
@@ -28,7 +59,7 @@ const Toolbar = ({ config, onConfigChange }: ToolbarProps) => {
   };
 
   const handleTimeframeChange = (value: string) => {
-    const [n, unit] = value.split('-');
+    const [n, unit] = value.split("-");
     const timeframe: Timeframe = {
       n: parseInt(n),
       unit: unit as Unit,
@@ -44,8 +75,8 @@ const Toolbar = ({ config, onConfigChange }: ToolbarProps) => {
     <div
       className="drag-handle flex flex-row items-center justify-between w-full space-x-2"
       style={{
-        borderRadius: '0.375rem 0.375rem 0 0',
-        padding: '0.5rem',
+        borderRadius: "0.375rem 0.375rem 0 0",
+        padding: "0.5rem",
       }}
     >
       <div className="flex items-center space-x-2">
@@ -62,13 +93,19 @@ const Toolbar = ({ config, onConfigChange }: ToolbarProps) => {
           </SelectContent>
         </Select>
 
-        <Select defaultValue={`${config.timeframe.n}-${config.timeframe.unit}`} onValueChange={handleTimeframeChange}>
+        <Select
+          defaultValue={`${config.timeframe.n}-${config.timeframe.unit}`}
+          onValueChange={handleTimeframeChange}
+        >
           <SelectTrigger className="drag-cancel w-24 h-8">
             <SelectValue placeholder="Timeframe" />
           </SelectTrigger>
           <SelectContent>
             {defaultTimeframes.map((tf) => (
-              <SelectItem key={`${tf.n}-${tf.unit}`} value={`${tf.n}-${tf.unit}`}>
+              <SelectItem
+                key={`${tf.n}-${tf.unit}`}
+                value={`${tf.n}-${tf.unit}`}
+              >
                 {`${tf.n} ${tf.unit}`}
               </SelectItem>
             ))}
@@ -80,10 +117,20 @@ const Toolbar = ({ config, onConfigChange }: ToolbarProps) => {
 };
 
 export const Chart = ({ config, onDelete, onConfigChange }: Props) => {
-  const [candlesticks, setCandlesticks] = useState<(CandlestickData<UTCTimestamp> | WhitespaceData<UTCTimestamp>)[]>([]);
+  const [candlesticks, setCandlesticks] = useState<
+    {
+      time: string; // timestamp ISO
+      open: number; // open
+      high: number; // high
+      low: number; // low
+      close: number; // close
+      volume: number; // volume
+    }[]
+  >([]);
+
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const el = useRef<HTMLDivElement | null>(null);
 
@@ -97,22 +144,22 @@ export const Chart = ({ config, onDelete, onConfigChange }: Props) => {
     config,
     symbol: config.ticker,
   });
-
+  console.log(candlestickData);
   const darkColors = {
-    backgroundColor: 'transparent',
-    textColor: 'white',
-    candleUpColor: '#ffffff',
-    candleDownColor: '#5d606b',
+    backgroundColor: "transparent",
+    textColor: "white",
+    candleUpColor: "#ffffff",
+    candleDownColor: "#5d606b",
   };
 
   const lightColors = {
-    backgroundColor: 'transparent',
-    textColor: 'black',
-    candleUpColor: '#4caf50',
-    candleDownColor: '#f44336',
+    backgroundColor: "transparent",
+    textColor: "black",
+    candleUpColor: "#4caf50",
+    candleDownColor: "#f44336",
   };
 
-  const colors = theme === 'dark' ? darkColors : lightColors;
+  const colors = theme === "dark" ? darkColors : lightColors;
 
   useEffect(() => {
     if (!chartContainerRef.current) {
@@ -187,7 +234,11 @@ export const Chart = ({ config, onDelete, onConfigChange }: Props) => {
 
   useEffect(() => {
     if (candleSeriesRef.current) {
-      candleSeriesRef.current.setData(candlesticks);
+      try {
+        candleSeriesRef.current.setData(candlesticks);
+      } catch (error) {
+        console.error("Error setting candlestick data:", error);
+      }
       chartRef.current?.timeScale().resetTimeScale();
     }
   }, [candlesticks]);
@@ -220,10 +271,20 @@ export const Chart = ({ config, onDelete, onConfigChange }: Props) => {
             <Toolbar config={config} onConfigChange={onConfigChange} />
           </CardHeader>
           <CardContent className="h-[calc(100%-3rem)] pt-2">
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} ref={el}>
+            <div
+              style={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+              ref={el}
+            >
               {isLoading && <div>Loading...</div>}
               {error && <div>Error loading chart data</div>}
-              <div ref={chartContainerRef} style={{ height: 'calc(100% - 2rem)' }} />
+              <div
+                ref={chartContainerRef}
+                style={{ height: "calc(100% - 2rem)" }}
+              />
             </div>
           </CardContent>
         </Card>

@@ -1,17 +1,29 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Link } from '@tanstack/react-router';
-import AuthLayout from '../auth/auth-layout';
-import { SignUpForm } from './components/sign-up-form';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Link } from "@tanstack/react-router";
+import AuthLayout from "../auth/auth-layout";
+import { SignUpForm } from "./components/sign-up-form";
 
 export default function SignUp() {
   return (
     <AuthLayout>
       <Card className="gap-4">
         <CardHeader>
-          <CardTitle className="text-lg tracking-tight">Register new user</CardTitle>
+          <CardTitle className="text-lg tracking-tight">
+            Register new user
+          </CardTitle>
           <CardDescription>
-            Already have an account?{' '}
-            <Link to="/sign-in" className="hover:text-primary underline underline-offset-4">
+            Already have an account?{" "}
+            <Link
+              to="/sign-in"
+              className="hover:text-primary underline underline-offset-4"
+            >
               Sign In
             </Link>
           </CardDescription>
@@ -21,12 +33,18 @@ export default function SignUp() {
         </CardContent>
         <CardFooter>
           <p className="text-muted-foreground px-8 text-center text-sm">
-            By creating an account, you agree to our{' '}
-            <a href="/terms" className="hover:text-primary underline underline-offset-4">
+            By creating an account, you agree to our{" "}
+            <a
+              href="/terms"
+              className="hover:text-primary underline underline-offset-4"
+            >
               Terms of Service
-            </a>{' '}
-            and{' '}
-            <a href="/privacy" className="hover:text-primary underline underline-offset-4">
+            </a>{" "}
+            and{" "}
+            <a
+              href="/privacy"
+              className="hover:text-primary underline underline-offset-4"
+            >
               Privacy Policy
             </a>
             .

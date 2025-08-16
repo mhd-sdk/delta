@@ -1,6 +1,6 @@
-import { ChartConfig, Panel, PanelType } from '../panel';
-import { AccountInfo } from './AccountInfo';
-import { Chart } from './chart/chart';
+import { ChartConfig, Panel, PanelType } from "../panel";
+import { AccountInfo } from "./AccountInfo";
+import { Chart } from "./chart/chart";
 
 interface Props {
   panel: Panel;
@@ -11,7 +11,10 @@ interface Props {
 export const DraggablePanel = ({ panel, onDelete, onConfigChange }: Props) => {
   const handleChartChange = (config: ChartConfig) => {
     if (panel.data.type === PanelType.Chart) {
-      onConfigChange({ ...panel, data: { type: PanelType.Chart, config } } as Panel);
+      onConfigChange({
+        ...panel,
+        data: { type: PanelType.Chart, config },
+      } as Panel);
     }
   };
 
@@ -22,7 +25,13 @@ export const DraggablePanel = ({ panel, onDelete, onConfigChange }: Props) => {
   const renderPanel = (panel: Panel) => {
     switch (panel.data.type) {
       case PanelType.Chart:
-        return <Chart onDelete={handleDelete} config={panel.data.config} onConfigChange={handleChartChange} />;
+        return (
+          <Chart
+            onDelete={handleDelete}
+            config={panel.data.config}
+            onConfigChange={handleChartChange}
+          />
+        );
       case PanelType.AccountInfo:
         return <AccountInfo />;
       default:

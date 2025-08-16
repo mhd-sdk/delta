@@ -79,4 +79,4 @@ interface CredentialsContainer {
   get(options?: CredentialRequestOptions): Promise<Credential | null>;
   preventSilentAccess(): Promise<void>;
   store(credential: Credential): Promise<Credential>;
-} 
+}

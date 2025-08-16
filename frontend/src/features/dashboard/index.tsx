@@ -1,71 +1,80 @@
-import { Header } from '@/components/layout/header';
-import { Main } from '@/components/layout/main';
-import { ProfileDropdown } from '@/components/profile-dropdown';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { useState } from 'react';
-import { Grid } from './components/grid';
-import { Panel, PanelType } from './panel';
-import { Range, Unit } from './timerange';
+import { Header } from "@/components/layout/header";
+import { Main } from "@/components/layout/main";
+import { ProfileDropdown } from "@/components/profile-dropdown";
+import { Search } from "@/components/search";
+import { ThemeSwitch } from "@/components/theme-switch";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { useEffect, useState } from "react";
+import { Grid } from "./components/grid";
+import { Panel, PanelType } from "./panel";
+import { Range, Unit } from "./timerange";
+
+const LOCAL_STORAGE_KEY = "dashboard_panels";
 
 export default function Dashboard() {
-  const [panels, setPanels] = useState<Panel[]>([
-    {
+  // Charger les panels depuis localStorage ou fallback à l'état par défaut
+  const [panels, setPanels] = useState<Panel[]>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (stored) {
+        try {
+          return JSON.parse(stored) as Panel[];
+        } catch (e) {
+          console.error("Erreur en lisant les panels depuis localStorage", e);
+        }
+      }
+    }
+    return [
+      {
+        data: {
+          type: PanelType.Chart,
+          config: {
+            range: Range.oneDay,
+            ticker: "nvda",
+            timeframe: { n: 1, unit: Unit.hour },
+          },
+        },
+        height: 5,
+        width: 3,
+        id: "1",
+        x: 0,
+        y: 0,
+      },
+    ];
+  });
+
+  const handleNewPanel = () => {
+    const newPanel: Panel = {
       data: {
         type: PanelType.Chart,
         config: {
           range: Range.oneDay,
-          ticker: 'nvda',
-          timeframe: {
-            n: 1,
-            unit: Unit.hour,
-          },
+          ticker: "nvda",
+          timeframe: { n: 1, unit: Unit.hour },
         },
       },
       height: 5,
       width: 3,
-      id: '1',
+      id: Date.now().toString(), // Utiliser un timestamp comme ID unique
       x: 0,
-      y: 0,
-    },
-    {
-      data: {
-        type: PanelType.Chart,
-        config: {
-          range: Range.oneDay,
-          ticker: 'nvda',
-          timeframe: {
-            n: 1,
-            unit: Unit.hour,
-          },
-        },
-      },
-      height: 5,
-      width: 3,
-      id: '2',
-      x: 1,
-      y: 0,
-    },
-    {
-      data: {
-        type: PanelType.Chart,
-        config: {
-          range: Range.oneDay,
-          ticker: 'nvda',
-          timeframe: {
-            n: 1,
-            unit: Unit.hour,
-          },
-        },
-      },
-      height: 5,
-      width: 3,
-      id: '3',
-      x: 2,
-      y: 0,
-    },
-  ]);
-  console.log(panels);
+      y: panels.length * 6, // Positionner le nouveau panel en dessous des précédents
+    };
+    setPanels([...panels, newPanel]);
+  };
+
+  // Sauvegarder les panels dans localStorage à chaque changement
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(panels));
+    } catch (e) {
+      console.error("Erreur en sauvegardant les panels dans localStorage", e);
+    }
+  }, [panels]);
 
   return (
     <>
@@ -79,20 +88,16 @@ export default function Dashboard() {
       </Header>
 
       {/* ===== Main ===== */}
-      <Main className="h-screen">
-        <div className="mb-2 flex items-center justify-between space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        </div>
-        <div
-          style={{
-            transition: 'margin-left 0.3s',
-            width: '100%',
-            position: 'absolute',
-          }}
-        >
-          <Grid panels={panels} onChange={setPanels} />
-        </div>
-      </Main>
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <Main className="h-screen">
+            <Grid panels={panels} onChange={setPanels} />
+          </Main>
+        </ContextMenuTrigger>
+        <ContextMenuContent className="w-64">
+          <ContextMenuItem onClick={handleNewPanel}>New Panel</ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     </>
   );
 }

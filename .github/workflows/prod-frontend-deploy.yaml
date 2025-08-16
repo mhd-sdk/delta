@@ -46,4 +46,4 @@ jobs:
 
       - name: Update Kubernetes deployment
         run: |
-          kubectl -n delta rollout restart deployment/delta-frontend-prod --timeout=120s
+          kubectl -n delta rollout restart deployment/delta-frontend-prod

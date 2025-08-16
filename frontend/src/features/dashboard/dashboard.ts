@@ -1,4 +1,4 @@
-import { Range, Timeframe, Unit } from './timerange';
+import { Range, Timeframe, Unit } from "./timerange";
 
 export const defaultTimeframes: Timeframe[] = [
   { n: 1, unit: Unit.min },
