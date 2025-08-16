@@ -16,6 +16,7 @@ spec:
       containers:
         - name: delta-frontend-prod
           image: ghcr.io/mhd-sdk/delta/frontend:latest 
+          imagePullPolicy: Always
           ports:
           - containerPort: 5173
       restartPolicy: Always

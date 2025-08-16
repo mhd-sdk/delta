@@ -1,4 +1,4 @@
-name: Build and Deploy on Release
+name: Build and Deploy - Prod
 
 on:
   release:
@@ -25,10 +25,13 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository }}/frontend:${{ github.event.release.tag_name }}
+          LATEST_IMAGE_NAME=ghcr.io/${{ github.repository }}/frontend:latest
+          TAGGED_IMAGE_NAME=ghcr.io/${{ github.repository }}/frontend:${{ github.event.release.tag_name }}
           cd frontend
-          docker build -t $IMAGE_NAME .
-          docker push $IMAGE_NAME
+          docker build -t $LATEST_IMAGE_NAME .
+          docker build -t $TAGGED_IMAGE_NAME .
+          docker push $LATEST_IMAGE_NAME
+          docker push $TAGGED_IMAGE_NAME
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
@@ -41,23 +44,6 @@ jobs:
           echo "${{ secrets.KUBECONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
-      - name: Debug kubeconfig
-        run: |
-          echo "Kubeconfig content (without sensitive data):"
-          kubectl config view --minify
-          echo "Current context:"
-          kubectl config current-context
-          echo "Cluster info:"
-          kubectl cluster-info
-
-      - name: Test Kubernetes connection
-        run: |
-          kubectl version --client
-          kubectl cluster-info
-          kubectl get nodes
-
       - name: Update Kubernetes deployment
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository }}/frontend:${{ github.event.release.tag_name }}
-          kubectl set image deployment/delta-frontend delta=$IMAGE_NAME
-          kubectl rollout status deployment/delta-frontend --timeout=120s
+          kubectl -n delta-prod rollout restart deployment/delta-frontend --timeout=120s
