@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "/internal/pb";
+
+service StateService {
+  // Contrôle synchrone (start/stop)
+  rpc Control(ControlRequest) returns (ControlResponse);
+  
+  // Abonnement aux logs en streaming
+  rpc SubscribeLogs(LogSubscriptionRequest) returns (stream LogEvent);
+}
+
+message ControlRequest {
+  string command = 1; // "start" ou "stop"
+}
+
+message ControlResponse {
+  bool ack = 1;
+}
+
+message LogSubscriptionRequest {
+  // Optionnel : filtres pour les logs
+  string slave_id = 1;     // Si vide, tous les slaves
+  string log_level = 2;    // debug, info, warn, error
+  int64 since_timestamp = 3; // Pour récupérer les logs depuis un moment donné
+}
+
+message LogEvent {
+  string slave_id = 1;
+  string message = 2;
+  int64 timestamp = 3;
+  string level = 4;        // debug, info, warn, error
+}
