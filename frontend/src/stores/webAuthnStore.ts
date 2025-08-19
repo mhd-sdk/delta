@@ -1,10 +1,10 @@
-import { AuthResponse, AuthState, User } from "@/features/auth/types";
-import axios from "axios";
-import { Buffer } from "buffer";
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { AuthResponse, AuthState, User } from '@/features/auth/types';
+import axios from 'axios';
+import { Buffer } from 'buffer';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 interface WebAuthnStore extends AuthState {
   register: (username: string) => Promise<void>;
@@ -34,9 +34,9 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
             {
               withCredentials: true,
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
-            },
+            }
           );
 
           const options = beginResponse.data.publicKey;
@@ -50,18 +50,15 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
                 ...options.user,
                 id: base64URLToBuffer(options.user.id),
               },
-              excludeCredentials: options.excludeCredentials?.map(
-                (credential: { id: string }) => ({
-                  ...credential,
-                  id: base64URLToBuffer(credential.id),
-                }),
-              ),
+              excludeCredentials: options.excludeCredentials?.map((credential: { id: string }) => ({
+                ...credential,
+                id: base64URLToBuffer(credential.id),
+              })),
             },
           })) as PublicKeyCredential;
 
           // Step 3: Finish registration
-          const attestationResponse =
-            credential.response as AuthenticatorAttestationResponse;
+          const attestationResponse = credential.response as AuthenticatorAttestationResponse;
           const finishResponse = await axios.post(
             `${API_URL}/auth/register/finish?username=${username}`,
             {
@@ -69,20 +66,16 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
               rawId: bufferToBase64URL(Buffer.from(credential.rawId)),
               type: credential.type,
               response: {
-                clientDataJSON: bufferToBase64URL(
-                  Buffer.from(attestationResponse.clientDataJSON),
-                ),
-                attestationObject: bufferToBase64URL(
-                  Buffer.from(attestationResponse.attestationObject),
-                ),
+                clientDataJSON: bufferToBase64URL(Buffer.from(attestationResponse.clientDataJSON)),
+                attestationObject: bufferToBase64URL(Buffer.from(attestationResponse.attestationObject)),
               },
             },
             {
               withCredentials: true,
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
-            },
+            }
           );
 
           const authData: AuthResponse = finishResponse.data;
@@ -99,18 +92,15 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
             isAuthenticated: true,
           });
         } catch (error) {
-          let errorMessage = "Registration failed";
+          let errorMessage = 'Registration failed';
 
           // Récupérer le corps de l'erreur de l'API si disponible
           if (axios.isAxiosError(error) && error.response) {
             // Utiliser le message d'erreur du serveur s'il existe
-            errorMessage =
-              error.response.data?.message ||
-              error.response.data ||
-              errorMessage;
+            errorMessage = error.response.data?.message || error.response.data || errorMessage;
 
             // Vous pouvez aussi logger l'erreur complète pour le débogage
-            console.error("API Error:", error.response.data);
+            console.error('API Error:', error.response.data);
           } else if (error instanceof Error) {
             errorMessage = error.message;
           }
@@ -134,9 +124,9 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
             {
               withCredentials: true,
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
-            },
+            }
           );
 
           const options = beginResponse.data;
@@ -146,18 +136,15 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
             publicKey: {
               ...options,
               challenge: base64URLToBuffer(options.challenge),
-              allowCredentials: options.allowCredentials?.map(
-                (credential: { id: string }) => ({
-                  ...credential,
-                  id: base64URLToBuffer(credential.id),
-                }),
-              ),
+              allowCredentials: options.allowCredentials?.map((credential: { id: string }) => ({
+                ...credential,
+                id: base64URLToBuffer(credential.id),
+              })),
             },
           })) as PublicKeyCredential;
-
+          console.log(credential);
           // Step 3: Finish login
-          const assertionResponse =
-            credential.response as AuthenticatorAssertionResponse;
+          const assertionResponse = credential.response as AuthenticatorAssertionResponse;
 
           const finishResponse = await axios.post(
             `${API_URL}/auth/login/finish?username=${username}`,
@@ -166,26 +153,18 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
               rawId: bufferToBase64URL(Buffer.from(credential.rawId)),
               type: credential.type,
               response: {
-                clientDataJSON: bufferToBase64URL(
-                  Buffer.from(assertionResponse.clientDataJSON),
-                ),
-                authenticatorData: bufferToBase64URL(
-                  Buffer.from(assertionResponse.authenticatorData),
-                ),
-                signature: bufferToBase64URL(
-                  Buffer.from(assertionResponse.signature),
-                ),
-                userHandle: assertionResponse.userHandle
-                  ? bufferToBase64URL(Buffer.from(assertionResponse.userHandle))
-                  : null,
+                clientDataJSON: bufferToBase64URL(Buffer.from(assertionResponse.clientDataJSON)),
+                authenticatorData: bufferToBase64URL(Buffer.from(assertionResponse.authenticatorData)),
+                signature: bufferToBase64URL(Buffer.from(assertionResponse.signature)),
+                userHandle: assertionResponse.userHandle ? bufferToBase64URL(Buffer.from(assertionResponse.userHandle)) : null,
               },
             },
             {
               withCredentials: true,
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
-            },
+            }
           );
 
           const authData: AuthResponse = finishResponse.data;
@@ -238,7 +217,7 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
             withCredentials: true,
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
             },
           });
 
@@ -272,32 +251,32 @@ export const useWebAuthnStore = create<WebAuthnStore>()(
       },
     }),
     {
-      name: "webauthn-auth-storage",
-    },
-  ),
+      name: 'webauthn-auth-storage',
+    }
+  )
 );
 
 // Utility functions for WebAuthn operations
 function bufferToBase64URL(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
-  let str = "";
+  let str = '';
 
   for (const byte of bytes) {
     str += String.fromCharCode(byte);
   }
 
-  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 function base64URLToBuffer(base64URL: string): ArrayBuffer {
   if (!base64URL) {
-    console.error("base64URL is undefined or null");
+    console.error('base64URL is undefined or null');
     return new ArrayBuffer(0); // Return empty buffer instead of throwing error
   }
 
-  const base64 = base64URL.replace(/-/g, "+").replace(/_/g, "/");
+  const base64 = base64URL.replace(/-/g, '+').replace(/_/g, '/');
   const paddingLength = (4 - (base64.length % 4)) % 4;
-  const padded = base64 + "=".repeat(paddingLength);
+  const padded = base64 + '='.repeat(paddingLength);
 
   const binary = atob(padded);
   const buffer = new ArrayBuffer(binary.length);
