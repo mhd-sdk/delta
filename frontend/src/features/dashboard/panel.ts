@@ -1,4 +1,4 @@
-import { Range, Timeframe, Unit } from './timerange';
+import { Range, Timeframe, Unit } from "./timerange";
 
 export const defaultTimeframes: Timeframe[] = [
   { n: 1, unit: Unit.min },
@@ -22,12 +22,12 @@ export interface Panel {
 }
 
 export enum PanelType {
-  Chart = 'Chart',
-  TimeAndSales = 'TimeAndSales',
-  AccountInfo = 'AccountInfo',
-  TickerInfo = 'TickerInfo',
-  Headlines = 'Headlines',
-  Scanner = 'Scanner',
+  Chart = "Chart",
+  TimeAndSales = "TimeAndSales",
+  AccountInfo = "AccountInfo",
+  TickerInfo = "TickerInfo",
+  Headlines = "Headlines",
+  Scanner = "Scanner",
 }
 
 export type PanelData =

@@ -1,17 +1,15 @@
 'use client';
 
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { showSubmittedData } from '@/utils/show-submitted-data';
+import { PasswordInput } from '@/components/password-input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { PasswordInput } from '@/components/password-input';
-import { SelectDropdown } from '@/components/select-dropdown';
-import { userTypes } from '../data/data';
-import { User } from '../data/schema';
+import { showSubmittedData } from '@/utils/show-submitted-data';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Algorithm } from '../data/algorithms';
 
 const formSchema = z
   .object({
@@ -71,7 +69,7 @@ const formSchema = z
 type UserForm = z.infer<typeof formSchema>;
 
 interface Props {
-  currentRow?: User;
+  currentRow?: Algorithm;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -192,26 +190,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1">
-                    <FormLabel className="col-span-2 text-right">Role</FormLabel>
-                    <SelectDropdown
-                      defaultValue={field.value}
-                      onValueChange={field.onChange}
-                      placeholder="Select a role"
-                      className="col-span-4"
-                      items={userTypes.map(({ label, value }) => ({
-                        label,
-                        value,
-                      }))}
-                    />
-                    <FormMessage className="col-span-4 col-start-3" />
-                  </FormItem>
-                )}
-              />
+
               <FormField
                 control={form.control}
                 name="password"

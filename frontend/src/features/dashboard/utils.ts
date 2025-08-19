@@ -1,5 +1,5 @@
-import { Panel } from './panel';
-import { Range, Timeframe, Unit } from './timerange';
+import { Panel } from "./panel";
+import { Range, Timeframe, Unit } from "./timerange";
 
 export const rangeToDates = (range: Range): { start: Date; end: Date } => {
   const end = new Date();

@@ -1,7 +1,7 @@
-import { JSX } from 'react';
-import RGL, { WidthProvider } from 'react-grid-layout';
-import { Panel } from '../panel';
-import { DraggablePanel } from './draggablePanel';
+import { JSX } from "react";
+import RGL, { WidthProvider } from "react-grid-layout";
+import { Panel } from "../panel";
+import { DraggablePanel } from "./draggablePanel";
 
 interface Props {
   panels: Panel[];
@@ -38,7 +38,15 @@ export const Grid = ({ panels, onChange }: Props): JSX.Element => {
     onChange(updatedPanels);
   };
 
-  const layout = panels.map((panel) => ({ i: panel.id, x: panel.x, y: panel.y, w: panel.width, h: panel.height, minW: 5, minH: 3 }));
+  const layout = panels.map((panel) => ({
+    i: panel.id,
+    x: panel.x,
+    y: panel.y,
+    w: panel.width,
+    h: panel.height,
+    minW: 5,
+    minH: 3,
+  }));
 
   return (
     <ReactGridLayout
@@ -55,8 +63,21 @@ export const Grid = ({ panels, onChange }: Props): JSX.Element => {
     >
       {panels.map((panel) => (
         // <Chart onDelete={() => handleDelete(panel.id)} config={panel.data.config as ChartConfig} onConfigChange={handleConfigChange} />
-        <div key={panel.id} data-grid={{ i: panel.id, x: panel.x, y: panel.y, w: panel.width, h: panel.height }}>
-          <DraggablePanel onDelete={() => handleDelete(panel.id)} onConfigChange={handleConfigChange} panel={panel} />
+        <div
+          key={panel.id}
+          data-grid={{
+            i: panel.id,
+            x: panel.x,
+            y: panel.y,
+            w: panel.width,
+            h: panel.height,
+          }}
+        >
+          <DraggablePanel
+            onDelete={() => handleDelete(panel.id)}
+            onConfigChange={handleConfigChange}
+            panel={panel}
+          />
         </div>
       ))}
     </ReactGridLayout>

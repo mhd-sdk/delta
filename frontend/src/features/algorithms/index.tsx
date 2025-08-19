@@ -3,20 +3,17 @@ import { Main } from '@/components/layout/main';
 import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Search } from '@/components/search';
 import { ThemeSwitch } from '@/components/theme-switch';
-import { columns } from './components/users-columns';
+import { columns } from './components/algorithms-columns';
+import { AlgorithmsTable } from './components/algorithms-table';
 import { UsersDialogs } from './components/users-dialogs';
-import { UsersPrimaryButtons } from './components/users-primary-buttons';
-import { UsersTable } from './components/users-table';
-import UsersProvider from './context/users-context';
-import { userListSchema } from './data/schema';
-import { users } from './data/users';
+import AlgorithmsContext from './context/algorithms-context';
+import { algorithms } from './data/algorithms';
 
 export default function Algorithms() {
   // Parse user list
-  const userList = userListSchema.parse(users);
 
   return (
-    <UsersProvider>
+    <>
       <Header fixed>
         <Search />
         <div className="ml-auto flex items-center space-x-4">
@@ -24,21 +21,20 @@ export default function Algorithms() {
           <ProfileDropdown />
         </div>
       </Header>
-
-      <Main>
-        <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">User List</h2>
-            <p className="text-muted-foreground">Manage, configure and deploy your algorithms here.</p>
+      <AlgorithmsContext>
+        <Main>
+          <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Algorithms</h2>
+              <p className="text-muted-foreground">Manage, configure and deploy your algorithms here.</p>
+            </div>
           </div>
-          <UsersPrimaryButtons />
-        </div>
-        <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          <UsersTable data={userList} columns={columns} />
-        </div>
-      </Main>
-
-      <UsersDialogs />
-    </UsersProvider>
+          <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
+            <AlgorithmsTable data={algorithms} columns={columns} />
+          </div>
+        </Main>
+        <UsersDialogs />
+      </AlgorithmsContext>
+    </>
   );
 }

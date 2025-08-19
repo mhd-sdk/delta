@@ -1,19 +1,37 @@
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { showSubmittedData } from '@/utils/show-submitted-data';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { showSubmittedData } from "@/utils/show-submitted-data";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
   file: z
     .instanceof(FileList)
     .refine((files) => files.length > 0, {
-      message: 'Please upload a file',
+      message: "Please upload a file",
     })
-    .refine((files) => ['text/csv'].includes(files?.[0]?.type), 'Please upload csv format.'),
+    .refine(
+      (files) => ["text/csv"].includes(files?.[0]?.type),
+      "Please upload csv format.",
+    ),
 });
 
 interface Props {
@@ -27,10 +45,10 @@ export function TasksImportDialog({ open, onOpenChange }: Props) {
     defaultValues: { file: undefined },
   });
 
-  const fileRef = form.register('file');
+  const fileRef = form.register("file");
 
   const onSubmit = () => {
-    const file = form.getValues('file');
+    const file = form.getValues("file");
 
     if (file && file[0]) {
       const fileDetails = {
@@ -38,7 +56,7 @@ export function TasksImportDialog({ open, onOpenChange }: Props) {
         size: file[0].size,
         type: file[0].type,
       };
-      showSubmittedData(fileDetails, 'You have imported the following file:');
+      showSubmittedData(fileDetails, "You have imported the following file:");
     }
     onOpenChange(false);
   };
@@ -54,7 +72,9 @@ export function TasksImportDialog({ open, onOpenChange }: Props) {
       <DialogContent className="gap-2 sm:max-w-sm">
         <DialogHeader className="text-left">
           <DialogTitle>Import Tasks</DialogTitle>
-          <DialogDescription>Import tasks quickly from a CSV file.</DialogDescription>
+          <DialogDescription>
+            Import tasks quickly from a CSV file.
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form id="task-import-form" onSubmit={form.handleSubmit(onSubmit)}>

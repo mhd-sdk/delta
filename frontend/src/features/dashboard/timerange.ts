@@ -1,12 +1,12 @@
 export enum Range {
-  oneDay = '1day',
-  threeDays = '3days',
-  oneWeek = '1week',
-  oneMonth = '1month',
-  threeMonths = '3months',
-  sixMonths = '6months',
-  oneYear = '1year',
-  fiveYear = '5year',
+  oneDay = "1Day",
+  threeDays = "3Days",
+  oneWeek = "1Week",
+  oneMonth = "1Month",
+  threeMonths = "3Months",
+  sixMonths = "6Months",
+  oneYear = "1Year",
+  fiveYear = "5Year",
 }
 
 export const RangeOptions: Range[] = [
@@ -26,18 +26,14 @@ export type Timeframe = {
 };
 
 export enum Unit {
-  min = 'Min',
-  hour = 'Hour',
-  day = 'Day',
-  week = 'Week',
-  month = 'Month',
+  min = "Min",
+  hour = "Hour",
+  day = "Day",
+  week = "Week",
+  month = "Month",
 }
 export const defaultTimeframes: Timeframe[] = [
-  { n: 1, unit: Unit.min },
-  { n: 5, unit: Unit.min },
-  { n: 15, unit: Unit.min },
   { n: 30, unit: Unit.min },
-  { n: 1, unit: Unit.hour },
   { n: 4, unit: Unit.hour },
   { n: 1, unit: Unit.day },
   { n: 1, unit: Unit.week },
@@ -75,5 +71,28 @@ export const calcOptimizedRange = (timeframe: Timeframe): Range => {
 
     default:
       return Range.oneDay;
+  }
+};
+
+export const rangeToTimeframe = (range: Range): Timeframe => {
+  switch (range) {
+    case Range.oneDay:
+      return { n: 1, unit: Unit.day };
+    case Range.threeDays:
+      return { n: 3, unit: Unit.day };
+    case Range.oneWeek:
+      return { n: 1, unit: Unit.week };
+    case Range.oneMonth:
+      return { n: 1, unit: Unit.month };
+    case Range.threeMonths:
+      return { n: 3, unit: Unit.month };
+    case Range.sixMonths:
+      return { n: 6, unit: Unit.month };
+    case Range.oneYear:
+      return { n: 12, unit: Unit.month };
+    case Range.fiveYear:
+      return { n: 60, unit: Unit.month };
+    default:
+      return { n: 1, unit: Unit.day };
   }
 };

@@ -1,7 +1,7 @@
-import { IconLoader } from '@tabler/icons-react';
-import { cn } from '@/lib/utils';
 import { FormControl } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import { IconLoader } from '@tabler/icons-react';
 
 interface SelectDropdownProps {
   onValueChange?: (value: string) => void;

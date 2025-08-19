@@ -1,7 +1,7 @@
-import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { Row } from '@tanstack/react-table';
-import { IconTrash } from '@tabler/icons-react';
-import { Button } from '@/components/ui/button';
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { Row } from "@tanstack/react-table";
+import { IconTrash } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,16 +14,18 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useTasks } from '../context/tasks-context';
-import { labels } from '../data/data';
-import { taskSchema } from '../data/schema';
+} from "@/components/ui/dropdown-menu";
+import { useTasks } from "../context/tasks-context";
+import { labels } from "../data/data";
+import { taskSchema } from "../data/schema";
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>;
 }
 
-export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
+export function DataTableRowActions<TData>({
+  row,
+}: DataTableRowActionsProps<TData>) {
   const task = taskSchema.parse(row.original);
 
   const { setOpen, setCurrentRow } = useTasks();
@@ -31,7 +33,10 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="data-[state=open]:bg-muted flex h-8 w-8 p-0">
+        <Button
+          variant="ghost"
+          className="data-[state=open]:bg-muted flex h-8 w-8 p-0"
+        >
           <DotsHorizontalIcon className="h-4 w-4" />
           <span className="sr-only">Open menu</span>
         </Button>
@@ -40,7 +45,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
         <DropdownMenuItem
           onClick={() => {
             setCurrentRow(task);
-            setOpen('update');
+            setOpen("update");
           }}
         >
           Edit
@@ -64,7 +69,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
         <DropdownMenuItem
           onClick={() => {
             setCurrentRow(task);
-            setOpen('delete');
+            setOpen("delete");
           }}
         >
           Delete

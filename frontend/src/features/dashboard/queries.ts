@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { CandlestickData, UTCTimestamp, WhitespaceData } from 'lightweight-charts';
 import { ChartConfig } from './panel';
 import { Unit } from './timerange';
 import { rangeToDates } from './utils';
@@ -10,35 +9,37 @@ interface GetCandlesticksParams {
   symbol: string;
 }
 
-type CandlestickResult = (CandlestickData<UTCTimestamp> | WhitespaceData<UTCTimestamp>)[];
-
-interface BarData {
-  timestamp: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-}
-
-const fetchCandlesticks = async ({ config, symbol }: GetCandlesticksParams): Promise<CandlestickResult> => {
+const fetchCandlesticks = async ({
+  config,
+  symbol,
+}: GetCandlesticksParams): Promise<
+  {
+    time: string; // timestamp ISO
+    open: number; // open
+    high: number; // high
+    low: number; // low
+    close: number; // close
+    volume: number; // volume
+  }[]
+> => {
   const { start, end } = rangeToDates(config.range);
 
-  const response = await axios.get<BarData[]>(`/api/market-data/bars`, {
-    params: {
+  const response = await axios.post(`http://localhost:3000/api/market-data/bars`, {
+    data: {
       symbol,
-      timeframe: `${config.timeframe.n}${config.timeframe.unit}`,
+      timeframe: config.timeframe,
       start: start.toISOString(),
       end: end.toISOString(),
     },
   });
-
-  return response.data.map((bar) => ({
-    time: (new Date(bar.timestamp).getTime() / 1000) as UTCTimestamp,
-    open: bar.open,
-    high: bar.high,
-    low: bar.low,
-    close: bar.close,
+  return response.data.map((bar: any) => ({
+    // transform time to unix timestamp
+    time: Math.floor(new Date(bar.t).getTime() / 1000),
+    open: bar.o,
+    high: bar.h,
+    low: bar.l,
+    close: bar.c,
+    volume: bar.v,
   }));
 };
 
