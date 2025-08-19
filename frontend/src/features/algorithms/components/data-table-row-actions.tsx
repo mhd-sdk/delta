@@ -1,24 +1,17 @@
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { IconEdit, IconTrash } from '@tabler/icons-react';
+import { IconEdit } from '@tabler/icons-react';
 import { Row } from '@tanstack/react-table';
-import { useUsers } from '../context/users-context';
-import { User } from '../data/schema';
+import { useAlgorithms } from '../context/algorithms-context';
+import { Algorithm } from '../data/algorithms';
 
 interface DataTableRowActionsProps {
-  row: Row<User>;
+  row: Row<Algorithm>;
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
-  const { setOpen, setCurrentRow } = useUsers();
+  const { setOpen, setCurrentRow, currentRow } = useAlgorithms();
   return (
     <>
       <DropdownMenu modal={false}>
@@ -28,6 +21,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             <span className="sr-only">Open menu</span>
           </Button>
         </DropdownMenuTrigger>
+
         <DropdownMenuContent align="end" className="w-[160px]">
           <DropdownMenuItem
             onClick={() => {
@@ -40,17 +34,16 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
               <IconEdit size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => {
               setCurrentRow(row.original);
-              setOpen('delete');
+              setOpen('edit');
             }}
-            className="text-red-500!"
           >
-            Delete
+            {currentRow?.status === 'Running' ? 'Stop' : 'Start'}
+
             <DropdownMenuShortcut>
-              <IconTrash size={16} />
+              <IconEdit size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuContent>
