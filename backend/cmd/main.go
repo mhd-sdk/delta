@@ -27,7 +27,7 @@ func main() {
 	}
 	slog.Info("Environment variables loaded")
 
-	server := server.New()
+	server := server.New(nil)
 
 	err = server.TestCredentials()
 	if err != nil {

@@ -35,7 +35,11 @@ type Server struct {
 	activeStreams    map[string]context.CancelFunc // Track active log streams
 }
 
-func New() *Server {
+func New(discover *bool) *Server {
+	defaultDiscover := true
+	if discover == nil {
+		discover = &defaultDiscover
+	}
 	apiKey := os.Getenv("API_KEY")
 	secretKey := os.Getenv("SECRET_KEY")
 	marketDataUrl := os.Getenv("MARKET_DATA_URL")
@@ -68,7 +72,9 @@ func New() *Server {
 		activeStreams:    make(map[string]context.CancelFunc),
 	}
 	initHandlers(s)
-	go s.discoverSlaves()
+	if *discover == true {
+		go s.discoverSlaves()
+	}
 	return s
 }
 
@@ -312,4 +318,15 @@ func (s *Server) subscribeToSlaveLogs(ctx context.Context, slaveID string, clien
 			}
 		}
 	}
+}
+
+// add testable function
+func (s *Server) GetSlaves() map[string]pb.StateServiceClient {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	slavesCopy := make(map[string]pb.StateServiceClient)
+	for k, v := range s.slaves {
+		slavesCopy[k] = v
+	}
+	return slavesCopy
 }
