@@ -10,7 +10,7 @@ require (
 	github.com/kr/pretty v0.1.0
 	github.com/lmittmann/tint v1.0.7
 	github.com/magefile/mage v1.15.0
-	google.golang.org/grpc v1.64.0
+	google.golang.org/grpc v1.64.1
 	google.golang.org/protobuf v1.36.7
 )
 
@@ -21,8 +21,8 @@ require (
 	github.com/gorilla/schema v1.4.1 // indirect
 	github.com/kr/text v0.1.0 // indirect
 	github.com/savsgio/gotils v0.0.0-20240303185622-093b76447511 // indirect
-	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	google.golang.org/genproto v0.0.0-20211206160659-862468c7d6e0 // indirect
 )
 
