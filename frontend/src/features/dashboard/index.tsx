@@ -1,31 +1,26 @@
-import { Header } from "@/components/layout/header";
-import { Main } from "@/components/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { useEffect, useState } from "react";
-import { Grid } from "./components/grid";
-import { Panel, PanelType } from "./panel";
-import { Range, Unit } from "./timerange";
+import { Header } from '@/components/layout/header';
+import { Main } from '@/components/layout/main';
+import { ProfileDropdown } from '@/components/profile-dropdown';
+import { Search } from '@/components/search';
+import { ThemeSwitch } from '@/components/theme-switch';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { useEffect, useState } from 'react';
+import { Grid } from './components/grid';
+import { Panel, PanelType } from './panel';
+import { Range, Unit } from './timerange';
 
-const LOCAL_STORAGE_KEY = "dashboard_panels";
+const LOCAL_STORAGE_KEY = 'dashboard_panels';
 
 export default function Dashboard() {
   // Charger les panels depuis localStorage ou fallback à l'état par défaut
   const [panels, setPanels] = useState<Panel[]>(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (stored) {
         try {
           return JSON.parse(stored) as Panel[];
         } catch (e) {
-          console.error("Erreur en lisant les panels depuis localStorage", e);
+          console.error('Erreur en lisant les panels depuis localStorage', e);
         }
       }
     }
@@ -35,13 +30,13 @@ export default function Dashboard() {
           type: PanelType.Chart,
           config: {
             range: Range.oneDay,
-            ticker: "nvda",
+            ticker: 'nvda',
             timeframe: { n: 1, unit: Unit.hour },
           },
         },
         height: 5,
         width: 3,
-        id: "1",
+        id: '1',
         x: 0,
         y: 0,
       },
@@ -53,16 +48,16 @@ export default function Dashboard() {
       data: {
         type: PanelType.Chart,
         config: {
-          range: Range.oneDay,
-          ticker: "nvda",
-          timeframe: { n: 1, unit: Unit.hour },
+          range: Range.oneDay, // default range
+          ticker: 'NVDA', // default ticker
+          timeframe: { n: 30, unit: Unit.min }, // default timeframe
         },
       },
       height: 5,
-      width: 3,
-      id: Date.now().toString(), // Utiliser un timestamp comme ID unique
+      width: 10,
+      id: Date.now().toString(),
       x: 0,
-      y: panels.length * 6, // Positionner le nouveau panel en dessous des précédents
+      y: panels.length * 6,
     };
     setPanels([...panels, newPanel]);
   };
@@ -72,7 +67,7 @@ export default function Dashboard() {
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(panels));
     } catch (e) {
-      console.error("Erreur en sauvegardant les panels dans localStorage", e);
+      console.error('Erreur en sauvegardant les panels dans localStorage', e);
     }
   }, [panels]);
 

@@ -1,5 +1,6 @@
 import { useWebAuthnStore } from '@/stores/webAuthnStore';
 import { handleServerError } from '@/utils/handle-server-error';
+import * as Sentry from '@sentry/react';
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { AxiosError } from 'axios';
@@ -12,6 +13,14 @@ import './index.css';
 import '/node_modules/react-grid-layout/css/styles.css';
 import '/node_modules/react-resizable/css/styles.css';
 
+Sentry.init({
+  dsn: 'https://e077c326c967748c4ffc418536607bfc@o4509881035718656.ingest.de.sentry.io/4509881038602320',
+  // Setting this option to true will send default PII data to Sentry.
+  // For example, automatic IP address collection on events
+  sendDefaultPii: true,
+  // Enable logs to be sent to Sentry
+  enableLogs: true,
+});
 // Import generated routes
 import { routeTree } from './routeTree.gen';
 
@@ -115,14 +124,16 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <FontProvider>
-            <AuthChecker />
-            <RouterProvider router={router} />
-          </FontProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
+      <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+            <FontProvider>
+              <AuthChecker />
+              <RouterProvider router={router} />
+            </FontProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </Sentry.ErrorBoundary>
     </StrictMode>
   );
 }
